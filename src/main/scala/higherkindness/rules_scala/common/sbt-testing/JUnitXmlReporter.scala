@@ -2,7 +2,7 @@ package higherkindness.rules_scala
 package common.sbt_testing
 
 import java.io.{PrintWriter, StringWriter}
-import sbt.testing.{Event, Status, TestSelector}
+import sbt.testing.{Event, NestedTestSelector, Status, TestSelector}
 import Status.{Canceled, Error, Failure, Ignored, Pending, Skipped}
 import scala.collection.mutable.ListBuffer
 import scala.xml.{Elem, Utility, XML}
@@ -30,8 +30,9 @@ class JUnitXmlReporter(tasksAndEvents: ListBuffer[(String, ListBuffer[Event])]) 
         yield s"""<testcase
             classname="${escape(name)}"
             name="${e.selector match {
-          case selector: TestSelector => escape(selector.testName)
-          case _                      => "Error occurred outside of a test case."
+          case selector: TestSelector       => escape(selector.testName)
+          case selector: NestedTestSelector => escape(selector.testName)
+          case _                            => "Error occurred outside of a test case."
         }}"
             time="${(e.duration / 1000d).toString}">
             ${

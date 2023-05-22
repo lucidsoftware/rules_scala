@@ -61,7 +61,7 @@ object DepsRunner extends WorkerMain[Unit] {
 
     val remove = if (namespace.getBoolean("check_used") == true) {
       val usedWhitelist = namespace.getList[String]("used_whitelist").asScala.map(_.tail).toList
-      (directLabels.diff(usedWhitelist)).filterNot(labelToPaths(_).exists(usedPaths))
+      directLabels.diff(usedWhitelist).filterNot(labelToPaths(_).exists(usedPaths))
     } else Nil
     remove.foreach { depLabel =>
       out.println(s"Target '$depLabel' not used, please remove it from the deps.")

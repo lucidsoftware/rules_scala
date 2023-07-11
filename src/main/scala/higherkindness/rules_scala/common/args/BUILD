@@ -4,7 +4,7 @@ load("//rules:scala.bzl", "scala_library")
 scala_library(
     name = "args",
     srcs = glob(["**/*.scala"]),
-    scala = "//src/main/scala:bootstrap",
+    scala = "//src/main/scala:bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "@annex//:net_sourceforge_argparse4j_argparse4j",

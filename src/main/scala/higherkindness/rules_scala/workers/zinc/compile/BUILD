@@ -5,7 +5,7 @@ scala_binary(
     name = "compile",
     srcs = glob(["**/*.scala"]),
     main_class = "higherkindness.rules_scala.workers.zinc.compile.ZincRunner",
-    scala = "//src/main/scala:bootstrap",
+    scala = "//src/main/scala:bootstrap_3",
     visibility = ["//visibility:public"],
     runtime_deps = [
         "@annex//:com_lihaoyi_sourcecode_2_13",

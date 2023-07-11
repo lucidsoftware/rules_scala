@@ -1,6 +1,7 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+rm output
 bazel clean
 bazel build :lib > output 2>&1
 

@@ -1,0 +1,9 @@
+load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_library")
+
+scala_library(
+    name = "scala3",
+    srcs = glob(["*.scala"]),
+    format = True,
+    visibility = ["//example/scala2:__pkg__"],
+    scala = "//src/main/scala:zinc_3",
+)

@@ -1,0 +1,9 @@
+load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_binary")
+
+scala_binary(
+    name = "scala2",
+    srcs = glob(["*.scala"]),
+    format = True,
+    deps = ["//example/scala3"],
+    scala = "//src/main/scala:zinc",
+)

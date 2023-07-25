@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
 import xsbti.{Logger, T2, VirtualFile}
-import xsbti.compile.{AnalysisContents, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefinesClass, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
+import xsbti.compile.{AnalysisContents, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefinesClass, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup}
 
 // The list in this docstring gets clobbered by the formatter, unfortunately.
 //format: off
@@ -111,7 +111,8 @@ object ZincRunner extends WorkerMain[Namespace] {
       val analyses = Option(
         namespace
           .getList[JList[String]]("analysis")
-      ).fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
+      ).filter(_ => usePersistence)
+        .fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
         .flatMap { value =>
           val prefixedLabel +: apis +: relations +: jars = value.asScala.toList
           val label = prefixedLabel.stripPrefix("_")
@@ -222,9 +223,7 @@ object ZincRunner extends WorkerMain[Namespace] {
     }
 
     val setup = {
-      val incOptions = IncOptions
-        .create()
-        .withAuxiliaryClassFiles(Array(TastyFiles.instance()))
+      val incOptions = IncOptions.create()
       val reporter = new LoggedReporter(logger, scalaInstance.actualVersion)
       val skip = false
       val file: Path = null

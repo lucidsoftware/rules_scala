@@ -138,7 +138,7 @@ object ZincRunner extends WorkerMain[Namespace] {
     )
     val analysesFormat = {
       val debug = namespace.getBoolean("debug")
-      val format = if (debug) AnxAnalysisStore.TextFormat else AnxAnalysisStore.BinaryFormat
+      val format = if (true) AnxAnalysisStore.TextFormat else AnxAnalysisStore.BinaryFormat
       new AnxAnalyses(format)
     }
     val analysisStore = new AnxAnalysisStore(analysisFiles, analysesFormat)

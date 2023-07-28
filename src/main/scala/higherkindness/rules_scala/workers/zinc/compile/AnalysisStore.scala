@@ -6,21 +6,21 @@ import java.io.{File, InputStream, OutputStream, OutputStreamWriter}
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, NoSuchFileException, Path, Paths}
 import java.nio.file.attribute.FileTime
+import java.util
 import java.util.concurrent.ConcurrentHashMap
+import java.util.LinkedHashMap
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 import java.util.Optional
 import sbt.internal.inc.binary.converters.{ProtobufReaders, ProtobufWriters}
 import sbt.internal.inc.Schema.Type.{Projection, Structure}
-import sbt.internal.inc.{APIs, Analysis, PlainVirtualFile, PlainVirtualFileConverter, Relations, Schema, SourceInfos, Stamp => StampImpl, Stamper, Stamps}
-import sbt.internal.inc.Schema.{Access, AnalyzedClass, Annotation, AnnotationArgument, ClassDefinition, ClassDependencies, ClassLike, Companions, MethodParameter, NameHash, ParameterList, Path => SchemaPath, Qualifier, Type, TypeParameter, UsedName, UsedNames, Values}
+import sbt.internal.inc.{APIs, Analysis, PlainVirtualFile, PlainVirtualFileConverter, Relations, Schema, SourceInfos, Stamper, Stamps, Stamp => StampImpl}
+import sbt.internal.inc.Schema.{Access, AnalyzedClass, Annotation, AnnotationArgument, ClassDefinition, ClassDependencies, ClassLike, Companions, MethodParameter, NameHash, ParameterList, Qualifier, Type, TypeParameter, UsedName, UsedNames, Values, Path => SchemaPath}
 import sbt.internal.shaded.com.google.protobuf.GeneratedMessageV3
 import sbt.io.IO
-import scala.math.Ordering
-import scala.collection.mutable.StringBuilder
 import scala.collection.immutable.TreeMap
 import xsbti.compile.analysis.{GenericMapper, ReadMapper, ReadWriteMappers, Stamp, WriteMapper}
 import xsbti.compile.{AnalysisContents, AnalysisStore, MiniSetup}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import xsbti.VirtualFileRef
 import java.util.Objects
 
@@ -97,7 +97,7 @@ class AnxAnalysisStore(files: AnalysisFiles, analyses: AnxAnalyses) extends Anal
         apis = analyses.apis().read(files.apis),
         relations = analyses.relations.read(files.relations),
         infos = analyses.sourceInfos.read(files.sourceInfos),
-        stamps = analyses.stamps.read(files.stamps)
+        stamps = analyses.stamps().read(files.stamps)
       )
       val miniSetup = analyses.miniSetup().read(files.miniSetup)
       Optional.of(AnalysisContents.create(analysis, miniSetup))
@@ -115,7 +115,7 @@ class AnxAnalysisStore(files: AnalysisFiles, analyses: AnxAnalyses) extends Anal
     analyses.apis().write(files.apis, analysis.apis)
     analyses.relations.write(files.relations, analysis.relations)
     analyses.sourceInfos.write(files.sourceInfos, analysis.infos)
-    analyses.stamps.write(files.stamps, analysis.stamps)
+    analyses.stamps().write(files.stamps, analysis.stamps)
     val miniSetup = analysisContents.getMiniSetup
     analyses.miniSetup().write(files.miniSetup, miniSetup)
   }
@@ -690,10 +690,36 @@ class AnxAnalyses(format: AnxAnalysisStore.Format) {
     (stream, value) => format.write(writer.toSourceInfos(value), stream)
   )
 
-  def stamps = new Store[Stamps](
-    stream => reader.fromStamps(format.read(Schema.Stamps.getDefaultInstance, stream)),
-    (stream, value) => format.write(writer.toStamps(value), stream)
-  )
+  def stamps(): Store[Stamps] = {
+    new Store[Stamps](
+      stream => reader.fromStamps(format.read(Schema.Stamps.getDefaultInstance, stream)),
+      (stream, value) =>
+        format.write(
+          sortStamps(writer.toStamps(value)),
+          stream
+        )
+    )
+  }
+
+  def sortStamps(stamps: Schema.Stamps): Schema.Stamps = {
+    val sortedProductStamps = sortStampTypeMap(stamps.getProductStampsMap).asJava
+    val sortedBinaryStamps = sortStampTypeMap(stamps.getBinaryStampsMap).asJava
+    val sortedSourceStamps = sortStampTypeMap(stamps.getSourceStampsMap).asJava
+
+    Schema.Stamps
+      .newBuilder(stamps)
+      .clearProductStamps()
+      .putAllProductStamps(sortedProductStamps)
+      .clearBinaryStamps()
+      .putAllBinaryStamps(sortedBinaryStamps)
+      .clearSourceStamps()
+      .putAllSourceStamps(sortedSourceStamps)
+      .build()
+  }
+
+  def sortStampTypeMap(stampTypeMap: util.Map[String, Schema.Stamps.StampType]): TreeMap[String, Schema.Stamps.StampType] = {
+    TreeMap[String, Schema.Stamps.StampType]() ++ stampTypeMap.asScala
+  }
 }
 
 object AnxMapper {

@@ -21,3 +21,5 @@ target/
 /.vscode/
 /bazel.iml
 *.iml
+.metals/
+.scala-build/

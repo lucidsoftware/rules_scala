@@ -3,9 +3,9 @@ load("@rules_jvm_external//:specs.bzl", "maven")
 
 def scala_2_12_artifacts():
     return [
-        "org.scala-lang:scala-compiler:2.12.14",
-        "org.scala-lang:scala-library:2.12.14",
-        "org.scala-lang:scala-reflect:2.12.14",
+        "org.scala-lang:scala-compiler:2.12.19",
+        "org.scala-lang:scala-library:2.12.19",
+        "org.scala-lang:scala-reflect:2.12.19",
         # The compiler bridge has a dependency on compiler-interface, which has a dependency on the Scala 2
         # library. We need to set this to neverlink = True to avoid this the Scala 2 library being pulled
         # onto the Scala 3, and other Scala versions like 2.12, compiler classpath during runtime.

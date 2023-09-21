@@ -3,10 +3,11 @@ common --color=yes
 common --noenable_bzlmod
 
 build --experimental_strict_action_env
-build --javacopt="-source 11 -target 11"
-build --java_language_version=11
-build --tool_java_language_version=11
-build --incompatible_java_common_parameters=false
+build --javacopt="-source 21 -target 21"
+build --java_language_version="21"
+build --java_runtime_version="remotejdk_21"
+build --tool_java_language_version="21"
+build --tool_java_runtime_version="remotejdk_21"
 
 build --strategy=ScalaCompile=worker
 build --worker_max_instances=4
@@ -27,17 +28,13 @@ test --test_output=all
 #build:rules --disk_cache=.bazel_cache
 #build:tests --disk_cache=../.bazel_cache
 
-common:rules_v5.0 --config=noop
-common:rules_v6.3 --config=noop
-common:rules_v7.0 --config=noop
+common:rules_v7.2 --config=noop
 
 # route potentially unrouted configs to a terminating noop config
 # it's a noop because we use the default value
 common:rules --config=noop
 common:tests --config=noop
-common:v5.0 --config=rules_v5.0
-common:v6.3 --config=rules_v6.3
-common:v7.0 --config=rules_v7.0
+common:v7.2 --config=rules_v7.2
 
 # pick something trivial as a "noop"
 common:noop --logging=3

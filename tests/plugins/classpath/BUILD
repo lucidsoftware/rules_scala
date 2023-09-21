@@ -1,4 +1,5 @@
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
+load("@rules_java//java:defs.bzl", "java_binary")
 
 scala_library(
     name = "plugin-lib",
@@ -39,8 +40,8 @@ scala_library(
     tags = ["manual"],
     deps = [
         ":plugin-lib",
-        "@annex//:org_scala_lang_scala_compiler_2_13_11",
-        "@annex//:org_scala_lang_scala_reflect_2_13_11",
+        "@annex//:org_scala_lang_scala_compiler_2_13_14",
+        "@annex//:org_scala_lang_scala_reflect_2_13_14",
     ],
 )
 

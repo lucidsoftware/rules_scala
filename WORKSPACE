@@ -73,32 +73,19 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-jdk_build_file_content = """
-filegroup(
-    name = "jdk",
-    srcs = glob(["**/*"]),
-    visibility = ["//visibility:public"],
-)
-filegroup(
-    name = "java",
-    srcs = ["bin/java"],
-    visibility = ["//visibility:public"],
-)
-"""
-
+# rules_java
 http_archive(
-    name = "jdk11-linux",
-    build_file_content = jdk_build_file_content,
-    strip_prefix = "jdk-11.0.11%2B9",
-    url = "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz",
+    name = "rules_java",
+    urls = [
+        "https://github.com/bazelbuild/rules_java/releases/download/7.6.4/rules_java-7.6.4.tar.gz",
+    ],
+    sha256 = "80e61f508ff79a3fde4a549b8b1f6ec7f8a82c259e51240a4403e5be36f88142",
 )
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+rules_java_dependencies()
+rules_java_toolchains()
 
-http_archive(
-    name = "jdk11-osx",
-    build_file_content = jdk_build_file_content,
-    strip_prefix = "jdk-11.0.11%2B9",
-    url = "https:/github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_x64_mac_hotspot_11.0.11_9.tar.gz",
-)
+register_toolchains("//:repository_default_toolchain_21_definition")
 
 rules_jvm_external_tag = "5.3"
 

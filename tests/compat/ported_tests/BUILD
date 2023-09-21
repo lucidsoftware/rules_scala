@@ -6,6 +6,7 @@ load(
     "scala_test",
     "scala_test_suite",
 )
+load("@rules_java//java:defs.bzl", "java_library")
 
 scala_library(
     name = "Runtime",

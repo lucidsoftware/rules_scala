@@ -7,56 +7,56 @@ load(
 
 alias(
     name = "bootstrap",
-    actual = ":bootstrap_2_13_11",
+    actual = ":bootstrap_2_13_14",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "bootstrap_3",
-    actual = ":bootstrap_3_3_0",
+    actual = ":bootstrap_3_4_2",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "zinc",
-    actual = ":zinc_2_13_11",
+    actual = ":zinc_2_13_14",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "zinc_3",
-    actual = ":zinc_3_3_0",
+    actual = ":zinc_3_4_2",
     visibility = ["//visibility:public"],
 )
 
 # Scala 2.13
-compiler_classpath_2_13_11 = [
+compiler_classpath_2_13_14 = [
     "@annex//:org_scala_lang_scala_compiler",
     "@annex//:org_scala_lang_scala_library",
     "@annex//:org_scala_lang_scala_reflect",
 ]
 
-runtime_classpath_2_13_11 = [
+runtime_classpath_2_13_14 = [
     "@annex//:org_scala_lang_scala_library",
 ]
 
 configure_bootstrap_scala(
-    name = "bootstrap_2_13_11",
-    compiler_classpath = compiler_classpath_2_13_11,
-    runtime_classpath = runtime_classpath_2_13_11,
-    version = "2.13.11",
+    name = "bootstrap_2_13_14",
+    compiler_classpath = compiler_classpath_2_13_14,
+    runtime_classpath = runtime_classpath_2_13_14,
+    version = "2.13.14",
     visibility = ["//visibility:public"],
 )
 
 configure_zinc_scala(
-    name = "zinc_2_13_11",
+    name = "zinc_2_13_14",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
-    compiler_classpath = compiler_classpath_2_13_11,
+    compiler_classpath = compiler_classpath_2_13_14,
     global_scalacopts = [
         "-Ytasty-reader",
     ],
-    runtime_classpath = runtime_classpath_2_13_11,
-    version = "2.13.11",
+    runtime_classpath = runtime_classpath_2_13_14,
+    version = "2.13.14",
     visibility = ["//visibility:public"],
 )
 
@@ -67,41 +67,41 @@ configure_zinc_scala(
 scala_library(
     name = "scala-sdk",
     deps_used_whitelist = [
-        "@annex_3//:org_scala_lang_scala3_library_3_3_3_0",
+        "@annex_3//:org_scala_lang_scala3_library_3_3_4_2",
     ],
     scala = ":zinc_3",
     deps = [
-        "@annex_3//:org_scala_lang_scala3_library_3_3_3_0",
+        "@annex_3//:org_scala_lang_scala3_library_3_3_4_2",
     ],
 )
 
-compiler_classpath_3_3_0 = [
-    "@annex_3//:org_scala_lang_scala3_compiler_3_3_3_0",
-    "@annex_3//:org_scala_lang_scala3_library_3_3_3_0",
+compiler_classpath_3_4_2 = [
+    "@annex_3//:org_scala_lang_scala3_compiler_3_3_4_2",
+    "@annex_3//:org_scala_lang_scala3_library_3_3_4_2",
 ]
 
-runtime_classpath_3_3_0 = [
-    "@annex_3//:org_scala_lang_scala3_library_3_3_3_0",
+runtime_classpath_3_4_2 = [
+    "@annex_3//:org_scala_lang_scala3_library_3_3_4_2",
     "@annex_3//:org_scala_lang_scala3_interfaces",
     "@annex_3//:org_scala_lang_tasty_core_3",
 ]
 
 configure_bootstrap_scala(
-    name = "bootstrap_3_3_0",
-    compiler_classpath = compiler_classpath_3_3_0,
-    runtime_classpath = runtime_classpath_3_3_0,
+    name = "bootstrap_3_4_2",
+    compiler_classpath = compiler_classpath_3_4_2,
+    runtime_classpath = runtime_classpath_3_4_2,
     use_ijar = False,
-    version = "3.3.0",
+    version = "3.4.2",
     visibility = ["//visibility:public"],
 )
 
 configure_zinc_scala(
-    name = "zinc_3_3_0",
-    compiler_bridge = "@annex_3//:org_scala_lang_scala3_sbt_bridge_3_3_0",
-    compiler_classpath = compiler_classpath_3_3_0,
-    runtime_classpath = runtime_classpath_3_3_0,
+    name = "zinc_3_4_2",
+    compiler_bridge = "@annex_3//:org_scala_lang_scala3_sbt_bridge_3_4_2",
+    compiler_classpath = compiler_classpath_3_4_2,
+    runtime_classpath = runtime_classpath_3_4_2,
     use_ijar = False,
-    version = "3.3.0",
+    version = "3.4.2",
     visibility = ["//visibility:public"],
 )
 

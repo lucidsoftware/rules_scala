@@ -1,4 +1,5 @@
 common       --config=rules
 common:v5.0 --config=rules_v5.0
 common:v6.3 --config=rules_v6.3
+common:v7.0 --config=rules_v7.0
 import %workspace%/.bazelrc_shared

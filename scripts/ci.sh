@@ -25,7 +25,6 @@ case "$1" in
 
     "lint")
         ./scripts/format.sh check
-        ./scripts/gen-docs.sh && git diff --exit-code
         ;;
     "")
         echo "command not specified"

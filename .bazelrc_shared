@@ -1,5 +1,6 @@
 common --announce_rc
 common --color=yes
+common --noenable_bzlmod
 
 build --experimental_strict_action_env
 build --javacopt="-source 11 -target 11"
@@ -28,6 +29,7 @@ test --test_output=all
 
 common:rules_v5.0 --config=noop
 common:rules_v6.3 --config=noop
+common:rules_v7.0 --config=noop
 
 # route potentially unrouted configs to a terminating noop config
 # it's a noop because we use the default value
@@ -35,6 +37,7 @@ common:rules --config=noop
 common:tests --config=noop
 common:v5.0 --config=rules_v5.0
 common:v6.3 --config=rules_v6.3
+common:v7.0 --config=rules_v7.0
 
 # pick something trivial as a "noop"
 common:noop --logging=3

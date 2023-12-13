@@ -135,7 +135,7 @@ emulate_rules_scala(
         "@annex//:org_scala_lang_scala_reflect_2_13_11",
         "@annex_test//:org_scala_lang_modules_scala_xml_2_13",
     ],
-    scala = "//scala:2_13",
+    scala = "@//scala:2_13",
     scalatest = "@scalatest_2_13//jar",
 )
 

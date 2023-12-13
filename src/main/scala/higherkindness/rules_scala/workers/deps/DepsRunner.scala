@@ -60,13 +60,15 @@ object DepsRunner extends WorkerMain[Unit] {
         case _             => throw new Exception(s"Unexpected case in DepsRunner")
       }
     val labelToPaths = groups.toMap
+    def pathsForLabel(depLabel: String) =
+      Seq(depLabel, s"@${depLabel}", depLabel.stripPrefix("@")).collect(labelToPaths).flatten
     val usedPaths = Files.readAllLines(namespace.get[File]("used").toPath).asScala.toSet
 
     val remove = if (namespace.getBoolean("check_used") == true) {
       val usedWhitelist = namespace.getList[String]("used_whitelist").asScala.map(_.tail).toList
       directLabels
         .diff(usedWhitelist)
-        .filterNot(label => labelToPaths.getOrElse(label, labelToPaths(s"@$label")).exists(usedPaths))
+        .filterNot(label => pathsForLabel(label).exists(usedPaths))
     } else Nil
     remove.foreach { depLabel =>
       out.println(s"Target '$depLabel' not used, please remove it from the deps.")
@@ -76,9 +78,7 @@ object DepsRunner extends WorkerMain[Unit] {
 
     val add = if (namespace.getBoolean("check_direct") == true) {
       val unusedWhitelist = namespace.getList[String]("unused_whitelist").asScala.map(_.tail).toList
-      (usedPaths -- (directLabels :++ unusedWhitelist).flatMap { label =>
-        labelToPaths.getOrElse(label, labelToPaths(s"@$label"))
-      })
+      (usedPaths -- (directLabels :++ unusedWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
           groups.collectFirst { case (label, paths) if paths(path) => label }.orElse {
             System.err.println(s"Warning: There is a reference to $path, but no dependency of $label provides it")

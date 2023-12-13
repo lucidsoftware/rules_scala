@@ -3,7 +3,7 @@
 
 bazel build :0_used
 ! bazel build :0_unused || false
-bazel build :0_unused |& grep "buildozer 'remove deps @annex_test//:org_scalacheck_scalacheck_2_13' //dependencies/unused:0_unused"
+bazel build :0_unused |& grep "buildozer 'remove deps @\?@annex_test//:org_scalacheck_scalacheck_2_13' //dependencies/unused:0_unused"
 bazel build :0_unused_whitelist
 bazel build :indirect_unused
 ! bazel build :indirect_unused_missing || false

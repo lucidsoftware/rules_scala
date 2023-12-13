@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        bazel_version: [5.0.0, 6.3.2]
+        bazel_version: [6.3.2, 7.0.0]
     steps:
       - uses: actions/checkout@v3
       - run: ./scripts/ci.sh build

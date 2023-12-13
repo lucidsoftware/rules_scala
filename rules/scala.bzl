@@ -262,6 +262,7 @@ def make_scala_library(*extras):
             *[extra["outputs"] for extra in extras]
         ),
         implementation = _scala_library_implementation,
+        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     )
 
 scala_library = make_scala_library()
@@ -302,6 +303,7 @@ To run the program: `bazel run <target>`
             *[extra["outputs"] for extra in extras]
         ),
         implementation = _scala_binary_implementation,
+        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     )
 
 scala_binary = make_scala_binary()
@@ -365,6 +367,7 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
         ),
         test = True,
         implementation = _scala_test_implementation,
+        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     )
 
 scala_test = make_scala_test()
@@ -417,6 +420,7 @@ To run: `bazel run <target>`
         "bin": "%{name}-bin",
     },
     implementation = _scala_repl_implementation,
+    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
 )
 
 scala_import = rule(
@@ -436,6 +440,7 @@ Creates a Scala JVM library.
 
 Use this only for libraries with macros. Otherwise, use `java_import`.
 """,
+    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     implementation = _scala_import_implementation,
 )
 
@@ -464,6 +469,7 @@ scaladoc = rule(
     doc = """
 Generates Scaladocs.
 """,
+    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     implementation = _scaladoc_implementation,
 )
 

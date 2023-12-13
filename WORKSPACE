@@ -17,17 +17,6 @@ http_archive(
     ],
 )
 
-skydoc_tag = "0.3.0"
-
-skydoc_sha256 = "8762a212cff5f81505a1632630edcfe9adce381479a50a03c968bd2fc217972d"
-
-http_archive(
-    name = "io_bazel_skydoc",
-    sha256 = skydoc_sha256,
-    strip_prefix = "skydoc-{}".format(skydoc_tag),
-    url = "https://github.com/bazelbuild/skydoc/archive/{}.zip".format(skydoc_tag),
-)
-
 # com_github_bazelbuild_buildtools
 
 buildtools_tag = "0.29.0"
@@ -47,13 +36,13 @@ buildifier_dependencies()
 
 # io_bazel_rules_go
 
-rules_go_tag = "v0.28.0"
+rules_go_tag = "v0.43.0"
 
 rules_go_sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb"
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = rules_go_sha256,
+    integrity = "sha256-1qtrV+SMCVI+kwUPE2mPcIQoz9XmGSUuNp03evZZdwc=",
     urls = [
         "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),
         "https://github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),

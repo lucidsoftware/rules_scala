@@ -702,9 +702,9 @@ class AnxAnalyses(format: AnxAnalysisStore.Format) {
   }
 
   def sortStamps(stamps: Schema.Stamps): Schema.Stamps = {
-    val sortedProductStamps = sortStampTypeMap(stamps.getProductStampsMap).asJava
-    val sortedBinaryStamps = sortStampTypeMap(stamps.getBinaryStampsMap).asJava
-    val sortedSourceStamps = sortStampTypeMap(stamps.getSourceStampsMap).asJava
+    val sortedProductStamps = sortStampTypeMap(stamps.getProductStampsMap)
+    val sortedBinaryStamps = sortStampTypeMap(stamps.getBinaryStampsMap)
+    val sortedSourceStamps = sortStampTypeMap(stamps.getSourceStampsMap)
 
     Schema.Stamps
       .newBuilder(stamps)
@@ -719,8 +719,8 @@ class AnxAnalyses(format: AnxAnalysisStore.Format) {
 
   def sortStampTypeMap(
     stampTypeMap: util.Map[String, Schema.Stamps.StampType]
-  ): TreeMap[String, Schema.Stamps.StampType] = {
-    TreeMap[String, Schema.Stamps.StampType]() ++ stampTypeMap.asScala
+  ): java.util.TreeMap[String, Schema.Stamps.StampType] = {
+    new java.util.TreeMap(stampTypeMap)
   }
 }
 

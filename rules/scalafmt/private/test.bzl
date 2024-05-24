@@ -25,9 +25,7 @@ scala_non_default_format_attributes = {
         allow_single_file = True,
         default = "@rules_scala_annex//rules/scalafmt:testrunner",
     ),
-    "format": attr.bool(
-        default = False,
-    ),
+    "format": attr.bool(default = True),
 }
 
 def build_format(ctx):

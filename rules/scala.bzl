@@ -90,6 +90,7 @@ _compile_attributes = {
             ".java",
             ".srcjar",
         ],
+        flags = ["DIRECT_COMPILE_TIME_INPUT"],
     ),
     "data": attr.label_list(
         doc = "The additional runtime files needed by this library.",

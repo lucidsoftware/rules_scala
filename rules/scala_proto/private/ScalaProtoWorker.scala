@@ -1,6 +1,7 @@
 package annex.scala.proto
 
 import higherkindness.rules_scala.common.args.implicits._
+import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.worker.WorkerMain
 import java.io.{File, PrintStream}
 import java.nio.file.{Files, Paths}
@@ -63,13 +64,13 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
       }
     }
 
-    val exit = ProtocBridge.runWithGenerators(
+    val exitCode = ProtocBridge.runWithGenerators(
       new MyProtocRunner,
       namedGenerators = List("scala" -> ScalaPbCodeGenerator),
       params = params
     )
-    if (exit != 0) {
-      sys.exit(exit)
+    if (exitCode != 0) {
+      throw new AnnexWorkerError(exitCode)
     }
   }
 

@@ -1,17 +1,15 @@
 package higherkindness.rules_scala
 package common.worker
 
+import common.error.AnnexWorkerError
 import com.google.devtools.build.lib.worker.WorkerProtocol
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, PrintStream}
-import java.security.Permission
 import java.util.concurrent.ForkJoinPool
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait WorkerMain[S] {
-
-  private[this] case class ExitTrapped(code: Int) extends Throwable
 
   protected[this] def init(args: Option[Array[String]]): S
 
@@ -22,14 +20,12 @@ trait WorkerMain[S] {
       case "--persistent_worker" :: args =>
         val stdin = System.in
         val stdout = System.out
-        val defaultSecurityManager = System.getSecurityManager
         val exceptionHandler = new Thread.UncaughtExceptionHandler {
           override def uncaughtException(t: Thread, err: Throwable): Unit = err match {
             case e: Throwable => {
               // Future catches all NonFatal errors, and wraps them in a Failure, so only Fatal errors get here.
               // If any request thread throws a Fatal error (OOM, StackOverflow, etc.), we can't trust the JVM, so log the error and exit.
               e.printStackTrace(System.err)
-              System.setSecurityManager(defaultSecurityManager)
               System.exit(1)
             }
           }
@@ -41,16 +37,6 @@ trait WorkerMain[S] {
           false
         )
         implicit val ec = ExecutionContext.fromExecutor(fjp)
-
-        System.setSecurityManager(new SecurityManager {
-          val Exit = raw"exitVM\.(-?\d+)".r
-          override def checkPermission(permission: Permission): Unit = {
-            permission.getName match {
-              case Exit(code) => throw new ExitTrapped(code.toInt)
-              case _          =>
-            }
-          }
-        })
 
         System.setIn(new ByteArrayInputStream(Array.emptyByteArray))
         System.setOut(System.err)
@@ -86,7 +72,7 @@ trait WorkerMain[S] {
                 work(ctx, args, out)
                 0
               } catch {
-                case ExitTrapped(code) => code
+                case AnnexWorkerError(code, _, _) => code
               }
             }
 

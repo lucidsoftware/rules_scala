@@ -6,6 +6,7 @@ import workers.common.AnnexScalaInstance
 import workers.common.CommonArguments
 import workers.common.FileUtil
 import workers.common.LoggedReporter
+import common.error.AnnexWorkerError
 import common.worker.WorkerMain
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
 import java.io.{File, PrintStream, PrintWriter}
@@ -256,10 +257,10 @@ object ZincRunner extends WorkerMain[Namespace] {
     val compileResult =
       try incrementalCompiler.compile(inputs, logger)
       catch {
-        case _: CompileFailed => sys.exit(-1)
+        case _: CompileFailed => throw new AnnexWorkerError(-1)
         case e: ClassFormatError =>
           throw new Exception("You may be missing a `macro = True` attribute.", e)
-          sys.exit(1)
+          throw new AnnexWorkerError(1)
         case e: StackOverflowError => {
           // Downgrade to NonFatal error.
           // The JVM is not guaranteed to free shared resources correctly when unwinding the stack to catch a StackOverflowError,

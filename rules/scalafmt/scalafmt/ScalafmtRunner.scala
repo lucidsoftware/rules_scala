@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path}
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import org.scalafmt.Scalafmt
-import org.scalafmt.config.Config
+import org.scalafmt.config.ScalafmtConfig
 import org.scalafmt.sysops.FileOps
 import scala.annotation.tailrec
 import scala.io.Codec
@@ -27,7 +27,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
 
     val source = FileOps.readFile(namespace.get[File]("input").toPath())(Codec.UTF8)
 
-    val config = Config.fromHoconFile(namespace.get[File]("config").toPath()).get
+    val config = ScalafmtConfig.fromHoconFile(namespace.get[File]("config").toPath()).get
     @tailrec
     def format(code: String): String = {
       val formatted = Scalafmt.format(code, config).get

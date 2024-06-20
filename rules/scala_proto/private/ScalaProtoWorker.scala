@@ -15,7 +15,7 @@ import scalapb.ScalaPbCodeGenerator
 
 object ScalaProtoWorker extends WorkerMain[Unit] {
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("proto").addHelp(true).fromFilePrefix("@").build
     parser
       .addArgument("--output_dir")
@@ -42,7 +42,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  protected[this] def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
+  protected def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
     val namespace = argParser.parseArgs(args)
     val sources = namespace.getList[File]("sources").asScala.toList
     val protoPaths = namespace.getList[File]("proto_paths").asScala.toList

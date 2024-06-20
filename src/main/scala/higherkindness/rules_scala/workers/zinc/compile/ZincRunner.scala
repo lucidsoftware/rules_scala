@@ -121,8 +121,11 @@ object ZincRunner extends WorkerMain[Namespace] {
           val label = prefixedLabel.stripPrefix("_")
           jars
             .map(jar =>
-              Paths.get(jar) -> (classesDir
-                .resolve(labelToPath(label)), DepAnalysisFiles(Paths.get(apis), Paths.get(relations)))
+              Paths.get(jar) -> (
+                classesDir
+                  .resolve(labelToPath(label)),
+                DepAnalysisFiles(Paths.get(apis), Paths.get(relations))
+              )
             )
         }
         .toMap

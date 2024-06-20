@@ -14,8 +14,8 @@ def scala_artifacts():
     return [
         "ch.epfl.scala:bloop-frontend_2.12:1.0.0",
         "com.lihaoyi:sourcecode_2.13:0.2.7,",
-        "com.thesamet.scalapb:lenses_2.13:0.11.4",
-        "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.4",
+        "com.thesamet.scalapb:lenses_2.13:0.11.17",
+        "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
         "net.sourceforge.argparse4j:argparse4j:0.8.1",
         "org.jacoco:org.jacoco.core:0.7.5.201505241946",
         "org.scala-lang:scala-compiler:2.13.14",

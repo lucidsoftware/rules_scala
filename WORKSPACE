@@ -57,9 +57,9 @@ go_register_toolchains(version = "1.17")
 
 # protobuf
 
-protobuf_tag = "3.15.8"
+protobuf_tag = "3.19.6"
 
-protobuf_sha256 = "dd513a79c7d7e45cbaeaf7655289f78fd6b806e52dbbd7018ef4e3cf5cff697a"
+protobuf_sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389"
 
 http_archive(
     name = "com_google_protobuf",
@@ -76,25 +76,37 @@ protobuf_deps()
 # rules_java
 http_archive(
     name = "rules_java",
+    sha256 = "80e61f508ff79a3fde4a549b8b1f6ec7f8a82c259e51240a4403e5be36f88142",
     urls = [
         "https://github.com/bazelbuild/rules_java/releases/download/7.6.4/rules_java-7.6.4.tar.gz",
     ],
-    sha256 = "80e61f508ff79a3fde4a549b8b1f6ec7f8a82c259e51240a4403e5be36f88142",
 )
+
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+
 rules_java_dependencies()
+
 rules_java_toolchains()
 
 register_toolchains("//:repository_default_toolchain_21_definition")
 
-rules_jvm_external_tag = "5.3"
+# rules_jvm_external
+rules_jvm_external_tag = "6.1"
 
 http_archive(
     name = "rules_jvm_external",
-    sha256 = "6cc8444b20307113a62b676846c29ff018402fd4c7097fcd6d0a0fd5f2e86429",
+    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
     strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
 )
+
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
 
 # Scala
 load("//rules/scala:workspace.bzl", "scala_register_toolchains", "scala_repositories")
@@ -171,3 +183,17 @@ http_archive(
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
 rules_pkg_dependencies()
+
+# rules_python - this is needed by rules_jvm_external for some reason
+rules_python_tag = "0.33.2"
+
+http_archive(
+    name = "rules_python",
+    sha256 = "e3f1cc7a04d9b09635afb3130731ed82b5f58eadc8233d4efb59944d92ffc06f",
+    strip_prefix = "rules_python-{}".format(rules_python_tag),
+    url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()

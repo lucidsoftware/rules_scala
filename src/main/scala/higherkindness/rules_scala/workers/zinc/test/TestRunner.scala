@@ -21,7 +21,7 @@ import net.sourceforge.argparse4j.impl.Arguments
 import org.scalatools.testing.Framework
 import sbt.internal.inc.binary.converters.ProtobufReaders
 import sbt.internal.inc.Schema
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 import xsbti.compile.analysis.ReadMapper
 

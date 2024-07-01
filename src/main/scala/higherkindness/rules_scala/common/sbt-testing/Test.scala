@@ -59,7 +59,7 @@ object TestHelper {
 }
 
 class TestReporter(logger: Logger) {
-  def post(failures: Traversable[String]) = if (failures.nonEmpty) {
+  def post(failures: Iterable[String]) = if (failures.nonEmpty) {
     logger.error(s"${failures.size} ${if (failures.size == 1) "failure" else "failures"}:")
     failures.toSeq.sorted.foreach(name => logger.error(s"    $name"))
     logger.error("")
@@ -67,7 +67,7 @@ class TestReporter(logger: Logger) {
 
   def postTask() = logger.info("")
 
-  def pre(framework: Framework, tasks: Traversable[Task]) = {
+  def pre(framework: Framework, tasks: Iterable[Task]) = {
     logger.info(s"${framework.getClass.getName}: ${tasks.size} tests")
     logger.info("")
   }

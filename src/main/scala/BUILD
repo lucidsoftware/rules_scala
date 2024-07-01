@@ -54,6 +54,7 @@ configure_zinc_scala(
     compiler_classpath = compiler_classpath_2_13_14,
     global_scalacopts = [
         "-Ytasty-reader",
+        "-Wconf:any:error",
     ],
     runtime_classpath = runtime_classpath_2_13_14,
     version = "2.13.14",
@@ -99,6 +100,9 @@ configure_zinc_scala(
     name = "zinc_3_4_2",
     compiler_bridge = "@annex_3//:org_scala_lang_scala3_sbt_bridge_3_4_2",
     compiler_classpath = compiler_classpath_3_4_2,
+    global_scalacopts = [
+        "-Wconf:any:error",
+    ],
     runtime_classpath = runtime_classpath_3_4_2,
     use_ijar = False,
     version = "3.4.2",

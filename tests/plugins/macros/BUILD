@@ -46,7 +46,9 @@ scala_library(
     name = "util",
     srcs = ["MacroUtil.scala"],
     scala = "//scala:2_13",
-    deps = ["@annex//:org_scala_lang_scala_reflect_2_13_14"],
+    deps = [
+        "@annex//:org_scala_lang_scala_reflect_2_13_14",
+    ],
 )
 
 scala_binary(

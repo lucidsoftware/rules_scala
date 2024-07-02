@@ -60,18 +60,18 @@
             {
                 "coord": "com.thesamet.scalapb:compilerplugin_2.13:0.11.17",
                 "dependencies": [
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "com.thesamet.scalapb:protoc-gen_2.13:0.9.7",
                     "com.google.protobuf:protobuf-java:3.19.6",
                     "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
-                    "com.thesamet.scalapb:protoc-gen_2.13:0.9.7",
                     "dev.dirs:directories:26",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
                     "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
                     "com.google.protobuf:protobuf-java:3.19.6",
                     "com.thesamet.scalapb:protoc-gen_2.13:0.9.7",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/compilerplugin_2.13/0.11.17/compilerplugin_2.13-0.11.17.jar",
                 "mirror_urls": [
@@ -85,18 +85,18 @@
             {
                 "coord": "com.thesamet.scalapb:compilerplugin_2.13:jar:sources:0.11.17",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
-                    "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources:0.9.7",
-                    "com.thesamet.scalapb:protoc-gen_2.13:jar:sources:0.9.7",
-                    "dev.dirs:directories:jar:sources:26",
                     "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources:0.9.7",
+                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
+                    "dev.dirs:directories:jar:sources:26",
+                    "com.thesamet.scalapb:protoc-gen_2.13:jar:sources:0.9.7"
                 ],
                 "directDependencies": [
                     "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
                     "com.thesamet.scalapb:protoc-gen_2.13:jar:sources:0.9.7",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/compilerplugin_2.13/0.11.17/compilerplugin_2.13-0.11.17-sources.jar",
                 "mirror_urls": [
@@ -110,8 +110,8 @@
             {
                 "coord": "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
                 "dependencies": [
-                    "dev.dirs:directories:26",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "dev.dirs:directories:26"
                 ],
                 "directDependencies": [
                     "dev.dirs:directories:26",
@@ -148,9 +148,9 @@
             {
                 "coord": "com.thesamet.scalapb:protoc-gen_2.13:0.9.7",
                 "dependencies": [
-                    "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
+                    "org.scala-lang:scala-library:2.13.14",
                     "dev.dirs:directories:26",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7"
                 ],
                 "directDependencies": [
                     "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
@@ -171,8 +171,8 @@
             {
                 "coord": "com.thesamet.scalapb:protoc-gen_2.13:jar:sources:0.9.7",
                 "dependencies": [
-                    "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources:0.9.7",
                     "dev.dirs:directories:jar:sources:26",
+                    "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources:0.9.7",
                     "org.scala-lang:scala-library:jar:sources:2.13.14"
                 ],
                 "directDependencies": [

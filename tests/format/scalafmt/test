@@ -7,7 +7,7 @@ bazel test :formatted
 ! bazel test :unformatted
 ## copy
 cp unformatted.template.scala unformatted.tmp.scala
-! bazel test :unformatted-copy 
+! bazel test :unformatted-copy
 bazel run :unformatted-copy
 bazel test :unformatted-copy
 rm unformatted.tmp.scala

@@ -1,9 +1,14 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+# We use nouse_action_cache + bazel shutdown here in order to prevent the skyframe
+# cache and the persistent action cache from being used and thus getting the
+# warning we want printed, printed. The alternative is to bazel clean, which
+# takes much longer.
+bazel shutdown
 # Using a worker here prevents a println this tests needs from making it
 # to the command line, so we use standalone instead.
-bazel build :inefficient-usage --strategy=ScalaCompile=standalone 2>&1 | \
+bazel build :inefficient-usage --strategy=ScalaCompile=standalone --nouse_action_cache |& \
   awk '
       BEGIN                           {z  = 2}
       /slightly inefficient/          {z -= 1}

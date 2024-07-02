@@ -1,6 +1,9 @@
 common --announce_rc
 common --color=yes
 common --noenable_bzlmod
+# Fix "Failed to fetch blobs because they do not exist remotely" errors
+# https://github.com/bazelbuild/bazel/issues/18696#issuecomment-2175561503
+common --remote_download_all
 
 build --experimental_strict_action_env
 build --javacopt="-source 21 -target 21"
@@ -22,11 +25,8 @@ build --verbose_failures
 
 test --test_output=all
 
-# Disabling these in general. Feel free to turn them on during development.
-# Having them on can make testing the rules challenging because, after a clean,
-# you hit the disk cache instead of running actions again.
-#build:rules --disk_cache=.bazel_cache
-#build:tests --disk_cache=../.bazel_cache
+build:rules --disk_cache=.bazel_cache
+build:tests --disk_cache=../.bazel_cache
 
 common:rules_v7.2 --config=noop
 

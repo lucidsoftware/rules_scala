@@ -4,9 +4,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # skylib
 
-bazel_skylib_tag = "1.0.3"
+bazel_skylib_tag = "1.7.1"
 
-bazel_skylib_sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c"
+bazel_skylib_sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f"
 
 http_archive(
     name = "bazel_skylib",
@@ -17,17 +17,21 @@ http_archive(
     ],
 )
 
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
 # com_github_bazelbuild_buildtools
 
-buildtools_tag = "0.29.0"
+buildtools_tag = "7.1.2"
 
-buildtools_sha256 = "05eb52437fb250c7591dd6cbcfd1f9b5b61d85d6b20f04b041e0830dd1ab39b3"
+buildtools_sha256 = "4c63e823e6944c950401f92155416c631a65657dd32e1021451fc015faf22ecb"
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",
     sha256 = buildtools_sha256,
     strip_prefix = "buildtools-{}".format(buildtools_tag),
-    url = "https://github.com/bazelbuild/buildtools/archive/{}.zip".format(buildtools_tag),
+    url = "https://github.com/bazelbuild/buildtools/archive/v{}.zip".format(buildtools_tag),
 )
 
 load("@com_github_bazelbuild_buildtools//buildifier:deps.bzl", "buildifier_dependencies")
@@ -169,13 +173,12 @@ annex_proto_pinned_maven_install()
 
 # rules_pkg
 
-rules_pkg_version = "0.7.0"
+rules_pkg_version = "1.0.0"
 
 http_archive(
     name = "rules_pkg",
-    sha256 = "8a298e832762eda1830597d64fe7db58178aa84cd5926d76d5b744d6558941c2",
+    sha256 = "cad05f864a32799f6f9022891de91ac78f30e0fa07dc68abac92a628121b5b11",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/{v}/rules_pkg-{v}.tar.gz".format(v = rules_pkg_version),
         "https://github.com/bazelbuild/rules_pkg/releases/download/{v}/rules_pkg-{v}.tar.gz".format(v = rules_pkg_version),
     ],
 )

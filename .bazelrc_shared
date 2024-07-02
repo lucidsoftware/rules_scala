@@ -14,13 +14,7 @@ build --tool_java_runtime_version="remotejdk_21"
 
 build --strategy=ScalaCompile=worker
 build --worker_max_instances=4
-# To re-enable worker sandboxing you will need to revert
-# 037d7440cf3b192b9979ff2f2c1b2c674b433afc
-# But this will cause AnalysisCache files to be included as
-# action inputs. Those files are non-deterministic, so this
-# causes cache misses. We should fix that before reverting
-# that commit.
-#build --worker_sandboxing
+build --worker_sandboxing
 build --verbose_failures
 
 test --test_output=all

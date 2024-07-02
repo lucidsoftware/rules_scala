@@ -6,8 +6,7 @@ import common.sbt_testing.AnnexTestingLogger
 import common.sbt_testing.ClassLoaders
 import common.sbt_testing.TestDefinition
 import common.sbt_testing.TestFrameworkLoader
-import common.sbt_testing.TestRequest
-
+import workers.common.AnalysisUtil
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.attribute.FileTime
@@ -15,15 +14,10 @@ import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 import java.time.Instant
 import java.util.Collections
 import java.util.regex.Pattern
-import java.util.zip.GZIPInputStream
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
-import org.scalatools.testing.Framework
-import sbt.internal.inc.binary.converters.ProtobufReaders
-import sbt.internal.inc.Schema
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
-import xsbti.compile.analysis.ReadMapper
 
 object TestRunner {
 
@@ -57,8 +51,8 @@ object TestRunner {
   private[this] val testArgParser = {
     val parser = ArgumentParsers.newFor("test").addHelp(true).build()
     parser
-      .addArgument("--apis")
-      .help("APIs file")
+      .addArgument("--analysis_store")
+      .help("Analysis Store file")
       .metavar("class")
       .`type`(Arguments.fileType.verifyCanRead().verifyExists())
       .required(true)
@@ -129,16 +123,12 @@ object TestRunner {
     val sharedClassLoader =
       ClassLoaders.sbtTestClassLoader(classpath.filter(sharedClasspath.toSet).map(_.toUri.toURL).toSeq)
 
-    val apisFile = runPath.resolve(testNamespace.get[File]("apis").toPath)
-    val apisStream = Files.newInputStream(apisFile)
+    val analysisStoreFile = runPath.resolve(testNamespace.get[File]("analysis_store").toPath)
     val apis =
       try {
-        val raw =
-          try Schema.APIs.parseFrom(new GZIPInputStream(apisStream))
-          finally apisStream.close()
-        new ProtobufReaders(ReadMapper.getEmptyMapper, Schema.Version.V1_1).fromApis(shouldStoreApis = true)(raw)
+        AnalysisUtil.getAnalysis(AnalysisUtil.getAnalysisStore(analysisStoreFile.toFile, false)).apis
       } catch {
-        case NonFatal(e) => throw new Exception(s"Failed to load APIs from $apisFile", e)
+        case NonFatal(e) => throw new Exception(s"Failed to load APIs from analysis store: $analysisStoreFile", e)
       }
 
     val loader = new TestFrameworkLoader(classLoader, logger)

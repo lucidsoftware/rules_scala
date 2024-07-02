@@ -19,7 +19,7 @@ case class LibraryDep(file: Path) extends Dep {
 
 case class DepAnalysisFiles(apis: Path, relations: Path)
 
-case class ExternalDep(file: Path, classpath: Path, analysis: DepAnalysisFiles) extends Dep
+case class ExternalDep(file: Path, classpath: Path, analysisStore: Path) extends Dep
 
 object Dep {
 
@@ -28,7 +28,7 @@ object Dep {
     new BigInteger(1, digest.digest(Files.readAllBytes(file))).toString(16)
   }
 
-  def create(depsCache: Option[Path], classpath: Seq[Path], analyses: Map[Path, (Path, DepAnalysisFiles)]): Seq[Dep] = {
+  def create(depsCache: Option[Path], classpath: Seq[Path], analyses: Map[Path, (Path, Path)]): Seq[Dep] = {
     val roots = scala.collection.mutable.Set[Path]()
     classpath.flatMap { original =>
       analyses.get(original).fold[Option[Dep]](Some(LibraryDep(original))) { analysis =>

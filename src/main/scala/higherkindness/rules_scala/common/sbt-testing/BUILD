@@ -25,6 +25,9 @@ scala_library(
     srcs = _common_srcs,
     scala = "//src/main/scala:zinc",
     visibility = ["//visibility:public"],
+    deps_used_whitelist = [
+        "@annex//:org_scala_lang_scala_library",
+    ],
     deps = [
         "@annex//:org_scala_lang_modules_scala_xml_2_13",
         "@annex//:org_scala_sbt_test_interface",

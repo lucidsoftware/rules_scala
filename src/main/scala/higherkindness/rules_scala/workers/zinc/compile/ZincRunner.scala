@@ -1,6 +1,7 @@
 package higherkindness.rules_scala
 package workers.zinc.compile
 
+import workers.common.AnalysisUtil
 import workers.common.AnnexLogger
 import workers.common.AnnexScalaInstance
 import workers.common.CommonArguments
@@ -11,21 +12,20 @@ import common.worker.WorkerMain
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
 import java.io.{File, PrintStream, PrintWriter}
 import java.net.URLClassLoader
-import java.nio.file.{Files, NoSuchFileException, Path, Paths}
-import java.text.SimpleDateFormat
+import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{Date, List => JList, Optional, Properties}
+import java.util.{Optional, List => JList}
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.{Arguments => Arg}
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
 import sbt.internal.inc.{Analysis, CompileFailed, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 import scala.util.control.NonFatal
-import xsbti.{Logger, T2, VirtualFile, VirtualFileRef}
-import xsbti.compile.{AnalysisContents, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
+import xsbti.{T2, VirtualFile, VirtualFileRef}
+import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
 
 // The list in this docstring gets clobbered by the formatter, unfortunately.
 //format: off
@@ -111,46 +111,39 @@ object ZincRunner extends WorkerMain[Namespace] {
     val outputJar = namespace.get[File]("output_jar").toPath
 
     val deps = {
-      val analyses = Option(
-        namespace
-          .getList[JList[String]]("analysis")
-      ).filter(_ => usePersistence)
-        .fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
-        .flatMap { value =>
-          val prefixedLabel +: apis +: relations +: jars = value.asScala.toList
-          val label = prefixedLabel.stripPrefix("_")
-          jars
-            .map(jar =>
-              Paths.get(jar) -> (
-                classesDir
-                  .resolve(labelToPath(label)),
-                DepAnalysisFiles(Paths.get(apis), Paths.get(relations))
-              )
-            )
+      val analyses: Map[Path, (Path, Path)] = {
+        if (usePersistence) {
+          Option(
+            namespace.getList[JList[String]]("analysis")
+          ).fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
+            .flatMap { value =>
+              val prefixedLabel +: analysis_store +: jars = value.asScala.toList
+              val label = prefixedLabel.stripPrefix("_")
+              jars
+                .map(jar =>
+                  Paths.get(jar) -> (
+                    classesDir
+                      .resolve(labelToPath(label)),
+                    Paths.get(analysis_store),
+                  )
+                )
+            }
+            .toMap
+        } else {
+          Map.empty[Path, (Path, Path)]
         }
-        .toMap
+      }
       val originalClasspath = namespace.getList[File]("classpath").asScala.map(_.toPath)
       Dep.create(depsCache, originalClasspath.toSeq, analyses)
     }
 
-    // load persisted files
-    val analysisFiles = AnalysisFiles(
-      apis = namespace.get[File]("output_apis").toPath,
-      miniSetup = namespace.get[File]("output_setup").toPath,
-      relations = namespace.get[File]("output_relations").toPath,
-      sourceInfos = namespace.get[File]("output_infos").toPath,
-      stamps = namespace.get[File]("output_stamps").toPath
-    )
-    val analysesFormat = {
-      val debug = namespace.getBoolean("debug")
-      val format = if (debug) AnxAnalysisStore.TextFormat else AnxAnalysisStore.BinaryFormat
-      new AnxAnalyses(format)
-    }
-    val analysisStore = new AnxAnalysisStore(analysisFiles, analysesFormat)
+    val debug = namespace.getBoolean("debug")
+    val analysisStoreFile = namespace.get[File]("output_analysis_store")
+    val analysisStore: AnalysisStore = AnalysisUtil.getAnalysisStore(analysisStoreFile, debug, usePersistence)
 
     val persistence = persistenceDir.fold[ZincPersistence](NullPersistence) { rootDir =>
       val path = namespace.getString("label").replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_")
-      new FilePersistence(rootDir.resolve(path), analysisFiles, outputJar)
+      new FilePersistence(rootDir.resolve(path), analysisStoreFile.toPath, outputJar)
     }
 
     val classesOutputDir = classesDir.resolve(labelToPath(namespace.getString("label")))
@@ -167,11 +160,7 @@ object ZincRunner extends WorkerMain[Namespace] {
     } catch {
       case NonFatal(e) =>
         logger.warn(() => s"Failed to load cached analysis: $e")
-        Files.delete(analysisFiles.apis)
-        Files.delete(analysisFiles.miniSetup)
-        Files.delete(analysisFiles.relations)
-        Files.delete(analysisFiles.sourceInfos)
-        Files.delete(analysisFiles.stamps)
+        Files.delete(analysisStoreFile.toPath)
     }
     Files.createDirectories(classesOutputDir)
 
@@ -213,18 +202,25 @@ object ZincRunner extends WorkerMain[Namespace] {
     }
 
     val lookup = {
-      val depMap = deps.collect { case ExternalDep(_, classpath, files) =>
-        classpath -> files
+      val depMap = deps.collect { case ExternalDep(_, classpath, analysisStorePath) =>
+        classpath -> analysisStorePath
       }.toMap
       new AnxPerClasspathEntryLookup(file => {
         depMap
           .get(file)
-          .map(files =>
-            Analysis.Empty.copy(
-              apis = analysesFormat.apis().read(files.apis),
-              relations = analysesFormat.relations.read(files.relations)
+          .map { analysisStorePath =>
+            val analysis = AnalysisUtil.getAnalysis(
+              AnalysisUtil.getAnalysisStore(
+                analysisStorePath.toFile,
+                debug,
+                isIncremental = usePersistence,
+              ),
             )
-          )
+            Analysis.Empty.copy(
+              apis = analysis.apis,
+              relations = analysis.relations,
+            )
+          }
       })
     }
 
@@ -278,14 +274,14 @@ object ZincRunner extends WorkerMain[Namespace] {
     analysisStore.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
 
     // create used deps
-    val analysis = compileResult.analysis.asInstanceOf[Analysis]
+    val resultAnalysis = compileResult.analysis.asInstanceOf[Analysis]
     val usedDeps =
-      deps.filter(Dep.used(deps, analysis.relations, lookup)).filter(_.file != scalaInstance.libraryJar.toPath)
+      deps.filter(Dep.used(deps, resultAnalysis.relations, lookup)).filter(_.file != scalaInstance.libraryJar.toPath)
     Files.write(namespace.get[File]("output_used").toPath, usedDeps.map(_.file.toString).sorted.asJava)
 
     // create jar
     val mains =
-      analysis.infos.allInfos.values.toList
+      resultAnalysis.infos.allInfos.values.toList
         .flatMap(_.getMainClasses.toList)
         .sorted
 
@@ -332,6 +328,9 @@ final class AnxPerClasspathEntryLookup(analyses: Path => Option[CompileAnalysis]
 /**
  * We create this to deterministically set the hash code of directories otherwise they get set to the
  * System.identityHashCode() of an object created during compilation. That results in non-determinism.
+ *
+ * TODO: Get rid of this once the upstream fix is released:
+ * https://github.com/sbt/zinc/commit/b4db1476d7fdb2c530a97c543ec9710c13ac58e3
  */
 final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup {
   // My understanding is that setting all these to None is the same as the

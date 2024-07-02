@@ -66,6 +66,7 @@ ZincConfiguration = provider(
         "compiler_bridge": "compiled Zinc compiler bridge",
         "compile_worker": "the worker label for compilation with Zinc",
         "log_level": "log level for the Zinc compiler",
+        "incremental": "whether incremental compilation will be available for this Zinc compiler",
     },
 )
 
@@ -156,11 +157,10 @@ declare_zinc_configuration = rule(
 ZincInfo = provider(
     doc = "Zinc-specific outputs.",
     fields = {
-        "apis": "The API file.",
+        "analysis_store": "The analysis store file.",
         "deps": "The depset of library dependency outputs.",
         "deps_files": "The depset of all Zinc files.",
         "label": "The label for this output.",
-        "relations": "The relations file.",
     },
 )
 

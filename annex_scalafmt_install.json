@@ -8,23 +8,23 @@
             {
                 "coord": "com.geirsson:metaconfig-core_2.13:0.12.0",
                 "dependencies": [
-                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
-                    "com.lihaoyi:fansi_2.13:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
-                    "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
                     "org.scala-lang:scala-reflect:2.13.14",
-                    "org.typelevel:paiges-core_2.13:0.4.3"
+                    "net.java.dev.jna:jna:5.14.0",
+                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
+                    "org.scala-lang:scala-compiler:2.13.14",
+                    "org.typelevel:paiges-core_2.13:0.4.3",
+                    "com.lihaoyi:fansi_2.13:0.4.0",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
-                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14",
                     "org.scala-lang:scala-reflect:2.13.14",
-                    "org.typelevel:paiges-core_2.13:0.4.3"
+                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
+                    "org.typelevel:paiges-core_2.13:0.4.3",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/geirsson/metaconfig-core_2.13/0.12.0/metaconfig-core_2.13-0.12.0.jar",
                 "mirror_urls": [
@@ -38,23 +38,23 @@
             {
                 "coord": "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
                 "dependencies": [
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
+                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3",
                     "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
                     "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
-                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3"
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
-                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
                     "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
                     "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3"
+                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3",
+                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
+                    "org.scala-lang:scala-reflect:jar:sources:2.13.14"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/geirsson/metaconfig-core_2.13/0.12.0/metaconfig-core_2.13-0.12.0-sources.jar",
                 "mirror_urls": [
@@ -68,13 +68,13 @@
             {
                 "coord": "com.geirsson:metaconfig-pprint_2.13:0.12.0",
                 "dependencies": [
-                    "com.lihaoyi:fansi_2.13:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
                     "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14"
+                    "com.lihaoyi:fansi_2.13:0.4.0",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
                     "com.lihaoyi:fansi_2.13:0.4.0",
@@ -94,13 +94,13 @@
             {
                 "coord": "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
                 "dependencies": [
-                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scala-lang:scala-reflect:jar:sources:2.13.14"
+                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
@@ -120,18 +120,18 @@
             {
                 "coord": "com.geirsson:metaconfig-typesafe-config_2.13:0.12.0",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:0.12.0",
-                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
-                    "com.lihaoyi:fansi_2.13:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "com.typesafe:config:1.4.1",
                     "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
+                    "com.geirsson:metaconfig-core_2.13:0.12.0",
                     "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14",
-                    "org.typelevel:paiges-core_2.13:0.4.3"
+                    "org.typelevel:paiges-core_2.13:0.4.3",
+                    "com.lihaoyi:fansi_2.13:0.4.0",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
                     "com.geirsson:metaconfig-core_2.13:0.12.0",
@@ -150,18 +150,18 @@
             {
                 "coord": "com.geirsson:metaconfig-typesafe-config_2.13:jar:sources:0.12.0",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
+                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3",
                     "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
                     "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
-                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
                     "com.typesafe:config:jar:sources:1.4.1",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
+                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3"
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
@@ -225,8 +225,8 @@
             {
                 "coord": "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
                 "dependencies": [
-                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2"
                 ],
                 "directDependencies": [
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
@@ -278,12 +278,12 @@
             {
                 "coord": "com.thesamet.scalapb:lenses_2.13:0.11.17",
                 "dependencies": [
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0"
                 ],
                 "directDependencies": [
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/lenses_2.13/0.11.17/lenses_2.13-0.11.17.jar",
                 "mirror_urls": [
@@ -297,12 +297,12 @@
             {
                 "coord": "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
                 "dependencies": [
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0"
                 ],
                 "directDependencies": [
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/lenses_2.13/0.11.17/lenses_2.13-0.11.17-sources.jar",
                 "mirror_urls": [
@@ -318,14 +318,14 @@
                 "dependencies": [
                     "com.google.protobuf:protobuf-java:3.19.6",
                     "com.thesamet.scalapb:lenses_2.13:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0"
                 ],
                 "directDependencies": [
                     "com.google.protobuf:protobuf-java:3.19.6",
                     "com.thesamet.scalapb:lenses_2.13:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/scalapb-runtime_2.13/0.11.17/scalapb-runtime_2.13-0.11.17.jar",
                 "mirror_urls": [
@@ -339,16 +339,16 @@
             {
                 "coord": "com.thesamet.scalapb:scalapb-runtime_2.13:jar:sources:0.11.17",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
                     "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6"
                 ],
                 "directDependencies": [
                     "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
                     "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/com/thesamet/scalapb/scalapb-runtime_2.13/0.11.17/scalapb-runtime_2.13-0.11.17-sources.jar",
                 "mirror_urls": [
@@ -534,18 +534,18 @@
             {
                 "coord": "org.scala-lang:scala-compiler:2.13.14",
                 "dependencies": [
-                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "net.java.dev.jna:jna:5.14.0",
+                    "io.github.java-diff-utils:java-diff-utils:4.12",
                     "org.jline:jline:3.25.1",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
-                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "net.java.dev.jna:jna:5.14.0",
+                    "io.github.java-diff-utils:java-diff-utils:4.12",
                     "org.jline:jline:3.25.1",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-compiler/2.13.14/scala-compiler-2.13.14.jar",
                 "mirror_urls": [
@@ -559,17 +559,17 @@
             {
                 "coord": "org.scala-lang:scala-compiler:jar:sources:2.13.14",
                 "dependencies": [
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scala-lang/scala-compiler/2.13.14/scala-compiler-2.13.14-sources.jar",
@@ -644,12 +644,12 @@
             {
                 "coord": "org.scala-lang:scalap:2.13.14",
                 "dependencies": [
-                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
                     "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14"
+                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-compiler:2.13.14"
@@ -669,12 +669,12 @@
             {
                 "coord": "org.scala-lang:scalap:jar:sources:2.13.14",
                 "dependencies": [
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scala-lang:scala-reflect:jar:sources:2.13.14"
+                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-compiler:jar:sources:2.13.14"
@@ -694,12 +694,12 @@
             {
                 "coord": "org.scalameta:common_2.13:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:3.19.6",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
-                    "com.thesamet.scalapb:lenses_2.13:0.11.17",
-                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
+                    "com.google.protobuf:protobuf-java:3.19.6",
+                    "org.scala-lang:scala-library:2.13.14",
+                    "com.thesamet.scalapb:lenses_2.13:0.11.17"
                 ],
                 "directDependencies": [
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
@@ -718,12 +718,12 @@
             {
                 "coord": "org.scalameta:common_2.13:jar:sources:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
                     "com.thesamet.scalapb:scalapb-runtime_2.13:jar:sources:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6"
                 ],
                 "directDependencies": [
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
@@ -776,14 +776,14 @@
             {
                 "coord": "org.scalameta:parsers_2.13:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:3.19.6",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
-                    "com.thesamet.scalapb:lenses_2.13:0.11.17",
-                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang:scala-library:2.13.14",
+                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
                     "org.scalameta:common_2.13:4.9.7",
-                    "org.scalameta:trees_2.13:4.9.7"
+                    "com.google.protobuf:protobuf-java:3.19.6",
+                    "org.scalameta:trees_2.13:4.9.7",
+                    "org.scala-lang:scala-library:2.13.14",
+                    "com.thesamet.scalapb:lenses_2.13:0.11.17"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-library:2.13.14",
@@ -801,13 +801,13 @@
             {
                 "coord": "org.scalameta:parsers_2.13:jar:sources:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
                     "com.thesamet.scalapb:scalapb-runtime_2.13:jar:sources:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scalameta:common_2.13:jar:sources:4.9.7",
+                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
                     "org.scalameta:trees_2.13:jar:sources:4.9.7"
                 ],
                 "directDependencies": [
@@ -826,19 +826,19 @@
             {
                 "coord": "org.scalameta:scalafmt-config_2.13:3.8.2",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:0.12.0",
-                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
-                    "com.geirsson:metaconfig-typesafe-config_2.13:0.12.0",
-                    "com.lihaoyi:fansi_2.13:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "org.scala-lang:scala-reflect:2.13.14",
                     "com.typesafe:config:1.4.1",
                     "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
+                    "com.geirsson:metaconfig-typesafe-config_2.13:0.12.0",
+                    "com.geirsson:metaconfig-core_2.13:0.12.0",
                     "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
-                    "org.scala-lang:scala-reflect:2.13.14",
-                    "org.typelevel:paiges-core_2.13:0.4.3"
+                    "org.typelevel:paiges-core_2.13:0.4.3",
+                    "com.lihaoyi:fansi_2.13:0.4.0",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14"
                 ],
                 "directDependencies": [
                     "com.geirsson:metaconfig-core_2.13:0.12.0",
@@ -857,19 +857,19 @@
             {
                 "coord": "org.scalameta:scalafmt-config_2.13:jar:sources:3.8.2",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
-                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
-                    "com.geirsson:metaconfig-typesafe-config_2.13:jar:sources:0.12.0",
-                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3",
+                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
+                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
                     "com.typesafe:config:jar:sources:1.4.1",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
+                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3"
+                    "com.geirsson:metaconfig-typesafe-config_2.13:jar:sources:0.12.0",
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
@@ -888,35 +888,35 @@
             {
                 "coord": "org.scalameta:scalafmt-core_2.13:3.8.2",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:0.12.0",
-                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
-                    "com.geirsson:metaconfig-typesafe-config_2.13:0.12.0",
-                    "com.lihaoyi:fansi_2.13:0.4.0",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
-                    "com.typesafe:config:1.4.1",
-                    "io.github.java-diff-utils:java-diff-utils:4.12",
-                    "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4",
-                    "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
                     "org.scala-lang:scala-reflect:2.13.14",
-                    "org.scala-lang:scalap:2.13.14",
-                    "org.scalameta:mdoc-parser_2.13:2.5.2",
-                    "org.scalameta:parsers_2.13:4.9.7",
-                    "org.scalameta:scalafmt-config_2.13:3.8.2",
+                    "com.typesafe:config:1.4.1",
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4",
+                    "net.java.dev.jna:jna:5.14.0",
+                    "com.geirsson:metaconfig-pprint_2.13:0.12.0",
                     "org.scalameta:scalafmt-sysops_2.13:3.8.2",
+                    "org.scalameta:scalafmt-config_2.13:3.8.2",
+                    "org.scala-lang:scalap:2.13.14",
+                    "com.geirsson:metaconfig-typesafe-config_2.13:0.12.0",
+                    "com.geirsson:metaconfig-core_2.13:0.12.0",
+                    "org.scala-lang:scala-compiler:2.13.14",
+                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.typelevel:paiges-core_2.13:0.4.3",
+                    "com.lihaoyi:fansi_2.13:0.4.0",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14",
                     "org.scalameta:scalameta_2.13:4.9.6",
-                    "org.typelevel:paiges-core_2.13:0.4.3"
+                    "org.scalameta:mdoc-parser_2.13:2.5.2",
+                    "org.scalameta:parsers_2.13:4.9.7"
                 ],
                 "directDependencies": [
-                    "org.scala-lang:scala-library:2.13.14",
                     "org.scala-lang:scala-reflect:2.13.14",
-                    "org.scalameta:mdoc-parser_2.13:2.5.2",
-                    "org.scalameta:scalafmt-config_2.13:3.8.2",
                     "org.scalameta:scalafmt-sysops_2.13:3.8.2",
-                    "org.scalameta:scalameta_2.13:4.9.6"
+                    "org.scalameta:scalafmt-config_2.13:3.8.2",
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scalameta:scalameta_2.13:4.9.6",
+                    "org.scalameta:mdoc-parser_2.13:2.5.2"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scalameta/scalafmt-core_2.13/3.8.2/scalafmt-core_2.13-3.8.2.jar",
                 "mirror_urls": [
@@ -930,35 +930,35 @@
             {
                 "coord": "org.scalameta:scalafmt-core_2.13:jar:sources:3.8.2",
                 "dependencies": [
-                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
-                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
-                    "com.geirsson:metaconfig-typesafe-config_2.13:jar:sources:0.12.0",
-                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
-                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
-                    "com.typesafe:config:jar:sources:1.4.1",
-                    "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
-                    "net.java.dev.jna:jna:jar:sources:5.14.0",
-                    "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
                     "org.scala-lang:scalap:jar:sources:2.13.14",
-                    "org.scalameta:mdoc-parser_2.13:jar:sources:2.5.2",
-                    "org.scalameta:parsers_2.13:jar:sources:4.9.7",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
+                    "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3",
                     "org.scalameta:scalafmt-config_2.13:jar:sources:3.8.2",
-                    "org.scalameta:scalafmt-sysops_2.13:jar:sources:3.8.2",
                     "org.scalameta:scalameta_2.13:jar:sources:4.9.6",
-                    "org.typelevel:paiges-core_2.13:jar:sources:0.4.3"
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4",
+                    "org.scalameta:parsers_2.13:jar:sources:4.9.7",
+                    "com.geirsson:metaconfig-pprint_2.13:jar:sources:0.12.0",
+                    "org.scalameta:scalafmt-sysops_2.13:jar:sources:3.8.2",
+                    "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
+                    "com.lihaoyi:fansi_2.13:jar:sources:0.4.0",
+                    "com.typesafe:config:jar:sources:1.4.1",
+                    "net.java.dev.jna:jna:jar:sources:5.14.0",
+                    "org.scalameta:mdoc-parser_2.13:jar:sources:2.5.2",
+                    "com.geirsson:metaconfig-core_2.13:jar:sources:0.12.0",
+                    "org.jline:jline:jar:sources:3.25.1",
+                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
+                    "com.geirsson:metaconfig-typesafe-config_2.13:jar:sources:0.12.0",
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.scalameta:mdoc-parser_2.13:jar:sources:2.5.2",
                     "org.scalameta:scalafmt-config_2.13:jar:sources:3.8.2",
+                    "org.scalameta:scalameta_2.13:jar:sources:4.9.6",
                     "org.scalameta:scalafmt-sysops_2.13:jar:sources:3.8.2",
-                    "org.scalameta:scalameta_2.13:jar:sources:4.9.6"
+                    "org.scalameta:mdoc-parser_2.13:jar:sources:2.5.2",
+                    "org.scala-lang:scala-reflect:jar:sources:2.13.14"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scalameta/scalafmt-core_2.13/3.8.2/scalafmt-core_2.13-3.8.2-sources.jar",
                 "mirror_urls": [
@@ -972,12 +972,12 @@
             {
                 "coord": "org.scalameta:scalafmt-sysops_2.13:3.8.2",
                 "dependencies": [
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4"
                 ],
                 "directDependencies": [
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4",
-                    "org.scala-lang:scala-library:2.13.14"
+                    "org.scala-lang:scala-library:2.13.14",
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:1.0.4"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.8.2/scalafmt-sysops_2.13-3.8.2.jar",
                 "mirror_urls": [
@@ -991,12 +991,12 @@
             {
                 "coord": "org.scalameta:scalafmt-sysops_2.13:jar:sources:3.8.2",
                 "dependencies": [
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4"
                 ],
                 "directDependencies": [
-                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14"
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scala-lang.modules:scala-parallel-collections_2.13:jar:sources:1.0.4"
                 ],
                 "file": "v1/https/repo.maven.apache.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.8.2/scalafmt-sysops_2.13-3.8.2-sources.jar",
                 "mirror_urls": [
@@ -1010,13 +1010,13 @@
             {
                 "coord": "org.scalameta:scalameta_2.13:4.9.6",
                 "dependencies": [
-                    "io.github.java-diff-utils:java-diff-utils:4.12",
-                    "net.java.dev.jna:jna:5.14.0",
-                    "org.jline:jline:3.25.1",
-                    "org.scala-lang:scala-compiler:2.13.14",
-                    "org.scala-lang:scala-library:2.13.14",
                     "org.scala-lang:scala-reflect:2.13.14",
+                    "net.java.dev.jna:jna:5.14.0",
                     "org.scala-lang:scalap:2.13.14",
+                    "org.scala-lang:scala-compiler:2.13.14",
+                    "io.github.java-diff-utils:java-diff-utils:4.12",
+                    "org.jline:jline:3.25.1",
+                    "org.scala-lang:scala-library:2.13.14",
                     "org.scalameta:parsers_2.13:4.9.7"
                 ],
                 "directDependencies": [
@@ -1039,14 +1039,14 @@
             {
                 "coord": "org.scalameta:scalameta_2.13:jar:sources:4.9.6",
                 "dependencies": [
+                    "org.scala-lang:scalap:jar:sources:2.13.14",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
+                    "org.scalameta:parsers_2.13:jar:sources:4.9.7",
                     "io.github.java-diff-utils:java-diff-utils:jar:sources:4.12",
                     "net.java.dev.jna:jna:jar:sources:5.14.0",
                     "org.jline:jline:jar:sources:3.25.1",
-                    "org.scala-lang:scala-compiler:jar:sources:2.13.14",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "org.scala-lang:scala-reflect:jar:sources:2.13.14",
-                    "org.scala-lang:scalap:jar:sources:2.13.14",
-                    "org.scalameta:parsers_2.13:jar:sources:4.9.7"
+                    "org.scala-lang:scala-compiler:jar:sources:2.13.14"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-library:jar:sources:2.13.14",
@@ -1068,13 +1068,13 @@
             {
                 "coord": "org.scalameta:trees_2.13:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:3.19.6",
                     "com.lihaoyi:sourcecode_2.13:0.4.2",
-                    "com.thesamet.scalapb:lenses_2.13:0.11.17",
-                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
                     "org.scala-lang.modules:scala-collection-compat_2.13:2.12.0",
+                    "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
+                    "org.scalameta:common_2.13:4.9.7",
+                    "com.google.protobuf:protobuf-java:3.19.6",
                     "org.scala-lang:scala-library:2.13.14",
-                    "org.scalameta:common_2.13:4.9.7"
+                    "com.thesamet.scalapb:lenses_2.13:0.11.17"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-library:2.13.14",
@@ -1092,13 +1092,13 @@
             {
                 "coord": "org.scalameta:trees_2.13:jar:sources:4.9.7",
                 "dependencies": [
-                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6",
+                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
                     "com.lihaoyi:sourcecode_2.13:jar:sources:0.4.2",
+                    "org.scala-lang:scala-library:jar:sources:2.13.14",
                     "com.thesamet.scalapb:lenses_2.13:jar:sources:0.11.17",
                     "com.thesamet.scalapb:scalapb-runtime_2.13:jar:sources:0.11.17",
-                    "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources:2.12.0",
-                    "org.scala-lang:scala-library:jar:sources:2.13.14",
-                    "org.scalameta:common_2.13:jar:sources:4.9.7"
+                    "org.scalameta:common_2.13:jar:sources:4.9.7",
+                    "com.google.protobuf:protobuf-java:jar:sources:3.19.6"
                 ],
                 "directDependencies": [
                     "org.scala-lang:scala-library:jar:sources:2.13.14",

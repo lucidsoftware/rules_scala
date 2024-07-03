@@ -26,7 +26,7 @@ class TestFrameworkLoader(loader: ClassLoader, logger: Logger) {
 
 object TestHelper {
   def withRunner[A](framework: Framework, scopeAndTestName: String, classLoader: ClassLoader, arguments: Seq[String])(
-    f: Runner => A
+    f: Runner => A,
   ) = {
     val options =
       if (framework.name == "specs2") {
@@ -54,7 +54,7 @@ object TestHelper {
       test.name,
       test.fingerprint,
       false,
-      Array(new TestWildcardSelector(scopeAndTestName.replace("::", " ")))
+      Array(new TestWildcardSelector(scopeAndTestName.replace("::", " "))),
     )
 }
 
@@ -88,7 +88,7 @@ class TestTaskExecutor(logger: Logger) {
             case _ =>
           }
         },
-        Array(new PrefixedTestingLogger(logger, "    "))
+        Array(new PrefixedTestingLogger(logger, "    ")),
       )
       tasks.foreach(execute)
     }

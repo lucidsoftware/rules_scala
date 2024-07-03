@@ -1,5 +1,5 @@
-load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 
 scala_library(
     name = "plugin-lib",

@@ -72,7 +72,7 @@ object ReplRunner {
       .asScala
       .map(file => runPath.resolve(file.toPath).toFile)
     val scalaInstance = new AnnexScalaInstance(
-      compilerClasspath.toArray
+      compilerClasspath.toArray,
     )
 
     val logger = new AnnexLogger(namespace.getString("log_level"))
@@ -93,7 +93,7 @@ object ReplRunner {
       options,
       "",
       "",
-      logger
+      logger,
     )()
   }
 }

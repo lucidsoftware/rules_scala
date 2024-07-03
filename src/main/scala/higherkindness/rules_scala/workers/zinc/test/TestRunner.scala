@@ -167,7 +167,7 @@ object TestRunner {
               framework,
               classpath.toSeq,
               new ProcessCommand(executable.toString, arguments),
-              logger
+              logger,
             )
           case "none" => new BasicTestRunner(framework, classLoader, logger)
         }

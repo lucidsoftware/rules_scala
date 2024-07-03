@@ -14,7 +14,7 @@ import java.io.{File, PrintStream, PrintWriter}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{Optional, List => JList}
+import java.util.{List => JList, Optional}
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.{Arguments => Arg}
 import net.sourceforge.argparse4j.inf.Namespace
@@ -114,7 +114,7 @@ object ZincRunner extends WorkerMain[Namespace] {
       val analyses: Map[Path, (Path, Path)] = {
         if (usePersistence) {
           Option(
-            namespace.getList[JList[String]]("analysis")
+            namespace.getList[JList[String]]("analysis"),
           ).fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
             .flatMap { value =>
               // Disable exhaustivity check here. Yes it could break, but it is
@@ -127,7 +127,7 @@ object ZincRunner extends WorkerMain[Namespace] {
                     classesDir
                       .resolve(labelToPath(label)),
                     Paths.get(analysis_store),
-                  )
+                  ),
                 )
             }
             .toMap
@@ -172,10 +172,10 @@ object ZincRunner extends WorkerMain[Namespace] {
           logger.warn(() => s"Failed to load previous analysis: $e")
           Optional.empty[AnalysisContents]()
         },
-        identity
+        identity,
       )
       .map[PreviousResult](contents =>
-        PreviousResult.of(Optional.of(contents.getAnalysis), Optional.of(contents.getMiniSetup))
+        PreviousResult.of(Optional.of(contents.getAnalysis), Optional.of(contents.getMiniSetup)),
       )
       .orElseGet(() => PreviousResult.of(Optional.empty[CompileAnalysis](), Optional.empty[MiniSetup]()))
 
@@ -191,8 +191,8 @@ object ZincRunner extends WorkerMain[Namespace] {
         .withScalacOptions(
           Array.concat(
             namespace.getList[File]("plugins").asScala.map(p => s"-Xplugin:$p").toArray,
-            Option(namespace.getList[String]("compiler_option")).fold[Seq[String]](Nil)(_.asScala.toSeq).toArray
-          )
+            Option(namespace.getList[String]("compiler_option")).fold[Seq[String]](Nil)(_.asScala.toSeq).toArray,
+          ),
         )
 
     val compilers = {
@@ -222,7 +222,7 @@ object ZincRunner extends WorkerMain[Namespace] {
 
     val externalHooks = new DefaultExternalHooks(
       Optional.of(new DeterministicDirectoryHashExternalHooks()),
-      Optional.empty()
+      Optional.empty(),
     )
 
     val setup = {
@@ -241,7 +241,7 @@ object ZincRunner extends WorkerMain[Namespace] {
         incOptions,
         reporter,
         Optional.empty[CompileProgress](),
-        Array.empty[T2[String, String]]
+        Array.empty[T2[String, String]],
       )
     }
 
@@ -361,7 +361,7 @@ final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup
   // https://github.com/sbt/zinc/blob/f55b5b5abfba2dfcec0082b6fa8d329286803d2d/internal/zinc-core/src/main/scala/sbt/internal/inc/IncrementalCommon.scala#L429
   override def shouldDoIncrementalCompilation(
     changedClasses: util.Set[String],
-    previousAnalysis: CompileAnalysis
+    previousAnalysis: CompileAnalysis,
   ): Boolean = true
 
   // We set the hash code of the directories to 0. By default they get set

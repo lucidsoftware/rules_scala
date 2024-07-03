@@ -1,5 +1,5 @@
-load("//rules:scalafmt.bzl", "scala_format_test")
 load("//rules:scala.bzl", "scala_library")
+load("//rules:scalafmt.bzl", "scala_format_test")
 
 _subprocess_srcs = ["SubprocessRunner.scala"]
 
@@ -23,11 +23,11 @@ scala_library(
 scala_library(
     name = "common",
     srcs = _common_srcs,
-    scala = "//src/main/scala:zinc",
-    visibility = ["//visibility:public"],
     deps_used_whitelist = [
         "@annex//:org_scala_lang_scala_library",
     ],
+    scala = "//src/main/scala:zinc",
+    visibility = ["//visibility:public"],
     deps = [
         "@annex//:org_scala_lang_modules_scala_xml_2_13",
         "@annex//:org_scala_sbt_test_interface",

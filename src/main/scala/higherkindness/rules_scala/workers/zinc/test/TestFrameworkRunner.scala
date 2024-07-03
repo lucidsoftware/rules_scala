@@ -81,14 +81,14 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
 
 class ProcessCommand(
   val executable: String,
-  val arguments: Seq[String]
+  val arguments: Seq[String],
 ) extends Serializable
 
 class ProcessTestRunner(
   framework: Framework,
   classpath: Seq[Path],
   command: ProcessCommand,
-  logger: Logger with Serializable
+  logger: Logger with Serializable,
 ) extends TestFrameworkRunner {
   def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]) = {
     val reporter = new TestReporter(logger)
@@ -115,7 +115,7 @@ class ProcessTestRunner(
           scopeAndTestName,
           classpath.map(_.toString),
           logger,
-          arguments
+          arguments,
         )
         val out = new ObjectOutputStream(process.getOutputStream)
         try out.writeObject(request)

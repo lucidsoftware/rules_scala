@@ -121,7 +121,7 @@ object DocRunner extends WorkerMain[Unit] {
       output.toPath,
       options,
       logger,
-      reporter
+      reporter,
     )
 
     try FileUtil.delete(tmpDir)

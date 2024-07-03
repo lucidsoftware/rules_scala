@@ -1,5 +1,5 @@
-load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_scala_annex//rules:providers.bzl", "reconfigure_deps_configuration")
+load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 
 # used_deps off
 reconfigure_deps_configuration(

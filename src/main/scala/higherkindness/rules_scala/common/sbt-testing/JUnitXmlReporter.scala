@@ -45,21 +45,21 @@ class JUnitXmlReporter(tasksAndEvents: ListBuffer[(String, ListBuffer[Event])]) 
                 case Status.Error if e.throwable.isDefined =>
                   val t = e.throwable.get
                   s"""<error message="${escape(t.getMessage)}" type="${escape(t.getClass.getName)}">${escape(
-                      trace
+                      trace,
                     )}</error>"""
                 case Status.Error =>
                   s"""<error message="No Exception or message provided"/>"""
                 case Status.Failure if e.throwable.isDefined =>
                   val t = e.throwable.get
                   s"""<failure message="${escape(t.getMessage)}" type="${escape(t.getClass.getName)}">${escape(
-                      trace
+                      trace,
                     )}</failure>"""
                 case Status.Failure =>
                   s"""<failure message="No Exception or message provided"/>"""
                 case Status.Canceled if e.throwable.isDefined =>
                   val t = e.throwable.get
                   s"""<skipped message="${escape(t.getMessage)}" type="${escape(t.getClass.getName)}">${escape(
-                      trace
+                      trace,
                     )}</skipped>"""
                 case Status.Canceled =>
                   s"""<skipped message="No Exception or message provided"/>"""

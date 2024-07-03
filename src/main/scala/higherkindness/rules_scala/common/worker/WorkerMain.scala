@@ -34,7 +34,7 @@ trait WorkerMain[S] {
           Runtime.getRuntime().availableProcessors(),
           ForkJoinPool.defaultForkJoinWorkerThreadFactory,
           exceptionHandler,
-          false
+          false,
         )
         implicit val ec = ExecutionContext.fromExecutor(fjp)
 

@@ -4,7 +4,7 @@ package common.error
 final class AnnexWorkerError(
   val code: Int,
   val message: String = "",
-  val cause: Throwable = null
+  val cause: Throwable = null,
 ) extends Error(message, cause)
 
 object AnnexWorkerError {

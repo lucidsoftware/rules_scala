@@ -3,12 +3,12 @@ load(
     _CodeCoverageConfiguration = "CodeCoverageConfiguration",
 )
 load(
-    "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
-    _coverage_replacements_provider = "coverage_replacements_provider",
-)
-load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+)
+load(
+    "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
+    _coverage_replacements_provider = "coverage_replacements_provider",
 )
 
 def phase_coverage_jacoco(ctx, g):

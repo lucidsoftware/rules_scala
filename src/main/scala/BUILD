@@ -55,8 +55,8 @@ scala2_global_scalacopts = shared_global_scalacopts + shared_scala2_global_scala
 configure_bootstrap_scala(
     name = "bootstrap_2_13_14",
     compiler_classpath = compiler_classpath_2_13_14,
-    runtime_classpath = runtime_classpath_2_13_14,
     global_scalacopts = scala2_global_scalacopts,
+    runtime_classpath = runtime_classpath_2_13_14,
     version = "2.13.14",
     visibility = ["//visibility:public"],
 )
@@ -100,8 +100,8 @@ runtime_classpath_3_4_2 = [
 configure_bootstrap_scala(
     name = "bootstrap_3_4_2",
     compiler_classpath = compiler_classpath_3_4_2,
-    runtime_classpath = runtime_classpath_3_4_2,
     global_scalacopts = shared_global_scalacopts,
+    runtime_classpath = runtime_classpath_3_4_2,
     use_ijar = False,
     version = "3.4.2",
     visibility = ["//visibility:public"],

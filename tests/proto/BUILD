@@ -1,10 +1,10 @@
 load(
-    "@rules_scala_annex//rules:scala_proto.bzl",
-    "scala_proto_library",
-)
-load(
     "@rules_scala_annex//rules:scala.bzl",
     "scala_library",
+)
+load(
+    "@rules_scala_annex//rules:scala_proto.bzl",
+    "scala_proto_library",
 )
 
 proto_library(

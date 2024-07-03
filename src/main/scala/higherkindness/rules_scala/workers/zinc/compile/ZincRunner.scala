@@ -117,7 +117,9 @@ object ZincRunner extends WorkerMain[Namespace] {
             namespace.getList[JList[String]]("analysis")
           ).fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
             .flatMap { value =>
-              val prefixedLabel +: analysis_store +: jars = value.asScala.toList
+              // Disable exhaustivity check here. Yes it could break, but it is
+              // not likely to.
+              val (prefixedLabel :: analysis_store :: jars) = value.asScala.toList: @unchecked
               val label = prefixedLabel.stripPrefix("_")
               jars
                 .map(jar =>
@@ -381,7 +383,7 @@ final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup
     val directoryFileHashes = directories.map { path =>
       FileHash.of(path, 0)
     }
-    val fileHashes = ClasspathCache.hashClasspath(files)
+    val fileHashes = ClasspathCache.hashClasspath(files.toSeq)
 
     Optional.of(directoryFileHashes ++ fileHashes)
   }

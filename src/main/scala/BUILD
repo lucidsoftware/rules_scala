@@ -40,10 +40,23 @@ runtime_classpath_2_13_14 = [
     "@annex//:org_scala_lang_scala_library",
 ]
 
+shared_global_scalacopts = [
+    "-deprecation",
+    "-Wconf:any:error",
+]
+
+shared_scala2_global_scalacopts = [
+    "-Xlint:_,-unused",
+    "-Ytasty-reader",
+]
+
+scala2_global_scalacopts = shared_global_scalacopts + shared_scala2_global_scalacopts
+
 configure_bootstrap_scala(
     name = "bootstrap_2_13_14",
     compiler_classpath = compiler_classpath_2_13_14,
     runtime_classpath = runtime_classpath_2_13_14,
+    global_scalacopts = scala2_global_scalacopts,
     version = "2.13.14",
     visibility = ["//visibility:public"],
 )
@@ -52,10 +65,7 @@ configure_zinc_scala(
     name = "zinc_2_13_14",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13_14,
-    global_scalacopts = [
-        "-Ytasty-reader",
-        "-Wconf:any:error",
-    ],
+    global_scalacopts = scala2_global_scalacopts,
     runtime_classpath = runtime_classpath_2_13_14,
     version = "2.13.14",
     visibility = ["//visibility:public"],
@@ -91,6 +101,7 @@ configure_bootstrap_scala(
     name = "bootstrap_3_4_2",
     compiler_classpath = compiler_classpath_3_4_2,
     runtime_classpath = runtime_classpath_3_4_2,
+    global_scalacopts = shared_global_scalacopts,
     use_ijar = False,
     version = "3.4.2",
     visibility = ["//visibility:public"],
@@ -100,9 +111,7 @@ configure_zinc_scala(
     name = "zinc_3_4_2",
     compiler_bridge = "@annex_3//:org_scala_lang_scala3_sbt_bridge_3_4_2",
     compiler_classpath = compiler_classpath_3_4_2,
-    global_scalacopts = [
-        "-Wconf:any:error",
-    ],
+    global_scalacopts = shared_global_scalacopts,
     runtime_classpath = runtime_classpath_3_4_2,
     use_ijar = False,
     version = "3.4.2",

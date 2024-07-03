@@ -73,7 +73,7 @@ class JUnitXmlReporter(tasksAndEvents: ListBuffer[(String, ListBuffer[Event])]) 
       </testsuite>""").mkString("")}
     </testsuites>""")
 
-  def write = {
+  def write(): Unit = {
     Option(System.getenv.get("XML_OUTPUT_FILE"))
       .foreach { filespec =>
         XML.save(filespec, result, "UTF-8", true, null)

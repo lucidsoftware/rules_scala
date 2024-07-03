@@ -1,7 +1,6 @@
 package higherkindness.rules_scala
 package workers.jacoco.instrumenter
 
-import common.args.implicits._
 import common.worker.WorkerMain
 import java.io.{BufferedInputStream, BufferedOutputStream, PrintStream}
 import java.net.URI
@@ -11,7 +10,6 @@ import java.nio.file.FileVisitResult
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.Collections
@@ -20,7 +18,7 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import org.jacoco.core.instr.Instrumenter
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object JacocoInstrumenter extends WorkerMain[Unit] {
   private[this] val argParser = {
@@ -55,7 +53,7 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
     val jacoco = new Instrumenter(new OfflineInstrumentationAccessGenerator)
 
     pathPairs.foreach { case (inPath, outPath) =>
-      val inFS = FileSystems.newFileSystem(inPath, null)
+      val inFS = FileSystems.newFileSystem(inPath, null: ClassLoader)
       val outFS =
         FileSystems.newFileSystem(URI.create("jar:" + outPath.toUri), Collections.singletonMap("create", "true"))
 

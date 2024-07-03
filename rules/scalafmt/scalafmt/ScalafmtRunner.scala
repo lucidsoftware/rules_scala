@@ -3,7 +3,7 @@ package annex.scalafmt
 import higherkindness.rules_scala.common.worker.WorkerMain
 import higherkindness.rules_scala.workers.common.Color
 import java.io.{File, PrintStream}
-import java.nio.file.{Files, Path}
+import java.nio.file.Files
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import org.scalafmt.Scalafmt

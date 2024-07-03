@@ -34,7 +34,7 @@ class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Lo
         }
         reporter.post(failures.toSeq)
         val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-        xmlReporter.write
+        xmlReporter.write()
         !failures.nonEmpty
       }
     }
@@ -74,7 +74,7 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
     }
     reporter.post(failures)
     val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-    xmlReporter.write
+    xmlReporter.write()
     !failures.nonEmpty
   }
 }

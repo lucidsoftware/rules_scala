@@ -9,7 +9,7 @@ import java.nio.file.{FileAlreadyExistsException, Files}
 import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DepsRunner extends WorkerMain[Unit] {
   private[this] val argParser = {
@@ -80,7 +80,7 @@ object DepsRunner extends WorkerMain[Unit] {
       val unusedWhitelist = namespace.getList[String]("unused_whitelist").asScala.map(_.tail).toList
       (usedPaths -- (directLabels :++ unusedWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
-          groups.collectFirst { case (label, paths) if paths(path) => label }.orElse {
+          groups.collectFirst { case (myLabel, paths) if paths(path) => myLabel }.orElse {
             System.err.println(s"Warning: There is a reference to $path, but no dependency of $label provides it")
             None
           }

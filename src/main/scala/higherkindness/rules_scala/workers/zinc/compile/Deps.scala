@@ -14,7 +14,7 @@ sealed trait Dep {
 }
 
 case class LibraryDep(file: Path) extends Dep {
-  def classpath = file
+  def classpath: Path = file
 }
 
 case class DepAnalysisFiles(apis: Path, relations: Path)

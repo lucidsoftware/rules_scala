@@ -159,7 +159,7 @@ object TestRunner {
           case "classloader" =>
             val urls = classpath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
             def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
-            new ClassLoaderTestRunner(framework, classLoaderProvider, logger)
+            new ClassLoaderTestRunner(framework, classLoaderProvider _, logger)
           case "process" =>
             val executable = runPath.resolve(testNamespace.get[File]("subprocess_exec").toPath)
             val arguments = Option(namespace.getList[String]("subprocess_arg")).fold[Seq[String]](Nil)(_.asScala.toSeq)

@@ -4,9 +4,8 @@ package workers.common
 import scala.annotation.tailrec
 import java.io.IOException
 import java.nio.channels.FileChannel
-import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, OpenOption, Path, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
+import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
 import java.nio.file.attribute.BasicFileAttributes
-import java.security.SecureRandom
 import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
 
 class CopyFileVisitor(source: Path, target: Path) extends SimpleFileVisitor[Path] {

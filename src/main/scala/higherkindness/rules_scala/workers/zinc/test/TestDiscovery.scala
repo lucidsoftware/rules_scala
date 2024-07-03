@@ -17,6 +17,7 @@ class TestDiscovery(framework: Framework) {
     framework.fingerprints.foreach {
       case fingerprint: AnnotatedFingerprint => annotatedPrints += TestAnnotatedFingerprint(fingerprint)
       case fingerprint: SubclassFingerprint  => subclassPrints += TestSubclassFingerprint(fingerprint)
+      case _ => throw new Exception("Unexpected fingerprint during test discovery")
     }
     (annotatedPrints.toSet, subclassPrints.toSet)
   }

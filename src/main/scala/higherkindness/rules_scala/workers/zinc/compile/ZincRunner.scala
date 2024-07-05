@@ -20,8 +20,8 @@ import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
-import sbt.internal.inc.{Analysis, CompileFailed, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.jdk.CollectionConverters._
+import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, FilteredRelations, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import scala.util.control.NonFatal
 import xsbti.{T2, VirtualFile, VirtualFileRef}
@@ -278,10 +278,25 @@ object ZincRunner extends WorkerMain[Namespace] {
       }
 
     // create analyses
-    analysisStore.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
+    val path = analysisStoreFile.getCanonicalPath()
+    val analysisStoreText = AnalysisUtil.getAnalysisStore(
+      new File(path.substring(0, path.length() - 3) + ".text.gz"),
+      true,
+      usePersistence,
+    )
+    // Filter out libraryClassNames from the analysis because it is non-deterministic.
+    // Can stop doing this once the bug in Zinc is fixed. Check the comment on FilteredRelations
+    // for more info.
+    val resultAnalysis = {
+      val originalResultAnalysis = compileResult.analysis.asInstanceOf[Analysis]
+      originalResultAnalysis.copy(
+        relations = FilteredRelations.getFilteredRelations(originalResultAnalysis.relations),
+      )
+    }
+    analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+    analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
     // create used deps
-    val resultAnalysis = compileResult.analysis.asInstanceOf[Analysis]
     val usedDeps =
       // Filter out the Scala standard library as that should just always be
       // implicitly available and not something we should be book keeping.

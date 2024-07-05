@@ -126,7 +126,15 @@ object TestRunner {
     val analysisStoreFile = runPath.resolve(testNamespace.get[File]("analysis_store").toPath)
     val apis =
       try {
-        AnalysisUtil.getAnalysis(AnalysisUtil.getAnalysisStore(analysisStoreFile.toFile, false)).apis
+        AnalysisUtil
+          .getAnalysis(
+            AnalysisUtil.getAnalysisStore(
+              analysisStoreFile.toFile,
+              debug = false,
+              isIncremental = false,
+            ),
+          )
+          .apis
       } catch {
         case NonFatal(e) => throw new Exception(s"Failed to load APIs from analysis store: $analysisStoreFile", e)
       }

@@ -141,7 +141,7 @@ object ZincRunner extends WorkerMain[Namespace] {
 
     val debug = namespace.getBoolean("debug")
     val analysisStoreFile = namespace.get[File]("output_analysis_store")
-    val analysisStore: AnalysisStore = AnalysisUtil.getAnalysisStore(analysisStoreFile, debug)
+    val analysisStore: AnalysisStore = AnalysisUtil.getAnalysisStore(analysisStoreFile, debug, usePersistence)
 
     val persistence = persistenceDir.fold[ZincPersistence](NullPersistence) { rootDir =>
       val path = namespace.getString("label").replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_")
@@ -211,7 +211,13 @@ object ZincRunner extends WorkerMain[Namespace] {
         depMap
           .get(file)
           .map { analysisStorePath =>
-            val analysis = AnalysisUtil.getAnalysis(AnalysisUtil.getAnalysisStore(analysisStorePath.toFile, debug))
+            val analysis = AnalysisUtil.getAnalysis(
+              AnalysisUtil.getAnalysisStore(
+                analysisStorePath.toFile,
+                debug,
+                isIncremental = usePersistence,
+              ),
+            )
             Analysis.Empty.copy(
               apis = analysis.apis,
               relations = analysis.relations,
@@ -333,6 +339,9 @@ final class AnxPerClasspathEntryLookup(analyses: Path => Option[CompileAnalysis]
 /**
  * We create this to deterministically set the hash code of directories otherwise they get set to the
  * System.identityHashCode() of an object created during compilation. That results in non-determinism.
+ *
+ * TODO: Get rid of this once the upstream fix is released:
+ * https://github.com/sbt/zinc/commit/b4db1476d7fdb2c530a97c543ec9710c13ac58e3
  */
 final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup {
   // My understanding is that setting all these to None is the same as the

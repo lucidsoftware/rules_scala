@@ -273,7 +273,15 @@ object ZincRunner extends WorkerMain[Namespace] {
       }
 
     // create analyses
+    val path = analysisStoreFile.getCanonicalPath()
+    val analysisStoreText = AnalysisUtil.getAnalysisStore(
+      new File(path.substring(0, path.length() - 3) + ".text.gz"),
+      true,
+      usePersistence,
+    )
+    analysisStoreText.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
+
 
     // create used deps
     val resultAnalysis = compileResult.analysis.asInstanceOf[Analysis]

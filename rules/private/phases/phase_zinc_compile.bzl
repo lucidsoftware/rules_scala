@@ -24,6 +24,7 @@ def phase_zinc_compile(ctx, g):
     zinc_configuration = ctx.attr.scala[_ZincConfiguration]
 
     analysis_store = ctx.actions.declare_file("{}/analysis_store.gz".format(ctx.label.name))
+    analysis_store_text = ctx.actions.declare_file("{}/analysis_store.text.gz".format(ctx.label.name))
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
     tmp = ctx.actions.declare_directory("{}/tmp".format(ctx.label.name))
@@ -72,7 +73,7 @@ def phase_zinc_compile(ctx, g):
         ] + [zinc.deps_files for zinc in zincs],
     )
 
-    outputs = [g.classpaths.jar, mains_file, analysis_store, used, tmp]
+    outputs = [g.classpaths.jar, mains_file, analysis_store, analysis_store_text, used, tmp]
 
     execution_requirements_tags = {
         "supports-multiplex-workers": "1",

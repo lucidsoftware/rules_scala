@@ -36,7 +36,7 @@ trait WorkerMain[S] {
           exceptionHandler,
           false,
         )
-        implicit val ec = ExecutionContext.fromExecutor(fjp)
+        val ec = ExecutionContext.fromExecutor(fjp)
 
         System.setIn(new ByteArrayInputStream(Array.emptyByteArray))
         System.setOut(System.err)
@@ -74,7 +74,7 @@ trait WorkerMain[S] {
               } catch {
                 case AnnexWorkerError(code, _, _) => code
               }
-            }
+            }(ec)
 
             f.onComplete {
               case Success(code) => {
@@ -89,7 +89,7 @@ trait WorkerMain[S] {
                 System.err.println(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
                 e.printStackTrace(System.err)
               }
-            }
+            }(scala.concurrent.ExecutionContext.global)
             process(ctx)
           }
           process(init(Some(args.toArray)))

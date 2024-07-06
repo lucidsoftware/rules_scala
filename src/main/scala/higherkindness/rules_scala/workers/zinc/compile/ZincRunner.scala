@@ -14,18 +14,18 @@ import java.io.{File, PrintStream, PrintWriter}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{List => JList, Optional}
+import java.util.{Optional, List as JList}
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.impl.{Arguments => Arg}
+import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
-import sbt.internal.inc.{Analysis, CompileFailed, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.jdk.CollectionConverters._
+import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import scala.util.control.NonFatal
 import xsbti.{T2, VirtualFile, VirtualFileRef}
-import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
+import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, GlobalsCache, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
 
 // The list in this docstring gets clobbered by the formatter, unfortunately.
 //format: off
@@ -48,11 +48,7 @@ import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptions
  */
  //format: on
 object ZincRunner extends WorkerMain[Namespace] {
-
-
-  private[this] def labelToPath(label: String) = Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
-
-  protected[this] def init(args: Option[Array[String]]) = {
+  protected[this] def init(args: Option[Array[String]]): Namespace = {
     val parser = ArgumentParsers.newFor("zinc-worker").addHelp(true).build
     parser.addArgument("--persistence_dir", /* deprecated */ "--persistenceDir").metavar("path")
     parser.addArgument("--use_persistence").`type`(Arg.booleanType)
@@ -278,7 +274,6 @@ object ZincRunner extends WorkerMain[Namespace] {
     )
     analysisStoreText.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
-
 
     // create used deps
     val resultAnalysis = compileResult.analysis.asInstanceOf[Analysis]

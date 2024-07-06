@@ -8,7 +8,7 @@ import java.util.Properties
 
 object AnnexScalaInstance {
   // Check the comment on ScalaInstanceDualLoader to understand why this is necessary.
-  private val dualClassLoader: ScalaInstanceDualLoader = {
+  private def getDualClassLoader(): ScalaInstanceDualLoader = {
     new ScalaInstanceDualLoader(
       // Classloader for xsbti classes
       getClass.getClassLoader,
@@ -24,7 +24,7 @@ object AnnexScalaInstance {
   private def getClassLoader(jars: Array[File]): URLClassLoader = {
     new URLClassLoader(
       jars.map(_.toURI.toURL),
-      dualClassLoader,
+      getDualClassLoader(),
     )
   }
 

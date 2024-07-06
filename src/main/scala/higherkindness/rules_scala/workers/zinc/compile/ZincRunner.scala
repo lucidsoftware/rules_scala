@@ -49,12 +49,6 @@ import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptions
  //format: on
 object ZincRunner extends WorkerMain[Namespace] {
 
-  private[this] val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
-
-  private[this] val compilerCache = CompilerCache.fresh
-
-  // prevents GC of the soft reference in classloaderCache
-  private[this] var lastCompiler: AnyRef = null
 
   private[this] def labelToPath(label: String) = Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
 
@@ -196,10 +190,13 @@ object ZincRunner extends WorkerMain[Namespace] {
         )
 
     val compilers = {
-      val scalaCompiler = ZincUtil
-        .scalaCompiler(scalaInstance, namespace.get[File]("compiler_bridge"))
-        .withClassLoaderCache(classloaderCache)
-      lastCompiler = scalaCompiler
+      val scalaCompiler = new AnalyzingCompiler(
+        scalaInstance,
+        ZincUtil.constantBridgeProvider(scalaInstance, namespace.get[File]("compiler_bridge").toPath()),
+        ClasspathOptionsUtil.noboot(scalaInstance.version),
+        _ => (),
+        None
+      )
       ZincUtil.compilers(scalaInstance, ClasspathOptionsUtil.boot, None, scalaCompiler)
     }
 
@@ -243,7 +240,7 @@ object ZincRunner extends WorkerMain[Namespace] {
         lookup,
         skip,
         file,
-        compilerCache,
+        CompilerCache.fresh,
         incOptions,
         reporter,
         Optional.empty[CompileProgress](),

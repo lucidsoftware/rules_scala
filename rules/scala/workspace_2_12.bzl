@@ -1,15 +1,18 @@
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "zinc_version")
+
+scala_2_12_version = "2.12.19"
 
 def scala_2_12_artifacts():
     return [
-        "org.scala-lang:scala-compiler:2.12.19",
-        "org.scala-lang:scala-library:2.12.19",
-        "org.scala-lang:scala-reflect:2.12.19",
+        "org.scala-lang:scala-compiler:{}".format(scala_2_12_version),
+        "org.scala-lang:scala-library:{}".format(scala_2_12_version),
+        "org.scala-lang:scala-reflect:{}".format(scala_2_12_version),
         # The compiler bridge has a dependency on compiler-interface, which has a dependency on the Scala 2
         # library. We need to set this to neverlink = True to avoid this the Scala 2 library being pulled
         # onto the Scala 3, and other Scala versions like 2.12, compiler classpath during runtime.
-        maven.artifact("org.scala-sbt", "compiler-bridge_2.12", "1.10.0", neverlink = True),
+        maven.artifact("org.scala-sbt", "compiler-bridge_2.12", zinc_version, neverlink = True),
     ]
 
 def scala_2_12_repositories():

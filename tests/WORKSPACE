@@ -86,7 +86,7 @@ load(
     "scala_repositories",
 )
 
-# Scala
+# Scala 2.13 and 3
 scala_repositories()
 
 load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
@@ -103,15 +103,6 @@ scala_2_12_repositories()
 load("@annex_2_12//:defs.bzl", annex_2_12_pinned_maven_install = "pinned_maven_install")
 
 annex_2_12_pinned_maven_install()
-
-# Scala 3
-load("@rules_scala_annex//rules/scala:workspace_3.bzl", "scala_3_repositories")
-
-scala_3_repositories()
-
-load("@annex_3//:defs.bzl", annex_3_pinned_maven_install = "pinned_maven_install")
-
-annex_3_pinned_maven_install()
 
 load(
     "@rules_scala_annex//rules/scala_proto:workspace.bzl",
@@ -139,7 +130,7 @@ scala_import_external(
 
 emulate_rules_scala(
     extra_deps = [
-        "@annex//:org_scala_lang_scala_reflect_2_13_14",
+        "@annex//:org_scala_lang_scala_reflect",
         "@annex_test//:org_scala_lang_modules_scala_xml_2_13",
     ],
     scala = "@//scala:2_13",
@@ -200,7 +191,7 @@ jvm_maven_import_external(
 
 bind(
     name = "default_scala",
-    actual = "//scala:zinc_2_13_14",
+    actual = "//scala:zinc_2_13",
 )
 
 http_file(

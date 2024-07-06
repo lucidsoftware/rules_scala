@@ -14,9 +14,9 @@ import java.io.{File, PrintStream, PrintWriter}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{List => JList, Optional}
+import java.util.{List as JList, Optional}
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.impl.{Arguments => Arg}
+import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
@@ -45,6 +45,10 @@ import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptions
  * single Scala version. Probably still use ClassLoaderCache + hard reference since ClassLoaderCache is hard to remove.
  * The compiler classpath is passed via the initial flags to the worker (rather than the per-request arg file). Bazel
  * worker management cycles out Scala compiler versions. Currently, this runner follows strategy A.
+ *
+ * We use A in combination with having our own cache of AnnexScalaInstances, which is where we create the classloaders
+ * that Zinc caches. We do so to prevent non-determinism in Zinc's analysis store files. Check the comments in
+ * AnnexScalaInstance for more info.
  */
  //format: on
 object ZincRunner extends WorkerMain[Namespace] {
@@ -180,7 +184,8 @@ object ZincRunner extends WorkerMain[Namespace] {
       .orElseGet(() => PreviousResult.of(Optional.empty[CompileAnalysis](), Optional.empty[MiniSetup]()))
 
     // setup compiler
-    val scalaInstance = new AnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
+    val scalaInstance =
+      AnnexScalaInstance.getAnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
 
     val compileOptions =
       CompileOptions.create

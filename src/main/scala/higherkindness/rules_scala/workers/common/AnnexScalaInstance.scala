@@ -5,10 +5,76 @@ import xsbti.compile.ScalaInstance
 import java.io.File
 import java.net.URLClassLoader
 import java.util.Properties
+import java.util.concurrent.ConcurrentHashMap
 
 object AnnexScalaInstance {
+  // See the comment on getAnnexScalaInstance as to why this is necessary
+  private val instanceCache: ConcurrentHashMap[String, AnnexScalaInstance] =
+    new ConcurrentHashMap[String, AnnexScalaInstance]()
+
+  /**
+   * Given a set of jars, get back an AnnexScalaInstance for those jars. If an instance for those jars is already stored
+   * in the instanceCache, then return that instance. Otherwise create a new AnnexScalaInstance for those jars, insert
+   * it into the cache, and return it. This function should be thread safe.
+   *
+   * The goal is we have at most one AnnexScalaInstance per set of input jars, which means we have at most one
+   * AnnexScalaInstance per Scala version.
+   *
+   * Why? Because using the AnnexScalaInstance caching seems to prevent non-determinism in Zinc's analysis store output.
+   *
+   * As background: Zinc has a class loader cache, which can be disabled when creating the analyzing compiler. The Scala
+   * compiler also does some classpath caching, which can be disabled using -YdisableFlatCpCaching.
+   *
+   * Caveat: the rest of this information is from empirical observation and cursory reading of the Scala and Zinc code.
+   * I don't deeply understand why these things are the way they are and deeply understanding these things seems
+   * non-trivial.
+   *
+   * The non-determinism appears to only be relevant for when the ZincRunner is run in worker mode. I imagine there's
+   * some kind of issue with either thread safety. Or an issue when Zinc uses a cached classloader from a ScalaInstance
+   * from a prior compilation in combination with a new ScalaInstance for the current compilation. Or there's some issue
+   * with Scala's classpath caching.
+   *
+   * If all three caches are enabled (this cache + Zinc claspath + Scala compiler), then the non-determinism seems go
+   * away.
+   *
+   * If this cache is not used, but the Zinc classpath + Scala compiler caches are used, then non-determinsm shows up in
+   * the analysis store files in many different places.
+   *
+   * If this cache is not used and the Zinc cache is not used, but the Scala compiler cache is used then you have a
+   * metaspace leak caused by the Scala compiler's cache. It looks like like every instance of the Scala compiler
+   * prevents the classloaders from being GC'd. Meaning, for each compilation, the Scala compiler gets a new
+   * classloader, loads a bunch of classes from it, but those classes are never cleaned up because the classloader isn't
+   * GC'd.
+   *
+   * Disabling all three caches works, but is super duper slow. At that point there's not much benefit to using the
+   * worker strategy.
+   *
+   * Using this cache and the Scala compiler cache, but disabling Zinc's classloader cache works, but doesn't seem to be
+   * any different from leaving Zinc's cache enabled.
+   */
+  def getAnnexScalaInstance(allJars: Array[File]): AnnexScalaInstance = {
+    val key = allJars.map(_.getCanonicalPath).mkString(":")
+
+    Option(instanceCache.get(key)).getOrElse {
+      val instance = new AnnexScalaInstance(allJars)
+      val instanceInsertedByOtherThreadOrNull = instanceCache.putIfAbsent(key, instance)
+
+      // putIfAbsent is atomic, but there exists time between the get and the putIfAbsent.
+      // This handles the scenario in which the AnnexScalaInstance is created and inserted
+      // by another thread after we ran our .get.
+      // We could also handle this by generating the AnnexScalaInstance every time and only
+      // using a putIfAbsent, but that's likely more expensive because of all the classloaders
+      // that get constructed when creating an AnnexScalaInstance.
+      if (instanceInsertedByOtherThreadOrNull == null) {
+        instance
+      } else {
+        instanceInsertedByOtherThreadOrNull
+      }
+    }
+  }
+
   // Check the comment on ScalaInstanceDualLoader to understand why this is necessary.
-  private val dualClassLoader: ScalaInstanceDualLoader = {
+  private def getDualClassLoader(): ScalaInstanceDualLoader = {
     new ScalaInstanceDualLoader(
       // Classloader for xsbti classes
       getClass.getClassLoader,
@@ -24,14 +90,13 @@ object AnnexScalaInstance {
   private def getClassLoader(jars: Array[File]): URLClassLoader = {
     new URLClassLoader(
       jars.map(_.toURI.toURL),
-      dualClassLoader,
+      getDualClassLoader(),
     )
   }
 
   // These are not the most robust checks for these jars, but it is more or
   // less what Zinc and Bloop are doing. They're also fast, so if it works it
   // works.
-
   private final def isScala2CompilerJar(jarName: String): Boolean = {
     jarName.startsWith("scala-compiler") || jarName.startsWith("scala-reflect")
   }
@@ -46,10 +111,15 @@ object AnnexScalaInstance {
   }
 }
 
-// See this interface for comments better explaining the purpose of all the
-// member variables:
-// https://github.com/sbt/zinc/blob/4eacff2a9bf5c8750bfc5096955065ce67f4e68a/internal/compiler-interface/src/main/java/xsbti/compile/ScalaInstance.java
-final class AnnexScalaInstance(override val allJars: Array[File]) extends ScalaInstance {
+/**
+ * See this interface for comments better explaining the purpose of all the member variables:
+ * https://github.com/sbt/zinc/blob/4eacff2a9bf5c8750bfc5096955065ce67f4e68a/internal/compiler-interface/src/main/java/xsbti/compile/ScalaInstance.java
+ *
+ * This is private to this package, so people use the static getAnnexScalaInstance to get an instance of this class. We
+ * need to have only one of these per Scala version to prevent non-determinism. See the comment on that function for
+ * more info.
+ */
+private[common] class AnnexScalaInstance(override val allJars: Array[File]) extends ScalaInstance {
 
   // Jars for the Scala compiler classes
   // We need to include the full classpath for the Scala 2 or Scala 3 compilers.

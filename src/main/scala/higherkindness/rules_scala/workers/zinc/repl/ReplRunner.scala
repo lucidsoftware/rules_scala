@@ -71,7 +71,7 @@ object ReplRunner {
       .getList[File]("compiler_classpath")
       .asScala
       .map(file => runPath.resolve(file.toPath).toFile)
-    val scalaInstance = new AnnexScalaInstance(
+    val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
       compilerClasspath.toArray,
     )
 

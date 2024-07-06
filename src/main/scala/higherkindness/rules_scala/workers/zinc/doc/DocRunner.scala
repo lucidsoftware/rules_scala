@@ -101,7 +101,8 @@ object DocRunner extends WorkerMain[Unit] {
         }
         .map(_.toFile)
 
-    val scalaInstance = new AnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
+    val scalaInstance =
+      AnnexScalaInstance.getAnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
 
     val logger = new AnnexLogger(namespace.getString("log_level"))
 

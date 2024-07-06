@@ -112,7 +112,7 @@ load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
 
 rules_jvm_external_setup()
 
-# Scala
+# Scala 2_13 and 3
 load("//rules/scala:workspace.bzl", "scala_register_toolchains", "scala_repositories")
 
 scala_repositories()
@@ -132,16 +132,6 @@ scala_2_12_repositories()
 load("@annex_2_12//:defs.bzl", annex_2_12_pinned_maven_install = "pinned_maven_install")
 
 annex_2_12_pinned_maven_install()
-
-# Scala 3
-
-load("//rules/scala:workspace_3.bzl", "scala_3_repositories")
-
-scala_3_repositories()
-
-load("@annex_3//:defs.bzl", annex_3_pinned_maven_install = "pinned_maven_install")
-
-annex_3_pinned_maven_install()
 
 # Scala fmt
 

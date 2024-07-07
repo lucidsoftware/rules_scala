@@ -16,6 +16,7 @@ scala_library(
     visibility = ["//visibility:public"],
     deps = [
         ":common",
+        "//src/main/scala/higherkindness/rules_scala/common/classloaders",
         "@annex//:org_scala_sbt_test_interface",
     ],
 )

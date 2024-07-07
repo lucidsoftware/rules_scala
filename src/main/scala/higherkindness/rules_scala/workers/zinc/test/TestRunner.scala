@@ -1,9 +1,9 @@
 package higherkindness.rules_scala
 package workers.zinc.test
 
+import common.classloaders.ClassLoaders
 import common.args.implicits._
 import common.sbt_testing.AnnexTestingLogger
-import common.sbt_testing.ClassLoaders
 import common.sbt_testing.TestDefinition
 import common.sbt_testing.TestFrameworkLoader
 import workers.common.AnalysisUtil

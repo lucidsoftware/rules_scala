@@ -1,7 +1,7 @@
 package higherkindness.rules_scala
 package workers.zinc.test
 
-import common.sbt_testing.ClassLoaders
+import common.classloaders.ClassLoaders
 import common.sbt_testing.JUnitXmlReporter
 import common.sbt_testing.TestDefinition
 import common.sbt_testing.TestFrameworkLoader

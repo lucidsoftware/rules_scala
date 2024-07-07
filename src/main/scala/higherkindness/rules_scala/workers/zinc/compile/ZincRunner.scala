@@ -49,6 +49,7 @@ import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptions
  //format: on
 object ZincRunner extends WorkerMain[Namespace] {
   protected[this] def init(args: Option[Array[String]]): Namespace = {
+    sys.props.put("scala.classpath.closeZip", "true")
     val parser = ArgumentParsers.newFor("zinc-worker").addHelp(true).build
     parser.addArgument("--persistence_dir", /* deprecated */ "--persistenceDir").metavar("path")
     parser.addArgument("--use_persistence").`type`(Arg.booleanType)
@@ -58,11 +59,22 @@ object ZincRunner extends WorkerMain[Namespace] {
     parser.parseArgsOrFail(args.getOrElse(Array.empty))
   }
 
+  protected[this] def work(worker: Namespace, args: Array[String], out: PrintStream) = {
+    new ZincRunner(worker, args, out).work()
+  }
+}
+
+class ZincRunner(worker: Namespace, args: Array[String], out: PrintStream) {
+
+  private[this] def labelToPath(label: String): Path = {
+    Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
+  }
+
   private def pathFrom(args: Namespace, name: String): Option[Path] = Option(args.getString(name)).map { dir =>
     Paths.get(dir.replace("~", sys.props.getOrElse("user.home", "")))
   }
 
-  protected[this] def work(worker: Namespace, args: Array[String], out: PrintStream) = {
+  def work() = {
     val usePersistence: Boolean = worker.getBoolean("use_persistence") match {
       case p: java.lang.Boolean => p
       case null                 => true

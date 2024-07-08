@@ -20,7 +20,7 @@ import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
-import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, FilteredRelations, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
+import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, FilteredInfos, FilteredRelations, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -291,11 +291,11 @@ object ZincRunner extends WorkerMain[Namespace] {
       val originalResultAnalysis = compileResult.analysis.asInstanceOf[Analysis]
       originalResultAnalysis.copy(
         relations = FilteredRelations.getFilteredRelations(originalResultAnalysis.relations),
+        infos = FilteredInfos.getFilteredInfos(originalResultAnalysis.infos),
       )
     }
     analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
-
 
     // create used deps
     val usedDeps =

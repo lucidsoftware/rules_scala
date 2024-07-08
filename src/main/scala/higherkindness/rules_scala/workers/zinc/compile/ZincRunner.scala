@@ -79,7 +79,7 @@ object ZincRunner extends WorkerMain[Namespace] {
   protected[this] def work(worker: Namespace, args: Array[String], out: PrintStream) = {
     val usePersistence: Boolean = worker.getBoolean("use_persistence") match {
       case p: java.lang.Boolean => p
-      case null                 => true
+      case null                 => false
     }
 
     val parser = ArgumentParsers.newFor("zinc").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
@@ -295,6 +295,7 @@ object ZincRunner extends WorkerMain[Namespace] {
     }
     analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+
 
     // create used deps
     val usedDeps =

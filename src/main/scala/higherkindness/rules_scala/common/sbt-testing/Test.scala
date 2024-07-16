@@ -26,7 +26,7 @@ class TestFrameworkLoader(loader: ClassLoader, logger: Logger) {
 
 object TestHelper {
   def withRunner[A](framework: Framework, scopeAndTestName: String, classLoader: ClassLoader, arguments: Seq[String])(
-    f: Runner => A
+    f: Runner => A,
   ) = {
     val options =
       if (framework.name == "specs2") {
@@ -54,12 +54,12 @@ object TestHelper {
       test.name,
       test.fingerprint,
       false,
-      Array(new TestWildcardSelector(scopeAndTestName.replace("::", " ")))
+      Array(new TestWildcardSelector(scopeAndTestName.replace("::", " "))),
     )
 }
 
 class TestReporter(logger: Logger) {
-  def post(failures: Traversable[String]) = if (failures.nonEmpty) {
+  def post(failures: Iterable[String]) = if (failures.nonEmpty) {
     logger.error(s"${failures.size} ${if (failures.size == 1) "failure" else "failures"}:")
     failures.toSeq.sorted.foreach(name => logger.error(s"    $name"))
     logger.error("")
@@ -67,7 +67,7 @@ class TestReporter(logger: Logger) {
 
   def postTask() = logger.info("")
 
-  def pre(framework: Framework, tasks: Traversable[Task]) = {
+  def pre(framework: Framework, tasks: Iterable[Task]) = {
     logger.info(s"${framework.getClass.getName}: ${tasks.size} tests")
     logger.info("")
   }
@@ -88,7 +88,7 @@ class TestTaskExecutor(logger: Logger) {
             case _ =>
           }
         },
-        Array(new PrefixedTestingLogger(logger, "    "))
+        Array(new PrefixedTestingLogger(logger, "    ")),
       )
       tasks.foreach(execute)
     }

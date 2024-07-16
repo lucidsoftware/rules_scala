@@ -1,5 +1,5 @@
-load("//rules:scalafmt.bzl", "scala_format_test")
 load("//rules:scala.bzl", "scala_library")
+load("//rules:scalafmt.bzl", "scala_format_test")
 
 _subprocess_srcs = ["SubprocessRunner.scala"]
 
@@ -16,6 +16,7 @@ scala_library(
     visibility = ["//visibility:public"],
     deps = [
         ":common",
+        "//src/main/scala/higherkindness/rules_scala/common/classloaders",
         "@annex//:org_scala_sbt_test_interface",
     ],
 )
@@ -23,6 +24,9 @@ scala_library(
 scala_library(
     name = "common",
     srcs = _common_srcs,
+    deps_used_whitelist = [
+        "@annex//:org_scala_lang_scala_library",
+    ],
     scala = "//src/main/scala:zinc",
     visibility = ["//visibility:public"],
     deps = [

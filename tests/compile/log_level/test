@@ -1,8 +1,9 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
-bazel clean
-bazel build :lib > output 2>&1
-
-cat output | grep "compiling 1 Scala source"
-rm output
+# We use nouse_action_cache + bazel shutdown here in order to prevent the skyframe
+# cache and the persistent action cache from being used and thus getting the
+# warning we want printed, printed. The alternative is to bazel clean, which
+# takes much longer.
+bazel shutdown
+bazel build :lib --nouse_action_cache |& grep "compiling 1 Scala source"

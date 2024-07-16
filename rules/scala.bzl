@@ -536,6 +536,10 @@ _configure_zinc_scala = rule(
         ),
         "deps_direct": attr.string(default = "error"),
         "deps_used": attr.string(default = "error"),
+        "incremental": attr.bool(
+            doc = "Whether Zinc's incremental compilation will be available for this Zinc compiler. If True, this requires additional configuration to use incremental compilation.",
+            default = False,
+        ),
         "_compile_worker": attr.label(
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/compile",
             allow_files = True,

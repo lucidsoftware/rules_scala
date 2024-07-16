@@ -1,5 +1,5 @@
-load("@rules_scala_annex//rules:scalafmt.bzl", "scala_format_test")
 load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_binary", "scala_library", "scala_test")
+load("@rules_scala_annex//rules:scalafmt.bzl", "scala_format_test")
 
 ### scala_format_test ###
 scala_format_test(
@@ -22,18 +22,21 @@ scala_binary(
     name = "formatted-binary",
     srcs = ["formatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_binary(
     name = "unformatted-binary",
     srcs = ["unformatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_binary(
     name = "unformatted-binary-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 ### scala_library ###
@@ -41,18 +44,21 @@ scala_library(
     name = "formatted-library",
     srcs = ["formatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_library(
     name = "unformatted-library",
     srcs = ["unformatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_library(
     name = "unformatted-library-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 ### scala_test ###
@@ -60,18 +66,21 @@ scala_test(
     name = "formatted-test",
     srcs = ["formatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_test(
     name = "unformatted-test",
     srcs = ["unformatted.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 scala_test(
     name = "unformatted-test-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
+    tags = ["no-cache"],
 )
 
 ### utf8 encoding test ###
@@ -84,4 +93,5 @@ scala_binary(
     name = "utf8-encoding-test-non-default",
     srcs = ["utf8-unformatted.tmp.scala"],
     format = True,
+    tags = ["no-cache"],
 )

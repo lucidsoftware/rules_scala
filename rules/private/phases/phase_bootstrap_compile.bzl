@@ -1,10 +1,7 @@
 load(
     "//rules/common:private/utils.bzl",
-    _strip_margin = "strip_margin",
-)
-load(
-    "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _strip_margin = "strip_margin",
 )
 
 #
@@ -28,8 +25,10 @@ def phase_bootstrap_compile(ctx, g):
     compile_classpath = ":".join([f.path for f in g.classpaths.compile.to_list()])
     srcs = " ".join([f.path for f in g.classpaths.srcs])
 
+    scala_configuration = g.javainfo.scala_info.scala_configuration
+
     main_class = "scala.tools.nsc.Main"
-    if int(g.javainfo.scala_info.scala_configuration.version[0]) >= 3:
+    if int(scala_configuration.version[0]) >= 3:
         main_class = "dotty.tools.dotc.Main"
 
     ctx.actions.run_shell(
@@ -47,17 +46,21 @@ def phase_bootstrap_compile(ctx, g):
             |  {main_class} \\
             |  -cp {compile_classpath} \\
             |  -d tmp/classes \\
+            |  {global_scalacopts} \\
+            |  {scalacopts} \\
             |  {srcs}
             |
             |{jar_creator} {output_jar} tmp/classes 2> /dev/null
             |""".format(
-                java = ctx.attr._jdk[java_common.JavaRuntimeInfo].java_executable_exec_path,
-                jar_creator = ctx.executable._jar_creator.path,
                 compiler_classpath = compiler_classpath,
                 compile_classpath = compile_classpath,
-                srcs = srcs,
-                output_jar = g.classpaths.jar.path,
+                global_scalacopts = " ".join(scala_configuration.global_scalacopts),
+                java = ctx.attr._jdk[java_common.JavaRuntimeInfo].java_executable_exec_path,
+                jar_creator = ctx.executable._jar_creator.path,
                 main_class = main_class,
+                output_jar = g.classpaths.jar.path,
+                scalacopts = " ".join(ctx.attr.scalacopts),
+                srcs = srcs,
             ),
         ),
         execution_requirements = _resolve_execution_reqs(ctx, {}),

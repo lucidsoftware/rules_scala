@@ -1,5 +1,5 @@
 package higherkindness.rules_scala
-package common.sbt_testing
+package common.classloaders
 
 import java.net.{URL, URLClassLoader}
 

@@ -17,6 +17,7 @@ class TestDiscovery(framework: Framework) {
     framework.fingerprints.foreach {
       case fingerprint: AnnotatedFingerprint => annotatedPrints += TestAnnotatedFingerprint(fingerprint)
       case fingerprint: SubclassFingerprint  => subclassPrints += TestSubclassFingerprint(fingerprint)
+      case _                                 => throw new Exception("Unexpected fingerprint during test discovery")
     }
     (annotatedPrints.toSet, subclassPrints.toSet)
   }
@@ -30,7 +31,7 @@ class TestDiscovery(framework: Framework) {
 
   private[this] def discover(definitions: Seq[Definition]) =
     Discovery(subclassPrints.map(_.superclassName), annotatedPrints.map(_.annotationName))(
-      definitions
+      definitions,
     )
 
   def apply(classes: Set[AnalyzedClass]) =

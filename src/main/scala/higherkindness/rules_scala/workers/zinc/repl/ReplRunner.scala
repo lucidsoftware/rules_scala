@@ -12,7 +12,7 @@ import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import sbt.internal.inc.{PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import xsbti.Logger
 
 object ReplRunner {
@@ -71,8 +71,8 @@ object ReplRunner {
       .getList[File]("compiler_classpath")
       .asScala
       .map(file => runPath.resolve(file.toPath).toFile)
-    val scalaInstance = new AnnexScalaInstance(
-      compilerClasspath.toArray
+    val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
+      compilerClasspath.toArray,
     )
 
     val logger = new AnnexLogger(namespace.getString("log_level"))
@@ -93,7 +93,7 @@ object ReplRunner {
       options,
       "",
       "",
-      logger
+      logger,
     )()
   }
 }

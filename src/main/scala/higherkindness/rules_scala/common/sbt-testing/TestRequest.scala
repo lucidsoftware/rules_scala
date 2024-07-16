@@ -9,5 +9,5 @@ class TestRequest(
   val scopeAndTestName: String,
   val classpath: Seq[String],
   val logger: Logger with Serializable,
-  val testArgs: Seq[String]
+  val testArgs: Seq[String],
 ) extends Serializable

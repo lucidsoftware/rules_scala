@@ -6,9 +6,6 @@ load(
 load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
-)
-load(
-    "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
 )
 

@@ -22,7 +22,7 @@ object CommonArguments {
     parser
       .addArgument("--analysis")
       .action(ArgumentsImpl.append)
-      .help("Analysis, given as: label apis relations [jar ...]")
+      .help("Analysis, given as: label analysis_store [jar ...]")
       .metavar("args")
       .nargs("*")
     parser
@@ -76,38 +76,14 @@ object CommonArguments {
       .required(true)
       .`type`(ArgumentsImpl.fileType.verifyCanCreate)
     parser
-      .addArgument("--output_apis")
-      .help("Output APIs")
-      .metavar("path")
-      .required(true)
-      .`type`(ArgumentsImpl.fileType.verifyCanCreate())
-    parser
-      .addArgument("--output_infos")
-      .help("Output Zinc source infos")
+      .addArgument("--output_analysis_store")
+      .help("Output Analysis Store")
       .metavar("path")
       .required(true)
       .`type`(ArgumentsImpl.fileType.verifyCanCreate())
     parser
       .addArgument("--output_jar")
       .help("Output jar")
-      .metavar("path")
-      .required(true)
-      .`type`(ArgumentsImpl.fileType.verifyCanCreate())
-    parser
-      .addArgument("--output_relations")
-      .help("Output Zinc relations")
-      .metavar("path")
-      .required(true)
-      .`type`(ArgumentsImpl.fileType.verifyCanCreate())
-    parser
-      .addArgument("--output_setup")
-      .help("Output Zinc setup")
-      .metavar("path")
-      .required(true)
-      .`type`(ArgumentsImpl.fileType.verifyCanCreate())
-    parser
-      .addArgument("--output_stamps")
-      .help("Output Zinc source stamps")
       .metavar("path")
       .required(true)
       .`type`(ArgumentsImpl.fileType.verifyCanCreate())

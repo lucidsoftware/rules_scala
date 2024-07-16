@@ -1,7 +1,7 @@
 package higherkindness.rules_scala
 package workers.zinc.test
 
-import common.sbt_testing.ClassLoaders
+import common.classloaders.ClassLoaders
 import common.sbt_testing.JUnitXmlReporter
 import common.sbt_testing.TestDefinition
 import common.sbt_testing.TestFrameworkLoader
@@ -34,7 +34,7 @@ class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Lo
         }
         reporter.post(failures.toSeq)
         val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-        xmlReporter.write
+        xmlReporter.write()
         !failures.nonEmpty
       }
     }
@@ -74,21 +74,21 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
     }
     reporter.post(failures)
     val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-    xmlReporter.write
+    xmlReporter.write()
     !failures.nonEmpty
   }
 }
 
 class ProcessCommand(
   val executable: String,
-  val arguments: Seq[String]
+  val arguments: Seq[String],
 ) extends Serializable
 
 class ProcessTestRunner(
   framework: Framework,
   classpath: Seq[Path],
   command: ProcessCommand,
-  logger: Logger with Serializable
+  logger: Logger with Serializable,
 ) extends TestFrameworkRunner {
   def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]) = {
     val reporter = new TestReporter(logger)
@@ -115,7 +115,7 @@ class ProcessTestRunner(
           scopeAndTestName,
           classpath.map(_.toString),
           logger,
-          arguments
+          arguments,
         )
         val out = new ObjectOutputStream(process.getOutputStream)
         try out.writeObject(request)

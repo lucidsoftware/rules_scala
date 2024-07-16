@@ -1,3 +1,4 @@
+load("@rules_java//java:defs.bzl", "java_library")
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 
 scala_library(

@@ -1,10 +1,8 @@
 package higherkindness.rules_scala
 package workers.common
 
-import higherkindness.rules_scala.workers.common.Color
 import xsbti.{Logger, Problem}
 import sbt.internal.inc.{LoggedReporter => SbtLoggedReporter}
-import scala.util.Try
 
 class LoggedReporter(logger: Logger, versionString: String) extends SbtLoggedReporter(0, logger) {
   // Scala 3 has great error messages, let's leave those alone, but still add color to the Scala 2 messages

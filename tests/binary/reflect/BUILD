@@ -9,7 +9,8 @@ scala_library(
 scala_binary(
     name = "good",
     srcs = ["Reflect.scala"],
-    deps_used_whitelist = ["@annex//:org_scala_lang_scala_reflect"],
     scala = "//scala:2_13",
-    deps = ["@annex//:org_scala_lang_scala_reflect"],
+    deps = [
+        "@annex//:org_scala_lang_scala_reflect",
+    ],
 )

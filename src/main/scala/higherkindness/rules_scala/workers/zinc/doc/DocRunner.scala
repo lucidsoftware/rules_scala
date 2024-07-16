@@ -16,7 +16,7 @@ import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.{LoggedReporter, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import xsbti.Logger
 
 object DocRunner extends WorkerMain[Unit] {
@@ -101,7 +101,8 @@ object DocRunner extends WorkerMain[Unit] {
         }
         .map(_.toFile)
 
-    val scalaInstance = new AnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
+    val scalaInstance =
+      AnnexScalaInstance.getAnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
 
     val logger = new AnnexLogger(namespace.getString("log_level"))
 
@@ -121,7 +122,7 @@ object DocRunner extends WorkerMain[Unit] {
       output.toPath,
       options,
       logger,
-      reporter
+      reporter,
     )
 
     try FileUtil.delete(tmpDir)

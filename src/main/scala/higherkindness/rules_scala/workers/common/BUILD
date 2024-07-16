@@ -8,6 +8,7 @@ scala_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",
+        "//third_party/bazel/src/java_tools/buildjar/java/com/google/devtools/build/buildjar/jarhelper",
         "@annex//:net_sourceforge_argparse4j_argparse4j",
         "@annex//:org_scala_sbt_zinc_2_13",
     ],

@@ -1,30 +1,31 @@
 package higherkindness.rules_scala
 package workers.zinc.compile
 
+import workers.common.AnalysisUtil
 import workers.common.AnnexLogger
 import workers.common.AnnexScalaInstance
 import workers.common.CommonArguments
 import workers.common.FileUtil
 import workers.common.LoggedReporter
+import common.error.AnnexWorkerError
 import common.worker.WorkerMain
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
 import java.io.{File, PrintStream, PrintWriter}
 import java.net.URLClassLoader
-import java.nio.file.{Files, NoSuchFileException, Path, Paths}
-import java.text.SimpleDateFormat
+import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{Date, List => JList, Optional, Properties}
+import java.util.{List as JList, Optional}
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.impl.{Arguments => Arg}
+import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.caching.ClasspathCache
-import sbt.internal.inc.{Analysis, CompileFailed, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.collection.JavaConverters._
+import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, FilteredInfos, FilteredRelations, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import scala.util.control.NonFatal
-import xsbti.{Logger, T2, VirtualFile, VirtualFileRef}
-import xsbti.compile.{AnalysisContents, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
+import xsbti.{T2, VirtualFile, VirtualFileRef}
+import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
 
 // The list in this docstring gets clobbered by the formatter, unfortunately.
 //format: off
@@ -44,6 +45,10 @@ import xsbti.compile.{AnalysisContents, Changes, ClasspathOptionsUtil, CompileAn
  * single Scala version. Probably still use ClassLoaderCache + hard reference since ClassLoaderCache is hard to remove.
  * The compiler classpath is passed via the initial flags to the worker (rather than the per-request arg file). Bazel
  * worker management cycles out Scala compiler versions. Currently, this runner follows strategy A.
+ *
+ * We use A in combination with having our own cache of AnnexScalaInstances, which is where we create the classloaders
+ * that Zinc caches. We do so to prevent non-determinism in Zinc's analysis store files. Check the comments in
+ * AnnexScalaInstance for more info.
  */
  //format: on
 object ZincRunner extends WorkerMain[Namespace] {
@@ -74,7 +79,7 @@ object ZincRunner extends WorkerMain[Namespace] {
   protected[this] def work(worker: Namespace, args: Array[String], out: PrintStream) = {
     val usePersistence: Boolean = worker.getBoolean("use_persistence") match {
       case p: java.lang.Boolean => p
-      case null                 => true
+      case null                 => false
     }
 
     val parser = ArgumentParsers.newFor("zinc").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
@@ -110,43 +115,41 @@ object ZincRunner extends WorkerMain[Namespace] {
     val outputJar = namespace.get[File]("output_jar").toPath
 
     val deps = {
-      val analyses = Option(
-        namespace
-          .getList[JList[String]]("analysis")
-      ).filter(_ => usePersistence)
-        .fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
-        .flatMap { value =>
-          val prefixedLabel +: apis +: relations +: jars = value.asScala.toList
-          val label = prefixedLabel.stripPrefix("_")
-          jars
-            .map(jar =>
-              Paths.get(jar) -> (classesDir
-                .resolve(labelToPath(label)), DepAnalysisFiles(Paths.get(apis), Paths.get(relations)))
-            )
+      val analyses: Map[Path, (Path, Path)] = {
+        if (usePersistence) {
+          Option(
+            namespace.getList[JList[String]]("analysis"),
+          ).fold[Seq[JList[String]]](Nil)(_.asScala.toSeq)
+            .flatMap { value =>
+              // Disable exhaustivity check here. Yes it could break, but it is
+              // not likely to.
+              val (prefixedLabel :: analysis_store :: jars) = value.asScala.toList: @unchecked
+              val label = prefixedLabel.stripPrefix("_")
+              jars
+                .map(jar =>
+                  Paths.get(jar) -> (
+                    classesDir
+                      .resolve(labelToPath(label)),
+                    Paths.get(analysis_store),
+                  ),
+                )
+            }
+            .toMap
+        } else {
+          Map.empty[Path, (Path, Path)]
         }
-        .toMap
+      }
       val originalClasspath = namespace.getList[File]("classpath").asScala.map(_.toPath)
       Dep.create(depsCache, originalClasspath.toSeq, analyses)
     }
 
-    // load persisted files
-    val analysisFiles = AnalysisFiles(
-      apis = namespace.get[File]("output_apis").toPath,
-      miniSetup = namespace.get[File]("output_setup").toPath,
-      relations = namespace.get[File]("output_relations").toPath,
-      sourceInfos = namespace.get[File]("output_infos").toPath,
-      stamps = namespace.get[File]("output_stamps").toPath
-    )
-    val analysesFormat = {
-      val debug = namespace.getBoolean("debug")
-      val format = if (debug) AnxAnalysisStore.TextFormat else AnxAnalysisStore.BinaryFormat
-      new AnxAnalyses(format)
-    }
-    val analysisStore = new AnxAnalysisStore(analysisFiles, analysesFormat)
+    val debug = namespace.getBoolean("debug")
+    val analysisStoreFile = namespace.get[File]("output_analysis_store")
+    val analysisStore: AnalysisStore = AnalysisUtil.getAnalysisStore(analysisStoreFile, debug, usePersistence)
 
     val persistence = persistenceDir.fold[ZincPersistence](NullPersistence) { rootDir =>
       val path = namespace.getString("label").replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_")
-      new FilePersistence(rootDir.resolve(path), analysisFiles, outputJar)
+      new FilePersistence(rootDir.resolve(path), analysisStoreFile.toPath, outputJar)
     }
 
     val classesOutputDir = classesDir.resolve(labelToPath(namespace.getString("label")))
@@ -163,11 +166,7 @@ object ZincRunner extends WorkerMain[Namespace] {
     } catch {
       case NonFatal(e) =>
         logger.warn(() => s"Failed to load cached analysis: $e")
-        Files.delete(analysisFiles.apis)
-        Files.delete(analysisFiles.miniSetup)
-        Files.delete(analysisFiles.relations)
-        Files.delete(analysisFiles.sourceInfos)
-        Files.delete(analysisFiles.stamps)
+        Files.delete(analysisStoreFile.toPath)
     }
     Files.createDirectories(classesOutputDir)
 
@@ -177,15 +176,16 @@ object ZincRunner extends WorkerMain[Namespace] {
           logger.warn(() => s"Failed to load previous analysis: $e")
           Optional.empty[AnalysisContents]()
         },
-        identity
+        identity,
       )
       .map[PreviousResult](contents =>
-        PreviousResult.of(Optional.of(contents.getAnalysis), Optional.of(contents.getMiniSetup))
+        PreviousResult.of(Optional.of(contents.getAnalysis), Optional.of(contents.getMiniSetup)),
       )
       .orElseGet(() => PreviousResult.of(Optional.empty[CompileAnalysis](), Optional.empty[MiniSetup]()))
 
     // setup compiler
-    val scalaInstance = new AnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
+    val scalaInstance =
+      AnnexScalaInstance.getAnnexScalaInstance(namespace.getList[File]("compiler_classpath").asScala.toArray)
 
     val compileOptions =
       CompileOptions.create
@@ -196,8 +196,8 @@ object ZincRunner extends WorkerMain[Namespace] {
         .withScalacOptions(
           Array.concat(
             namespace.getList[File]("plugins").asScala.map(p => s"-Xplugin:$p").toArray,
-            Option(namespace.getList[String]("compiler_option")).fold[Seq[String]](Nil)(_.asScala.toSeq).toArray
-          )
+            Option(namespace.getList[String]("compiler_option")).fold[Seq[String]](Nil)(_.asScala.toSeq).toArray,
+          ),
         )
 
     val compilers = {
@@ -209,24 +209,31 @@ object ZincRunner extends WorkerMain[Namespace] {
     }
 
     val lookup = {
-      val depMap = deps.collect { case ExternalDep(_, classpath, files) =>
-        classpath -> files
+      val depMap = deps.collect { case ExternalDep(_, classpath, analysisStorePath) =>
+        classpath -> analysisStorePath
       }.toMap
       new AnxPerClasspathEntryLookup(file => {
         depMap
           .get(file)
-          .map(files =>
-            Analysis.Empty.copy(
-              apis = analysesFormat.apis().read(files.apis),
-              relations = analysesFormat.relations.read(files.relations)
+          .map { analysisStorePath =>
+            val analysis = AnalysisUtil.getAnalysis(
+              AnalysisUtil.getAnalysisStore(
+                analysisStorePath.toFile,
+                debug,
+                isIncremental = usePersistence,
+              ),
             )
-          )
+            Analysis.Empty.copy(
+              apis = analysis.apis,
+              relations = analysis.relations,
+            )
+          }
       })
     }
 
     val externalHooks = new DefaultExternalHooks(
       Optional.of(new DeterministicDirectoryHashExternalHooks()),
-      Optional.empty()
+      Optional.empty(),
     )
 
     val setup = {
@@ -245,7 +252,7 @@ object ZincRunner extends WorkerMain[Namespace] {
         incOptions,
         reporter,
         Optional.empty[CompileProgress](),
-        Array.empty[T2[String, String]]
+        Array.empty[T2[String, String]],
       )
     }
 
@@ -256,10 +263,10 @@ object ZincRunner extends WorkerMain[Namespace] {
     val compileResult =
       try incrementalCompiler.compile(inputs, logger)
       catch {
-        case _: CompileFailed => sys.exit(-1)
+        case _: CompileFailed => throw new AnnexWorkerError(-1)
         case e: ClassFormatError =>
           throw new Exception("You may be missing a `macro = True` attribute.", e)
-          sys.exit(1)
+          throw new AnnexWorkerError(1)
         case e: StackOverflowError => {
           // Downgrade to NonFatal error.
           // The JVM is not guaranteed to free shared resources correctly when unwinding the stack to catch a StackOverflowError,
@@ -271,17 +278,42 @@ object ZincRunner extends WorkerMain[Namespace] {
       }
 
     // create analyses
-    analysisStore.set(AnalysisContents.create(compileResult.analysis, compileResult.setup))
+    val path = analysisStoreFile.getCanonicalPath()
+    val analysisStoreText = AnalysisUtil.getAnalysisStore(
+      new File(path.substring(0, path.length() - 3) + ".text.gz"),
+      true,
+      usePersistence,
+    )
+    // Filter out libraryClassNames from the analysis because it is non-deterministic.
+    // Can stop doing this once the bug in Zinc is fixed. Check the comment on FilteredRelations
+    // for more info.
+    val resultAnalysis = {
+      val originalResultAnalysis = compileResult.analysis.asInstanceOf[Analysis]
+      originalResultAnalysis.copy(
+        relations = FilteredRelations.getFilteredRelations(originalResultAnalysis.relations),
+        infos = FilteredInfos.getFilteredInfos(originalResultAnalysis.infos),
+      )
+    }
+    analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+    analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
     // create used deps
-    val analysis = compileResult.analysis.asInstanceOf[Analysis]
     val usedDeps =
-      deps.filter(Dep.used(deps, analysis.relations, lookup)).filter(_.file != scalaInstance.libraryJar.toPath)
+      // Filter out the Scala standard library as that should just always be
+      // implicitly available and not something we should be book keeping.
+      deps.filter(Dep.used(deps, resultAnalysis.relations, lookup)).filterNot { dep =>
+        // rules_jvm_external adds header_ or processed_ to a lot of jars
+        // rules_jvm_external is frequently used in bazel projects, so we
+        // handle when jars like that show up
+        val depFileName = dep.file.toFile.getName.stripPrefix("header_").stripPrefix("processed_")
+
+        scalaInstance.libraryJars.map(_.getName).contains(depFileName)
+      }
     Files.write(namespace.get[File]("output_used").toPath, usedDeps.map(_.file.toString).sorted.asJava)
 
     // create jar
     val mains =
-      analysis.infos.allInfos.values.toList
+      resultAnalysis.infos.allInfos.values.toList
         .flatMap(_.getMainClasses.toList)
         .sorted
 
@@ -328,6 +360,9 @@ final class AnxPerClasspathEntryLookup(analyses: Path => Option[CompileAnalysis]
 /**
  * We create this to deterministically set the hash code of directories otherwise they get set to the
  * System.identityHashCode() of an object created during compilation. That results in non-determinism.
+ *
+ * TODO: Get rid of this once the upstream fix is released:
+ * https://github.com/sbt/zinc/commit/b4db1476d7fdb2c530a97c543ec9710c13ac58e3
  */
 final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup {
   // My understanding is that setting all these to None is the same as the
@@ -356,7 +391,7 @@ final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup
   // https://github.com/sbt/zinc/blob/f55b5b5abfba2dfcec0082b6fa8d329286803d2d/internal/zinc-core/src/main/scala/sbt/internal/inc/IncrementalCommon.scala#L429
   override def shouldDoIncrementalCompilation(
     changedClasses: util.Set[String],
-    previousAnalysis: CompileAnalysis
+    previousAnalysis: CompileAnalysis,
   ): Boolean = true
 
   // We set the hash code of the directories to 0. By default they get set
@@ -369,7 +404,7 @@ final class DeterministicDirectoryHashExternalHooks extends ExternalHooks.Lookup
     val directoryFileHashes = directories.map { path =>
       FileHash.of(path, 0)
     }
-    val fileHashes = ClasspathCache.hashClasspath(files)
+    val fileHashes = ClasspathCache.hashClasspath(files.toSeq)
 
     Optional.of(directoryFileHashes ++ fileHashes)
   }

@@ -1,6 +1,7 @@
 package annex.scala.proto
 
 import higherkindness.rules_scala.common.args.implicits._
+import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.worker.WorkerMain
 import java.io.{File, PrintStream}
 import java.nio.file.{Files, Paths}
@@ -9,12 +10,12 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.ArgumentParser
 import protocbridge.{ProtocBridge, ProtocRunner}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scalapb.ScalaPbCodeGenerator
 
 object ScalaProtoWorker extends WorkerMain[Unit] {
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("proto").addHelp(true).fromFilePrefix("@").build
     parser
       .addArgument("--output_dir")
@@ -41,7 +42,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  protected[this] def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
+  protected def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
     val namespace = argParser.parseArgs(args)
     val sources = namespace.getList[File]("sources").asScala.toList
     val protoPaths = namespace.getList[File]("proto_paths").asScala.toList
@@ -63,13 +64,13 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
       }
     }
 
-    val exit = ProtocBridge.runWithGenerators(
+    val exitCode = ProtocBridge.runWithGenerators(
       new MyProtocRunner,
       namedGenerators = List("scala" -> ScalaPbCodeGenerator),
       params = params
     )
-    if (exit != 0) {
-      sys.exit(exit)
+    if (exitCode != 0) {
+      throw new AnnexWorkerError(exitCode)
     }
   }
 

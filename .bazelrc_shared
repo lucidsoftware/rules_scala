@@ -1,43 +1,34 @@
 common --announce_rc
 common --color=yes
 common --noenable_bzlmod
+# Fix "Failed to fetch blobs because they do not exist remotely" errors
+# https://github.com/bazelbuild/bazel/issues/18696#issuecomment-2175561503
+common --remote_download_all
 
 build --experimental_strict_action_env
-build --javacopt="-source 11 -target 11"
-build --java_language_version=11
-build --tool_java_language_version=11
-build --incompatible_java_common_parameters=false
+build --javacopt="-source 21 -target 21"
+build --java_language_version="21"
+build --java_runtime_version="remotejdk_21"
+build --tool_java_language_version="21"
+build --tool_java_runtime_version="remotejdk_21"
 
 build --strategy=ScalaCompile=worker
 build --worker_max_instances=4
-# To re-enable worker sandboxing you will need to revert
-# 037d7440cf3b192b9979ff2f2c1b2c674b433afc
-# But this will cause AnalysisCache files to be included as
-# action inputs. Those files are non-deterministic, so this
-# causes cache misses. We should fix that before reverting
-# that commit.
-#build --worker_sandboxing
+build --worker_sandboxing
 build --verbose_failures
 
 test --test_output=all
 
-# Disabling these in general. Feel free to turn them on during development.
-# Having them on can make testing the rules challenging because, after a clean,
-# you hit the disk cache instead of running actions again.
-#build:rules --disk_cache=.bazel_cache
-#build:tests --disk_cache=../.bazel_cache
+build:rules --disk_cache=.bazel_cache
+build:tests --disk_cache=../.bazel_cache
 
-common:rules_v5.0 --config=noop
-common:rules_v6.3 --config=noop
-common:rules_v7.0 --config=noop
+common:rules_v7.2 --config=noop
 
 # route potentially unrouted configs to a terminating noop config
 # it's a noop because we use the default value
 common:rules --config=noop
 common:tests --config=noop
-common:v5.0 --config=rules_v5.0
-common:v6.3 --config=rules_v6.3
-common:v7.0 --config=rules_v7.0
+common:v7.2 --config=rules_v7.2
 
 # pick something trivial as a "noop"
 common:noop --logging=3

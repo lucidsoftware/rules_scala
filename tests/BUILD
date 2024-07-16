@@ -1,12 +1,13 @@
-java_runtime(
-    name = "jdk",
-    srcs = select({
-        "@bazel_tools//src/conditions:linux_x86_64": ["@jdk11-linux//:jdk"],
-        "@bazel_tools//src/conditions:darwin_x86_64": ["@jdk11-osx//:jdk"],
-    }),
-    java = select({
-        "@bazel_tools//src/conditions:linux_x86_64": "@jdk11-linux//:java",
-        "@bazel_tools//src/conditions:darwin_x86_64": "@jdk11-osx//:java",
-    }),
-    visibility = ["//visibility:public"],
+load(
+    "@rules_java//toolchains:default_java_toolchain.bzl",
+    "DEFAULT_TOOLCHAIN_CONFIGURATION",
+    "default_java_toolchain",
+)
+
+default_java_toolchain(
+    name = "repository_default_toolchain_21",
+    configuration = DEFAULT_TOOLCHAIN_CONFIGURATION,
+    java_runtime = "@rules_java//toolchains:remotejdk_21",
+    source_version = "21",
+    target_version = "21",
 )

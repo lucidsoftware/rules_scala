@@ -5,11 +5,8 @@ load(
 )
 load(
     "@rules_scala_annex//rules:providers.bzl",
-    _ScalaInfo = "ScalaInfo",
-)
-load(
-    "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
+    _ScalaInfo = "ScalaInfo",
 )
 load(
     "//rules/common:private/utils.bzl",

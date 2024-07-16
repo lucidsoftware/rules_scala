@@ -3,9 +3,11 @@ workspace(name = "rules_scala_annex_test")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 
-bazel_skylib_tag = "1.0.3"
+# skylib
 
-bazel_skylib_sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c"
+bazel_skylib_tag = "1.7.1"
+
+bazel_skylib_sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f"
 
 http_archive(
     name = "bazel_skylib",
@@ -16,9 +18,15 @@ http_archive(
     ],
 )
 
-protobuf_tag = "3.15.8"
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
-protobuf_sha256 = "dd513a79c7d7e45cbaeaf7655289f78fd6b806e52dbbd7018ef4e3cf5cff697a"
+bazel_skylib_workspace()
+
+# protobuf
+
+protobuf_tag = "3.19.6"
+
+protobuf_sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389"
 
 http_archive(
     name = "com_google_protobuf",
@@ -32,46 +40,45 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-jdk_build_file_content = """
-filegroup(
-    name = "jdk",
-    srcs = glob(["**/*"]),
-    visibility = ["//visibility:public"],
-)
-filegroup(
-    name = "java",
-    srcs = ["bin/java"],
-    visibility = ["//visibility:public"],
-)
-"""
-
+# rules_java
 http_archive(
-    name = "jdk11-linux",
-    build_file_content = jdk_build_file_content,
-    strip_prefix = "jdk-11.0.9.1+1",
-    url = "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz",
+    name = "rules_java",
+    sha256 = "8afd053dd2a7b85a4f033584f30a7f1666c5492c56c76e04eec4428bdb2a86cf",
+    urls = [
+        "https://github.com/bazelbuild/rules_java/releases/download/7.6.5/rules_java-7.6.5.tar.gz",
+    ],
 )
 
-http_archive(
-    name = "jdk11-osx",
-    build_file_content = jdk_build_file_content,
-    strip_prefix = "jdk-11.0.9.1+1/Contents/Home",
-    url = "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_mac_hotspot_11.0.9.1_1.tar.gz",
-)
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+
+rules_java_dependencies()
+
+rules_java_toolchains()
+
+register_toolchains("//:repository_default_toolchain_21_definition")
 
 local_repository(
     name = "rules_scala_annex",
     path = "../",
 )
 
-rules_jvm_external_tag = "5.3"
+# rules_jvm_external
+rules_jvm_external_tag = "6.1"
 
 http_archive(
     name = "rules_jvm_external",
-    sha256 = "6cc8444b20307113a62b676846c29ff018402fd4c7097fcd6d0a0fd5f2e86429",
+    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
     strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
 )
+
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
 
 load(
     "@rules_scala_annex//rules/scala:workspace.bzl",
@@ -79,7 +86,7 @@ load(
     "scala_repositories",
 )
 
-# Scala
+# Scala 2.13 and 3
 scala_repositories()
 
 load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
@@ -97,15 +104,6 @@ load("@annex_2_12//:defs.bzl", annex_2_12_pinned_maven_install = "pinned_maven_i
 
 annex_2_12_pinned_maven_install()
 
-# Scala 3
-load("@rules_scala_annex//rules/scala:workspace_3.bzl", "scala_3_repositories")
-
-scala_3_repositories()
-
-load("@annex_3//:defs.bzl", annex_3_pinned_maven_install = "pinned_maven_install")
-
-annex_3_pinned_maven_install()
-
 load(
     "@rules_scala_annex//rules/scala_proto:workspace.bzl",
     "scala_proto_register_toolchains",
@@ -120,8 +118,8 @@ load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven
 
 annex_proto_pinned_maven_install()
 
-load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")
 load("@rules_scala_annex//rules:external.bzl", "scala_import_external")
+load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")
 
 scala_import_external(
     name = "scalatest_2_13",
@@ -132,7 +130,7 @@ scala_import_external(
 
 emulate_rules_scala(
     extra_deps = [
-        "@annex//:org_scala_lang_scala_reflect_2_13_11",
+        "@annex//:org_scala_lang_scala_reflect",
         "@annex_test//:org_scala_lang_modules_scala_xml_2_13",
     ],
     scala = "@//scala:2_13",
@@ -193,7 +191,7 @@ jvm_maven_import_external(
 
 bind(
     name = "default_scala",
-    actual = "//scala:zinc_2_13_11",
+    actual = "//scala:zinc_2_13",
 )
 
 http_file(
@@ -209,3 +207,17 @@ http_file(
     sha256 = "72c5bd08c7d97ccefc2fe871c47dd6aed4b12ba19f616e3ac30946907d1cc4d2",
     urls = ["https://repo.maven.apache.org/maven2/com/chuusai/shapeless_2.13/2.3.7/shapeless_2.13-2.3.7-sources.jar"],
 )
+
+# rules_python - this is needed by rules_jvm_external for some reason
+rules_python_tag = "0.33.2"
+
+http_archive(
+    name = "rules_python",
+    sha256 = "e3f1cc7a04d9b09635afb3130731ed82b5f58eadc8233d4efb59944d92ffc06f",
+    strip_prefix = "rules_python-{}".format(rules_python_tag),
+    url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()

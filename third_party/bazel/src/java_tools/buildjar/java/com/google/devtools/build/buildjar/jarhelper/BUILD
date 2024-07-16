@@ -1,5 +1,7 @@
-licenses(["notice"])
 # Copyright 2014 The Bazel Authors. Licensed under Apache License, Version 2.0
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+
+licenses(["notice"])
 
 java_library(
     name = "jarhelper",

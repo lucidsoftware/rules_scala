@@ -2,7 +2,7 @@ package higherkindness.rules_scala
 package workers.common
 
 import scala.annotation.tailrec
-import java.io.IOException
+import java.io.{File, IOException}
 import java.nio.channels.FileChannel
 import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
 import java.nio.file.attribute.BasicFileAttributes
@@ -44,6 +44,20 @@ class ZipFileVisitor(root: Path, zip: ZipOutputStream) extends SimpleFileVisitor
 }
 
 object FileUtil {
+
+  /**
+   * Given a jar, return the file name without the rules_jvm_external prefix added to it when stamping.
+   *
+   * rules_jvm_external adds a prefix to jars when it stamps them. We sometimes need to look at jar names for various
+   * things. The rules_jvm_external prefix often breaks that string comparison.
+   */
+  def getNameWithoutRulesJvmExternalStampPrefix(file: File): String = {
+    file.getName.stripPrefix("header_").stripPrefix("processed_")
+  }
+
+  def getNameWithoutRulesJvmExternalStampPrefix(path: Path): String = {
+    getNameWithoutRulesJvmExternalStampPrefix(path.toFile)
+  }
 
   def copy(source: Path, target: Path) = Files.walkFileTree(source, new CopyFileVisitor(source, target))
 

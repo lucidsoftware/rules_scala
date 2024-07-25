@@ -90,8 +90,6 @@ load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_jav
 
 rules_java_dependencies()
 
-rules_java_toolchains()
-
 register_toolchains("//:repository_default_toolchain_21_definition")
 
 # rules_jvm_external

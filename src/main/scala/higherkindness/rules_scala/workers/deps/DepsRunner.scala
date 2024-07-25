@@ -60,8 +60,21 @@ object DepsRunner extends WorkerMain[Unit] {
         case _             => throw new Exception(s"Unexpected case in DepsRunner")
       }
     val labelToPaths = groups.toMap
-    def pathsForLabel(depLabel: String) =
-      Seq(depLabel, s"@${depLabel}", depLabel.stripPrefix("@")).collect(labelToPaths).flatten
+    def pathsForLabel(depLabel: String): Seq[String] = {
+      // A label could have no @ prefix, a single @ prefix, or a double @@ prefix.
+      // In an ideal world, the label we see here would always match the label in
+      // the --group, but that's not always the case. So we need to be able to handle
+      // moving from any of the forms to any of the other forms.
+      val potentialLabels = if (depLabel.startsWith("@@")) {
+        Seq(depLabel.stripPrefix("@@"), depLabel.stripPrefix("@"), depLabel)
+      } else if (depLabel.startsWith("@")) {
+        Seq(depLabel.stripPrefix("@"), depLabel, s"@${depLabel}")
+      } else {
+        Seq(depLabel, s"@${depLabel}", s"@@${depLabel}")
+      }
+
+      potentialLabels.collect(labelToPaths).flatten
+    }
     val usedPaths = Files.readAllLines(namespace.get[File]("used").toPath).asScala.toSet
 
     val remove = if (namespace.getBoolean("check_used") == true) {

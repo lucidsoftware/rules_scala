@@ -302,12 +302,11 @@ object ZincRunner extends WorkerMain[Namespace] {
       // Filter out the Scala standard library as that should just always be
       // implicitly available and not something we should be book keeping.
       deps.filter(Dep.used(deps, resultAnalysis.relations, lookup)).filterNot { dep =>
-        // rules_jvm_external adds header_ or processed_ to a lot of jars
-        // rules_jvm_external is frequently used in bazel projects, so we
-        // handle when jars like that show up
-        val depFileName = dep.file.toFile.getName.stripPrefix("header_").stripPrefix("processed_")
+        val filteredDepFileName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(dep.file)
 
-        scalaInstance.libraryJars.map(_.getName).contains(depFileName)
+        scalaInstance.libraryJars
+          .map(FileUtil.getNameWithoutRulesJvmExternalStampPrefix)
+          .contains(filteredDepFileName)
       }
     Files.write(namespace.get[File]("output_used").toPath, usedDeps.map(_.file.toString).sorted.asJava)
 

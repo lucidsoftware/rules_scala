@@ -97,16 +97,19 @@ object AnnexScalaInstance {
   // These are not the most robust checks for these jars, but it is more or
   // less what Zinc and Bloop are doing. They're also fast, so if it works it
   // works.
-  private final def isScala2CompilerJar(jarName: String): Boolean = {
+  private final def isScala2CompilerJar(jar: File): Boolean = {
+    val jarName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(jar)
     jarName.startsWith("scala-compiler") || jarName.startsWith("scala-reflect")
   }
 
-  private final def isScala3CompilerJar(jarName: String): Boolean = {
+  private final def isScala3CompilerJar(jar: File): Boolean = {
+    val jarName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(jar)
     jarName.startsWith("scala3-compiler") || jarName.startsWith("scala3-interfaces") ||
     jarName.startsWith("tasty-core_3") || jarName.startsWith("scala-asm")
   }
 
-  private final def isScalaLibraryJar(jarName: String): Boolean = {
+  private final def isScalaLibraryJar(jar: File): Boolean = {
+    val jarName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(jar)
     jarName.startsWith("scala-library") || jarName.startsWith("scala3-library")
   }
 }
@@ -125,32 +128,16 @@ private[common] class AnnexScalaInstance(override val allJars: Array[File]) exte
   // We need to include the full classpath for the Scala 2 or Scala 3 compilers.
   // Thankfully that classpath doesn't seem to change very often.
   override val compilerJars: Array[File] = allJars.filter { jar =>
-    val jarName = jar.getName
-    AnnexScalaInstance.isScala2CompilerJar(jarName) ||
-    AnnexScalaInstance.isScala3CompilerJar(jarName) ||
-    AnnexScalaInstance.isScalaLibraryJar(jarName)
+    AnnexScalaInstance.isScala2CompilerJar(jar) ||
+    AnnexScalaInstance.isScala3CompilerJar(jar) ||
+    AnnexScalaInstance.isScalaLibraryJar(jar)
   }
 
   // Jars for the Scala library classes
-  override val libraryJars: Array[File] =
-    allJars.filter(jar => AnnexScalaInstance.isScalaLibraryJar(jar.getName))
+  override val libraryJars: Array[File] = allJars.filter(AnnexScalaInstance.isScalaLibraryJar)
 
   // All the jars that are not compiler or library jars
   override val otherJars: Array[File] = allJars.diff(compilerJars ++ libraryJars)
-
-  // Version for this Scala instance
-  override val actualVersion: String = {
-    val stream = AnnexScalaInstance
-      .getClassLoader(compilerJars)
-      .getResourceAsStream("compiler.properties")
-
-    try {
-      val props = new Properties
-      props.load(stream)
-      props.getProperty("version.number")
-    } finally stream.close()
-  }
-  override val version: String = actualVersion
 
   // Loader for only the classes and resources in the library jars of this Scala instance
   override val loaderLibraryOnly: ClassLoader = AnnexScalaInstance.getClassLoader(libraryJars)
@@ -161,6 +148,28 @@ private[common] class AnnexScalaInstance(override val allJars: Array[File]) exte
   // Loader for all the classes and resources in all the compiler jars of this
   // Scala instance
   override val loaderCompilerOnly: ClassLoader = AnnexScalaInstance.getClassLoader(compilerJars)
+
+  // Version for this Scala instance
+  override val actualVersion: String = {
+    val stream = loaderCompilerOnly
+      .getResourceAsStream("compiler.properties")
+
+    if (stream == null) {
+      throw new Exception(
+        "The resource stream for the compiler.properties file in the compiler jar is null." +
+          " Something went wrong getting the version in that file in the compiler jar. The jars" +
+          s" which were searched are as follows: ${compilerJars.mkString}",
+      )
+    }
+
+    try {
+      val props = new Properties
+      props.load(stream)
+      props.getProperty("version.number")
+    } finally stream.close()
+  }
+  override val version: String = actualVersion
+
 }
 
 /**

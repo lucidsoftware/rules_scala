@@ -22,14 +22,20 @@ def phase_zinc_depscheck(ctx, g):
     deps_configuration = ctx.attr.scala[_DepsConfiguration]
 
     deps_checks = {}
-    labeled_jars = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
+    labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
+
     worker_inputs, _, worker_input_manifests = ctx.resolve_command(tools = [deps_configuration.worker])
     for name in ("direct", "used"):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
         deps_args = ctx.actions.args()
         deps_args.add(name, format = "--check_%s=true")
         deps_args.add_all("--direct", [dep.label for dep in ctx.attr.deps], format_each = "_%s")
-        deps_args.add_all(labeled_jars, map_each = _depscheck_labeled_group)
+
+        # Check the comment on the function we're calling here to understand why
+        # we're not using map_each
+        for labeled_jar_group in labeled_jar_groups.to_list():
+            _add_args_for_depscheck_labeled_group(labeled_jar_group, deps_args)
+
         deps_args.add("--label", ctx.label, format = "_%s")
         deps_args.add_all("--used_whitelist", [dep.label for dep in ctx.attr.deps_used_whitelist], format_each = "_%s")
         deps_args.add_all("--unused_whitelist", [dep.label for dep in ctx.attr.deps_unused_whitelist], format_each = "_%s")
@@ -63,5 +69,12 @@ def phase_zinc_depscheck(ctx, g):
         toolchain = deps_configuration,
     )
 
-def _depscheck_labeled_group(labeled_jars):
-    return (["--group", "_{}".format(labeled_jars.label)] + [jar.path for jar in labeled_jars.jars.to_list()])
+# If you use avoid using map_each, then labels are converted to their apparent repo name rather than
+# their canonical repo name. The apparent repo name is the human readable one that we want for use
+# with buildozer. See https://bazel.build/rules/lib/builtins/Args.html for more info
+#
+# Avoiding map_each is why we've got this odd section of add and add_all to create a --group
+def _add_args_for_depscheck_labeled_group(labeled_jar_group, deps_args):
+    deps_args.add("--group")
+    deps_args.add(labeled_jar_group.label, format = "_%s")
+    deps_args.add_all(labeled_jar_group.jars)

@@ -1,6 +1,5 @@
 common --announce_rc
 common --color=yes
-common --noenable_bzlmod
 # Fix "Failed to fetch blobs because they do not exist remotely" errors
 # https://github.com/bazelbuild/bazel/issues/18696#issuecomment-2175561503
 common --remote_download_all

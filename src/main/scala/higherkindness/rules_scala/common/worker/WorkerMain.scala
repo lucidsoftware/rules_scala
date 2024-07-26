@@ -7,7 +7,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, Print
 import java.util.concurrent.ForkJoinPool
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Using}
 
 trait WorkerMain[S] {
 
@@ -38,9 +38,6 @@ trait WorkerMain[S] {
         )
         val ec = ExecutionContext.fromExecutor(fjp)
 
-        System.setIn(new ByteArrayInputStream(Array.emptyByteArray))
-        System.setOut(System.err)
-
         def writeResponse(requestId: Int, outStream: OutputStream, code: Int) = {
           // Defined here so all writes to stdout are synchronized
           stdout.synchronized {
@@ -53,56 +50,84 @@ trait WorkerMain[S] {
           }
         }
 
-        try {
-          @tailrec
-          def process(ctx: S): Unit = {
-            val request = WorkerProtocol.WorkRequest.parseDelimitedFrom(stdin)
-            if (request == null) {
-              return
-            }
-            val args = request.getArgumentsList.toArray(Array.empty[String])
-
-            val outStream = new ByteArrayOutputStream
-            val out = new PrintStream(outStream)
-            val requestId = request.getRequestId()
-            System.out.println(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
-
-            val f: Future[Int] = Future {
-              try {
-                work(ctx, args, out)
-                0
-              } catch {
-                case AnnexWorkerError(code, _, _) => code
-              }
-            }(ec)
-
-            f.onComplete {
-              case Success(code) => {
-                out.flush()
-                writeResponse(requestId, outStream, code)
-                System.out.println(s"WorkResponse $requestId sent with code $code")
-              }
-              case Failure(e) => {
-                e.printStackTrace(out)
-                out.flush()
-                writeResponse(requestId, outStream, -1)
-                System.err.println(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
-                e.printStackTrace(System.err)
-              }
-            }(scala.concurrent.ExecutionContext.global)
-            process(ctx)
+        @tailrec
+        def process(ctx: S): Unit = {
+          val request = WorkerProtocol.WorkRequest.parseDelimitedFrom(stdin)
+          if (request == null) {
+            return
           }
-          process(init(Some(args.toArray)))
-        } finally {
-          System.setIn(stdin)
-          System.setOut(stdout)
+          val args = request.getArgumentsList.toArray(Array.empty[String])
+
+          // We go through this hullabaloo with output streams being defined out here, so we can
+          // close them after the async work in the Future is all done.
+          // If we do something synchronous with Using, then there's a race condition where the
+          // streams can get closed before the Future is completed.
+          var outStream: ByteArrayOutputStream = null
+          var out: PrintStream = null
+
+          val requestId = request.getRequestId()
+          System.out.println(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
+
+          val f: Future[Int] = Future {
+            outStream = new ByteArrayOutputStream
+            out = new PrintStream(outStream)
+            try {
+              work(ctx, args, out)
+              0
+            } catch {
+              case AnnexWorkerError(code, _, _) => code
+            }
+          }(ec)
+
+          f.andThen {
+            case Success(code) => {
+              out.flush()
+              writeResponse(requestId, outStream, code)
+              System.out.println(s"WorkResponse $requestId sent with code $code")
+            }
+            case Failure(e) => {
+              e.printStackTrace(out)
+              out.flush()
+              writeResponse(requestId, outStream, -1)
+              System.err.println(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
+              e.printStackTrace(System.err)
+            }
+          }(scala.concurrent.ExecutionContext.global)
+            .andThen { case _ =>
+              out.close()
+              outStream.close()
+            }(scala.concurrent.ExecutionContext.global)
+          process(ctx)
         }
 
-      case args => {
-        val outStream = new ByteArrayOutputStream
-        val out = new PrintStream(outStream)
-        work(init(None), args.toArray, out)
-      }
+        Using.resource(new ByteArrayInputStream(Array.emptyByteArray)) { inStream =>
+          try {
+            System.setIn(inStream)
+            System.setOut(System.err)
+            process(init(Some(args.toArray)))
+          } finally {
+            System.setIn(stdin)
+            System.setOut(stdout)
+          }
+        }
+
+      case args =>
+        Using.Manager { use =>
+          val outStream = use(new ByteArrayOutputStream)
+          val out = use(new PrintStream(outStream))
+          try {
+            work(init(None), args.toArray, out)
+          } catch {
+            // This error means the work function encountered an error that we want to not be caught
+            // inside that function. That way it stops work and exits the function. However, we
+            // also don't want to crash the whole program.
+            case AnnexWorkerError(_, _, _) => {}
+          } finally {
+            out.flush()
+          }
+
+          outStream.writeTo(System.err)
+        }.get
     }
   }
 }

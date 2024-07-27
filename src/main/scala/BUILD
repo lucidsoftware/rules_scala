@@ -96,7 +96,7 @@ configure_bootstrap_scala(
     compiler_classpath = compiler_classpath_3,
     global_scalacopts = shared_global_scalacopts,
     runtime_classpath = runtime_classpath_3,
-    use_ijar = False,
+    use_ijar = True,
     version = scala_3_version,
     visibility = ["//visibility:public"],
 )
@@ -107,7 +107,7 @@ configure_zinc_scala(
     compiler_classpath = compiler_classpath_3,
     global_scalacopts = shared_global_scalacopts,
     runtime_classpath = runtime_classpath_3,
-    use_ijar = False,
+    use_ijar = True,
     version = scala_3_version,
     visibility = ["//visibility:public"],
 )

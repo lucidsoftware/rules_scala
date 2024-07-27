@@ -501,7 +501,7 @@ configure_bootstrap_scala = rule(
             doc = "Scalac options that will always be enabled.",
         ),
         "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler. Scala 3 currently cannot use ijars.",
+            doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
     },
@@ -535,7 +535,7 @@ _configure_zinc_scala = rule(
             default = "warn",
         ),
         "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler. Scala 3 currently cannot use ijars.",
+            doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
         "deps_direct": attr.string(default = "error"),

@@ -84,11 +84,13 @@ _compile_private_attributes = {
 
 _compile_attributes = {
     "srcs": attr.label_list(
-        doc = "The source Scala and Java files (and `.srcjar` files of those).",
+        doc = "The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).",
         allow_files = [
             ".scala",
             ".java",
             ".srcjar",
+            "-sources.jar",
+            "-src.jar",
         ],
         flags = ["DIRECT_COMPILE_TIME_INPUT"],
     ),
@@ -455,6 +457,8 @@ scaladoc = rule(
                 ".java",
                 ".scala",
                 ".srcjar",
+                "-sources.jar",
+                "-src.jar",
             ]),
             "scala": attr.label(
                 default = "@scala",

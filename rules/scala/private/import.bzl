@@ -24,7 +24,11 @@ def scala_import_implementation(ctx):
         _jar = []
         _src_jar = []
         for jar in ctx.files.jars:
-            if jar.basename.endswith("sources.jar") or jar.basename.endswith("src.jar"):
+            if (
+                jar.basename.lower().endswith("-sources.jar") or
+                jar.basename.lower().endswith("-src.jar") or
+                jar.basename.lower().endswith(".srcjar")
+            ):
                 _src_jar.append(jar)
             else:
                 _jar.append(jar)

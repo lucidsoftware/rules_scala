@@ -107,6 +107,8 @@ object ZincRunner extends WorkerMain[Namespace] {
               FileUtil.extractZip(jar.toPath, sourcesDir.resolve(i.toString))
             }
           }
+          // Filter out MANIFEST files as they are not source files
+          .filterNot(_.endsWith("META-INF/MANIFEST.MF"))
           .map(_.toFile)
     }
 

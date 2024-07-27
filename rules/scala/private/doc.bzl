@@ -36,7 +36,12 @@ def scaladoc_implementation(ctx):
     )
 
     srcs = [file for file in ctx.files.srcs if file.extension.lower() in ["java", "scala"]]
-    src_jars = [file for file in ctx.files.srcs if file.extension.lower() == "srcjar"]
+    src_jars = [
+        file
+        for file in ctx.files.srcs
+        if file.path.lower().endswith(".srcjar") or file.path.lower().endswith("-sources.jar") or
+           file.path.lower().endswith("-src.jar")
+    ]
 
     scalacopts = ["-doc-title", ctx.attr.title or ctx.label] + ctx.attr.scalacopts
 

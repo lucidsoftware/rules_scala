@@ -102,7 +102,7 @@ object FileUtil {
       else extractZip(archive, output)
     }
 
-  def extractZip(archive: Path, output: Path) = {
+  def extractZip(archive: Path, output: Path): List[Path] = {
     val fileStream = Files.newInputStream(archive)
     try {
       val zipStream = new ZipInputStream(fileStream)

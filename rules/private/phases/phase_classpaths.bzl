@@ -58,7 +58,12 @@ def phase_classpaths(ctx, g):
     ).transitive_runtime_jars
 
     srcs = [file for file in ctx.files.srcs if file.extension.lower() in ["java", "scala"]]
-    src_jars = [file for file in ctx.files.srcs if file.extension.lower() in ["srcjar"]]
+    src_jars = [
+        file
+        for file in ctx.files.srcs
+        if file.path.lower().endswith(".srcjar") or file.path.lower().endswith("-sources.jar") or
+           file.path.lower().endswith("-src.jar")
+    ]
 
     jar = ctx.actions.declare_file("{}/classes.jar".format(ctx.label.name))
 

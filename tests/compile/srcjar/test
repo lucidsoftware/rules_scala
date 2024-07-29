@@ -1,8 +1,20 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
-zip example.srcjar Example.scala
-bazel build :lib
+zip -FSr example.srcjar Example.scala META-INF/MANIFEST.MF
+bazel build :lib-srcjar
 diff <( sort expected)  <(
-   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib.jar" | sort
+   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-srcjar.jar" | sort
+)
+
+zip -FSr example-sources.jar Example.scala META-INF/MANIFEST.MF
+bazel build :lib-sources-jar
+diff <( sort expected)  <(
+   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-sources-jar.jar" | sort
+)
+
+zip -FSr example-src.jar Example.scala META-INF/MANIFEST.MF
+bazel build :lib-src-jar
+diff <( sort expected)  <(
+   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-src-jar.jar" | sort
 )

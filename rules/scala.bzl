@@ -84,11 +84,13 @@ _compile_private_attributes = {
 
 _compile_attributes = {
     "srcs": attr.label_list(
-        doc = "The source Scala and Java files (and `.srcjar` files of those).",
+        doc = "The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).",
         allow_files = [
             ".scala",
             ".java",
             ".srcjar",
+            "-sources.jar",
+            "-src.jar",
         ],
         flags = ["DIRECT_COMPILE_TIME_INPUT"],
     ),
@@ -455,6 +457,8 @@ scaladoc = rule(
                 ".java",
                 ".scala",
                 ".srcjar",
+                "-sources.jar",
+                "-src.jar",
             ]),
             "scala": attr.label(
                 default = "@scala",
@@ -497,7 +501,7 @@ configure_bootstrap_scala = rule(
             doc = "Scalac options that will always be enabled.",
         ),
         "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler. Scala 3 currently cannot use ijars.",
+            doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
     },
@@ -531,7 +535,7 @@ _configure_zinc_scala = rule(
             default = "warn",
         ),
         "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler. Scala 3 currently cannot use ijars.",
+            doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
         "deps_direct": attr.string(default = "error"),

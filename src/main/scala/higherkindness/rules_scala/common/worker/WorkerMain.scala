@@ -4,6 +4,7 @@ package common.worker
 import common.error.AnnexWorkerError
 import com.google.devtools.build.lib.worker.WorkerProtocol
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, PrintStream}
+import java.nio.file.Path
 import java.util.concurrent.ForkJoinPool
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,11 +14,14 @@ trait WorkerMain[S] {
 
   protected[this] def init(args: Option[Array[String]]): S
 
-  protected[this] def work(ctx: S, args: Array[String], out: PrintStream): Unit
+  protected[this] def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path): Unit
+
+  protected[this] var isWorker = false
 
   final def main(args: Array[String]): Unit = {
     args.toList match {
       case "--persistent_worker" :: args =>
+        isWorker = true
         val stdin = System.in
         val stdout = System.out
         val exceptionHandler = new Thread.UncaughtExceptionHandler {
@@ -57,6 +61,7 @@ trait WorkerMain[S] {
             return
           }
           val args = request.getArgumentsList.toArray(Array.empty[String])
+          val sandboxDir = Path.of(request.getSandboxDir())
 
           // We go through this hullabaloo with output streams being defined out here, so we can
           // close them after the async work in the Future is all done.
@@ -72,7 +77,7 @@ trait WorkerMain[S] {
             outStream = new ByteArrayOutputStream
             out = new PrintStream(outStream)
             try {
-              work(ctx, args, out)
+              work(ctx, args, out, sandboxDir)
               0
             } catch {
               case AnnexWorkerError(code, _, _) => code
@@ -116,7 +121,12 @@ trait WorkerMain[S] {
           val outStream = use(new ByteArrayOutputStream)
           val out = use(new PrintStream(outStream))
           try {
-            work(init(None), args.toArray, out)
+            work(
+              init(args = None),
+              args.toArray,
+              out,
+              workDir = Path.of(""),
+            )
           } catch {
             // This error means the work function encountered an error that we want to not be caught
             // inside that function. That way it stops work and exits the function. However, we

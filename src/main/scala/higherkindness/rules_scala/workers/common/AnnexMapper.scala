@@ -72,11 +72,11 @@ object AnnexMapper {
 }
 
 final class AnxWriteMapper(root: Path) extends WriteMapper {
-  private[this] val rootAbs = root.toAbsolutePath
+  private[this] val rootAbs = root.toAbsolutePath().normalize()
 
   private[this] def mapFile(path: Path): Path = {
-    if (path.startsWith(rootAbs)) {
-      AnnexMapper.rootPlaceholder.resolve(rootAbs.relativize(path))
+    if (path.toAbsolutePath().normalize().startsWith(rootAbs)) {
+      AnnexMapper.rootPlaceholder.resolve(rootAbs.relativize(path.toAbsolutePath().normalize()))
     } else {
       path
     }
@@ -111,7 +111,7 @@ final class AnxWriteMapper(root: Path) extends WriteMapper {
 }
 
 final class AnxReadMapper(root: Path, isIncremental: Boolean) extends ReadMapper {
-  private[this] val rootAbs = root.toAbsolutePath
+  private[this] val rootAbs = root.toAbsolutePath().normalize()
 
   private[this] def mapFile(virtualFileRef: VirtualFileRef): Path = {
     mapFile(PlainVirtualFileConverter.converter.toPath(virtualFileRef))

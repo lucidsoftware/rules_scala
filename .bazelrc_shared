@@ -14,6 +14,7 @@ build --tool_java_runtime_version="remotejdk_21"
 build --strategy=ScalaCompile=worker
 build --worker_max_instances=4
 build --worker_sandboxing
+build --experimental_worker_multiplex_sandboxing
 build --verbose_failures
 
 test --test_output=all

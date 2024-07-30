@@ -1,5 +1,6 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
-bazel build --strategy=ScalaCompile=worker :lib 2>&1 | grep -q $'\[\e\[31mError\e\[0m\] compile/error/Example\.scala:'
+bazel build --experimental_worker_multiplex_sandboxing --strategy=ScalaCompile=worker :lib 2>&1 | grep -q $'\[\e\[31mError\e\[0m\] compile/error/Example\.scala:'
+bazel build --noexperimental_worker_multiplex_sandboxing --strategy=ScalaCompile=worker :lib 2>&1 | grep -q $'\[\e\[31mError\e\[0m\] compile/error/Example\.scala:'
 bazel build --strategy=ScalaCompile=local :lib 2>&1 | grep -q $'\[\e\[31mError\e\[0m\] compile/error/Example\.scala:'

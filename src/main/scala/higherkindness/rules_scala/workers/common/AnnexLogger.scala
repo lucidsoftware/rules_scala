@@ -2,16 +2,13 @@ package higherkindness.rules_scala
 package workers.common
 
 import xsbti.Logger
-
 import java.io.{PrintStream, PrintWriter, StringWriter}
-import java.nio.file.Paths
+import java.nio.file.{Path, Paths}
 import java.util.function.Supplier
 
-import CommonArguments.LogLevel
+final class AnnexLogger(level: LogLevel, workDir: Path, out: PrintStream) extends Logger {
 
-final class AnnexLogger(level: String, out: PrintStream = System.err) extends Logger {
-
-  private[this] val root = s"${Paths.get("").toAbsolutePath}/"
+  private[this] val root = s"${workDir.toAbsolutePath().normalize()}/"
 
   private[this] def format(value: String): String = value.replace(root, "")
 
@@ -21,17 +18,17 @@ final class AnnexLogger(level: String, out: PrintStream = System.err) extends Lo
   }
 
   def error(msg: Supplier[String]): Unit = level match {
-    case LogLevel.Debug | LogLevel.Error | LogLevel.Info | LogLevel.Warn => out.println(format(msg.get))
+    case LogLevel.Error | LogLevel.Warn | LogLevel.Info | LogLevel.Debug => out.println(format(msg.get))
     case _                                                               =>
   }
 
   def info(msg: Supplier[String]): Unit = level match {
-    case LogLevel.Debug | LogLevel.Info => out.println(format(msg.get))
+    case LogLevel.Info | LogLevel.Debug => out.println(format(msg.get))
     case _                              =>
   }
 
   def trace(err: Supplier[Throwable]): Unit = level match {
-    case LogLevel.Debug | LogLevel.Error | LogLevel.Info | LogLevel.Warn =>
+    case LogLevel.Error | LogLevel.Warn | LogLevel.Info | LogLevel.Debug =>
       val trace = new StringWriter();
       err.get.printStackTrace(new PrintWriter(trace));
       out.println(format(trace.toString))
@@ -39,7 +36,7 @@ final class AnnexLogger(level: String, out: PrintStream = System.err) extends Lo
   }
 
   def warn(msg: Supplier[String]): Unit = level match {
-    case LogLevel.Debug | LogLevel.Info | LogLevel.Warn => out.println(format(msg.get))
+    case LogLevel.Warn | LogLevel.Info | LogLevel.Debug => out.println(format(msg.get))
     case _                                              =>
   }
 

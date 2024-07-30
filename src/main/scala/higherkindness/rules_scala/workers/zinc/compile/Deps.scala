@@ -60,7 +60,7 @@ object Dep {
     // format: off
     ({
       case ExternalDep(file, _, _) => externalDeps.exists(lookup.definesClass(PlainVirtualFile(file)).apply)
-      case LibraryDep(file)        => libraryDeps(PlainVirtualFile(file.toAbsolutePath))
+      case LibraryDep(file)        => libraryDeps(PlainVirtualFile(file.toAbsolutePath().normalize()))
     })
     // format: on
   }

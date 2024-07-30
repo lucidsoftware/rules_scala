@@ -78,6 +78,7 @@ def phase_zinc_compile(ctx, g):
     execution_requirements_tags = {
         "supports-multiplex-workers": "1",
         "supports-workers": "1",
+        "supports-multiplex-sandboxing": "1",
     }
 
     # Disable sandboxing if incremental compilation features are going to be used

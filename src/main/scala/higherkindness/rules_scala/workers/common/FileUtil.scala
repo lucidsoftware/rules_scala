@@ -52,11 +52,11 @@ object FileUtil {
    * things. The rules_jvm_external prefix often breaks that string comparison.
    */
   def getNameWithoutRulesJvmExternalStampPrefix(file: File): String = {
-    file.getName.stripPrefix("header_").stripPrefix("processed_")
+    getNameWithoutRulesJvmExternalStampPrefix(file.toPath)
   }
 
   def getNameWithoutRulesJvmExternalStampPrefix(path: Path): String = {
-    getNameWithoutRulesJvmExternalStampPrefix(path.toFile)
+    path.getFileName().toString().stripPrefix("header_").stripPrefix("processed_")
   }
 
   def copy(source: Path, target: Path) = Files.walkFileTree(source, new CopyFileVisitor(source, target))

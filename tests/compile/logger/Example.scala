@@ -1,15 +1,16 @@
 import higherkindness.rules_scala.workers.common.AnnexLogger
 import higherkindness.rules_scala.workers.common.Color
-import higherkindness.rules_scala.workers.common.CommonArguments.LogLevel
+import higherkindness.rules_scala.workers.common.LogLevel
 import higherkindness.rules_scala.workers.common.LoggedReporter
 
+import java.nio.file.Paths
 import sbt.internal.inc.javac.JavaPosition
 import sbt.util.InterfaceUtil.problem
 import xsbti.Severity
 
 object Example {
     def main(args: Array[String]) {
-        val logger = new AnnexLogger(LogLevel.Info)
+        val logger = new AnnexLogger(LogLevel.Info, Paths.get(""), System.err)
         val reporter = new LoggedReporter(logger, "2.13.14")
         val problem1 = problem("", new JavaPosition("Test Line", 100, "", 100), "Info Message 1", Severity.Info)
         val problem2 = problem("", new JavaPosition("Test Line", 200, "", 200), "Warning Message 2", Severity.Warn)

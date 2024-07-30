@@ -17,7 +17,7 @@ import sbt.testing.{Event, Framework, Logger}
 import scala.collection.mutable
 
 class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Logger) extends TestFrameworkRunner {
-  def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]) = {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
     var tasksAndEvents = new mutable.ListBuffer[(String, mutable.ListBuffer[Event])]()
     ClassLoaders.withContextClassLoader(classLoader) {
       TestHelper.withRunner(framework, scopeAndTestName, classLoader, arguments) { runner =>
@@ -32,7 +32,7 @@ class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Lo
           reporter.postTask()
           tasksAndEvents += ((task.taskDef.fullyQualifiedName, events))
         }
-        reporter.post(failures.toSeq)
+        reporter.post(failures)
         val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
         xmlReporter.write()
         !failures.nonEmpty
@@ -43,7 +43,7 @@ class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Lo
 
 class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => ClassLoader, logger: Logger)
     extends TestFrameworkRunner {
-  def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]) = {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
     var tasksAndEvents = new mutable.ListBuffer[(String, mutable.ListBuffer[Event])]()
     val reporter = new TestReporter(logger)
 
@@ -81,16 +81,16 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
 
 class ProcessCommand(
   val executable: String,
-  val arguments: Seq[String],
+  val arguments: List[String],
 ) extends Serializable
 
 class ProcessTestRunner(
   framework: Framework,
-  classpath: Seq[Path],
+  classpath: List[Path],
   command: ProcessCommand,
   logger: Logger with Serializable,
 ) extends TestFrameworkRunner {
-  def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]) = {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
     val reporter = new TestReporter(logger)
 
     val classLoader = framework.getClass.getClassLoader
@@ -125,11 +125,11 @@ class ProcessTestRunner(
         }
       } finally process.destroy
     }
-    reporter.post(failures.toSeq)
+    reporter.post(failures)
     !failures.nonEmpty
   }
 }
 
 trait TestFrameworkRunner {
-  def execute(tests: Seq[TestDefinition], scopeAndTestName: String, arguments: Seq[String]): Boolean
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Boolean
 }

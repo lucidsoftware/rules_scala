@@ -71,13 +71,9 @@ configure_zinc_scala(
 # IntelliJ libraries, so we can get a Scala SDK on sync.
 scala_library(
     name = "scala-sdk",
-    deps_used_whitelist = [
-        "@annex//:org_scala_lang_scala3_library_3",
-    ],
+    deps_used_whitelist = compiler_classpath_2_13,
     scala = ":zinc_3",
-    deps = [
-        "@annex//:org_scala_lang_scala3_library_3",
-    ],
+    deps = compiler_classpath_2_13,
 )
 
 compiler_classpath_3 = [
@@ -90,6 +86,13 @@ runtime_classpath_3 = [
     "@annex//:org_scala_lang_scala3_interfaces",
     "@annex//:org_scala_lang_tasty_core_3",
 ]
+
+scala_library(
+    name = "scala-sdk-3",
+    deps_used_whitelist = compiler_classpath_3,
+    scala = ":zinc_3",
+    deps = compiler_classpath_3,
+)
 
 configure_bootstrap_scala(
     name = "bootstrap_3",

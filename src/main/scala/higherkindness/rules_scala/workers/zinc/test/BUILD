@@ -9,6 +9,7 @@ scala_library(
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",
         "//src/main/scala/higherkindness/rules_scala/common/classloaders",
+        "//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "//src/main/scala/higherkindness/rules_scala/common/sbt-testing:common",
         "//src/main/scala/higherkindness/rules_scala/workers/common",
         "@annex//:net_sourceforge_argparse4j_argparse4j",

@@ -162,12 +162,17 @@ object CommonArguments {
   def apply(namespace: Namespace, workDir: Path): CommonArguments = {
     val analysisArgs = Option(namespace.getList[JList[String]]("analysis")).map(_.asScala).getOrElse(List.empty)
 
-    val analyses: List[Analysis] = analysisArgs.map { analysisArg =>
-      // Analysis strings are of the format: _label analysis_store [jar ...]
-      val Buffer(label, analysisStore, jars @ _*) = analysisArg.asScala: @unchecked
-      // Drop the leading _ on the label, which was added to avoid triggering argparse's arg file detection
-      Analysis(workDir, label.tail, analysisStore, jars.toList)
-    }.toList
+    val analyses: List[Analysis] = analysisArgs.view
+      .map(_.asScala)
+      .map { analysisArg =>
+        // Analysis strings are of the format: _label analysis_store [jar ...]
+        val label = analysisArg(0)
+        val analysisStore = analysisArg(1)
+        val jars = analysisArg.drop(2).toList
+        // Drop the leading _ on the label, which was added to avoid triggering argparse's arg file detection
+        Analysis(workDir, label.tail, analysisStore, jars)
+      }
+      .toList
 
     new CommonArguments(
       analyses = analyses,

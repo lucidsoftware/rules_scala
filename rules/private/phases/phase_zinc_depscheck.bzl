@@ -50,7 +50,14 @@ def phase_zinc_depscheck(ctx, g):
             outputs = [deps_check],
             executable = deps_configuration.worker.files_to_run.executable,
             input_manifests = worker_input_manifests,
-            execution_requirements = _resolve_execution_reqs(ctx, {"supports-workers": "1"}),
+            execution_requirements = _resolve_execution_reqs(
+                ctx,
+                {
+                    "supports-multiplex-workers": "1",
+                    "supports-workers": "1",
+                    "supports-multiplex-sandboxing": "1",
+                },
+            ),
             arguments = [deps_args],
         )
         deps_checks[name] = deps_check

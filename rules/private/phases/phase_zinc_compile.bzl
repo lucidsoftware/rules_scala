@@ -81,11 +81,14 @@ def phase_zinc_compile(ctx, g):
         "supports-multiplex-sandboxing": "1",
     }
 
-    # Disable sandboxing if incremental compilation features are going to be used
-    # because they require stashing files outside the sandbox that Bazel isn't
-    # aware of.
+    # Disable several things if incremental compilation features are going to be used
+    # because incremental compilation require stashing files outside the sandbox that
+    # Bazel isn't aware of and is less deterministic than ideal.
     if zinc_configuration.incremental:
         execution_requirements_tags["no-sandbox"] = "1"
+        execution_requirements_tags["no-cache"] = "1"
+        execution_requirements_tags["no-remote"] = "1"
+        execution_requirements_tags["supports-multiplex-sandboxing"] = "0"
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(

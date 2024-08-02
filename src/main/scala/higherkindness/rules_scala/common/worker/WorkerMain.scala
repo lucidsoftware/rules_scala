@@ -80,7 +80,9 @@ trait WorkerMain[S] {
               work(ctx, args, out, sandboxDir)
               0
             } catch {
-              case AnnexWorkerError(code, _, _) => code
+              case e @ AnnexWorkerError(code, _, _) =>
+                e.print(out)
+                code
             }
           }(ec)
 
@@ -131,7 +133,7 @@ trait WorkerMain[S] {
             // This error means the work function encountered an error that we want to not be caught
             // inside that function. That way it stops work and exits the function. However, we
             // also don't want to crash the whole program.
-            case AnnexWorkerError(_, _, _) => {}
+            case e: AnnexWorkerError => e.print(out)
           } finally {
             out.flush()
           }

@@ -20,8 +20,9 @@ def configure_bootstrap_scala_implementation(ctx):
             global_plugins = ctx.attr.global_plugins,
             global_scalacopts = ctx.attr.global_scalacopts,
             runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
+            semanticdb_bundle = ctx.attr.semanticdb_bundle,
             use_ijar = ctx.attr.use_ijar,
+            version = ctx.attr.version,
         ),
         _ScalaRulePhase(
             phases = [
@@ -37,8 +38,9 @@ def configure_zinc_scala_implementation(ctx):
             global_plugins = ctx.attr.global_plugins,
             global_scalacopts = ctx.attr.global_scalacopts,
             runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
+            semanticdb_bundle = ctx.attr.semanticdb_bundle,
             use_ijar = ctx.attr.use_ijar,
+            version = ctx.attr.version,
         ),
         _CodeCoverageConfiguration(
             instrumentation_worker = ctx.attr._code_coverage_instrumentation_worker,

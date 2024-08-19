@@ -7,12 +7,13 @@ load(
 ScalaConfiguration = provider(
     doc = "Scala compile-time and runtime configuration",
     fields = {
-        "version": "The Scala full version.",
         "compiler_classpath": "The compiler classpath.",
-        "runtime_classpath": "The runtime classpath.",
         "global_plugins": "Globally enabled compiler plugins",
         "global_scalacopts": "Globally enabled compiler options",
+        "runtime_classpath": "The runtime classpath.",
+        "semanticdb_bundle": "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
         "use_ijar": "Whether to use ijars for this Scala compiler",
+        "version": "The Scala full version.",
     },
 )
 
@@ -24,18 +25,14 @@ def _declare_scala_configuration_implementation(ctx):
             global_plugins = ctx.attr.global_plugins,
             global_scalacopts = ctx.attr.global_scalacopts,
             runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
+            semanticdb_bundle = ctx.attr.semanticdb_bundle,
             use_ijar = ctx.attr.use_ijar,
+            version = ctx.attr.version,
         ),
     ]
 
 declare_scala_configuration = rule(
     attrs = {
-        "version": attr.string(mandatory = True),
-        "runtime_classpath": attr.label_list(
-            mandatory = True,
-            providers = [JavaInfo],
-        ),
         "compiler_classpath": attr.label_list(
             mandatory = True,
             providers = [JavaInfo],
@@ -47,6 +44,15 @@ declare_scala_configuration = rule(
         "global_scalacopts": attr.string_list(
             doc = "Scalac options that will always be enabled.",
         ),
+        "runtime_classpath": attr.label_list(
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "semanticdb_bundle": attr.bool(
+            default = True,
+            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
+        ),
+        "version": attr.string(mandatory = True),
     },
     doc = "Creates a `ScalaConfiguration`.",
     implementation = _declare_scala_configuration_implementation,

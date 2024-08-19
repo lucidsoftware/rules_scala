@@ -8,6 +8,7 @@ def _scala_binary_implementation(ctx):
     return _run_phases(ctx, [
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
+        ("semanticdb", _phase_semanticdb),
         ("javainfo", _phase_javainfo),
         ("compile", _phase_noop),
         ("singlejar", _phase_singlejar),

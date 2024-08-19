@@ -9,6 +9,7 @@ def test_artifacts():
         "org.scala-sbt:compiler-interface:1.10.0",
         "org.scalacheck:scalacheck_2.13:1.18.0",
         "org.scalactic:scalactic_2.13:3.2.19",
+        "org.scalameta:semanticdb-scalac_2.13.14:4.9.9",
         "org.scalatest:scalatest_2.13:3.2.19",
         "org.specs2:specs2-common_2.13:4.20.7",
         "org.specs2:specs2-core_2.13:4.20.7",

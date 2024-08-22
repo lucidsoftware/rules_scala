@@ -4,12 +4,7 @@
 
 load("@bazel_skylib//lib:dicts.bzl", _dicts = "dicts")
 load(
-    "@rules_scala_annex//rules:jvm.bzl",
-    _labeled_jars = "labeled_jars",
-)
-load("@rules_scala_annex//rules:providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
-load(
-    "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
+    "//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
 load(
@@ -48,6 +43,13 @@ load(
 load(
     "//rules/scala:private/repl.bzl",
     _scala_repl_implementation = "scala_repl_implementation",
+)
+load(":jvm.bzl", _labeled_jars = "labeled_jars")
+load(":providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
+load(
+    ":register_toolchain.bzl",
+    _scala_toolchain_transition = "scala_toolchain_transition",
+    _scala_toolchain_transition_attributes = "scala_toolchain_transition_attributes",
 )
 
 _compile_private_attributes = {
@@ -246,17 +248,19 @@ def make_scala_library(*extras):
             _compile_attributes,
             _compile_private_attributes,
             _library_attributes,
+            _scala_toolchain_transition_attributes,
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
+        cfg = _scala_toolchain_transition,
         doc = "Compiles a Scala JVM library.",
+        implementation = _scala_library_implementation,
         outputs = _dicts.add(
             {
                 "jar": "%{name}.jar",
             },
             *[extra["outputs"] for extra in extras]
         ),
-        implementation = _scala_library_implementation,
         toolchains = [
             "//rules/scala:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
@@ -272,6 +276,7 @@ def make_scala_binary(*extras):
             _compile_private_attributes,
             _runtime_attributes,
             _runtime_private_attributes,
+            _scala_toolchain_transition_attributes,
             {
                 "main_class": attr.string(
                     doc = "The main class. If not provided, it will be inferred by its type signature.",
@@ -280,6 +285,7 @@ def make_scala_binary(*extras):
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
+        cfg = _scala_toolchain_transition,
         doc = """
 Compiles and links a Scala JVM executable.
 
@@ -292,6 +298,7 @@ Produces the following implicit outputs:
 To run the program: `bazel run <target>`
 """,
         executable = True,
+        implementation = _scala_binary_implementation,
         outputs = _dicts.add(
             {
                 "bin": "%{name}-bin",
@@ -300,7 +307,6 @@ To run the program: `bazel run <target>`
             },
             *[extra["outputs"] for extra in extras]
         ),
-        implementation = _scala_binary_implementation,
         toolchains = [
             "//rules/scala:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
@@ -316,6 +322,7 @@ def make_scala_test(*extras):
             _compile_private_attributes,
             _runtime_attributes,
             _runtime_private_attributes,
+            _scala_toolchain_transition_attributes,
             _testing_private_attributes,
             {
                 "isolation": attr.string(
@@ -349,6 +356,7 @@ def make_scala_test(*extras):
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
+        cfg = _scala_toolchain_transition,
         doc = """
 Compiles and links a collection of Scala tests.
 
@@ -360,6 +368,7 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 [More Info](/docs/scala.md#tests)
 """,
         executable = True,
+        implementation = _scala_test_implementation,
         outputs = _dicts.add(
             {
                 "bin": "%{name}-bin",
@@ -368,7 +377,6 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
             *[extra["outputs"] for extra in extras]
         ),
         test = True,
-        implementation = _scala_test_implementation,
         toolchains = [
             "//rules/scala:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
@@ -393,6 +401,7 @@ _scala_repl_private_attributes = _dicts.add(
 scala_repl = rule(
     attrs = _dicts.add(
         _scala_repl_private_attributes,
+        _scala_toolchain_transition_attributes,
         {
             "data": attr.label_list(
                 doc = "The additional runtime files needed by this REPL.",
@@ -408,16 +417,17 @@ scala_repl = rule(
             "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
         },
     ),
+    cfg = _scala_toolchain_transition,
     doc = """
 Launches a REPL with all given dependencies available.
 
 To run: `bazel run <target>`
 """,
     executable = True,
+    implementation = _scala_repl_implementation,
     outputs = {
         "bin": "%{name}-bin",
     },
-    implementation = _scala_repl_implementation,
     toolchains = [
         "//rules/scala:toolchain_type",
         "@bazel_tools//tools/jdk:toolchain_type",
@@ -464,6 +474,7 @@ Use this only for libraries with macros. Otherwise, use `java_import`.""",
 
 scaladoc = rule(
     attrs = _dicts.add(
+        _scala_toolchain_transition_attributes,
         _scaladoc_private_attributes,
         {
             "compiler_deps": attr.label_list(
@@ -488,12 +499,13 @@ scaladoc = rule(
             "title": attr.string(doc = "The name of the project. If none is provided, the target label will be used."),
         },
     ),
+    cfg = _scala_toolchain_transition,
     doc = "Generates Scaladoc.",
+    implementation = _scaladoc_implementation,
     toolchains = [
         "//rules/scala:toolchain_type",
         "@bazel_tools//tools/jdk:toolchain_type",
     ],
-    implementation = _scaladoc_implementation,
 )
 
 ##

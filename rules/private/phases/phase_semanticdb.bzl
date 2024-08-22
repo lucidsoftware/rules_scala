@@ -24,9 +24,9 @@ def _semanticdb_directory_from_file(file):
 # SemanticDB compiler plugin being enabled.
 #
 def phase_semanticdb(ctx, g):
-    scala_configuration = ctx.attr.scala[_ScalaConfiguration]
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
 
-    if scala_configuration.semanticdb_bundle:
+    if toolchain.scala_configuration.semanticdb_bundle:
         return struct(outputs = [], arguments_modifier = lambda _: None)
 
     directory_name = "{}/semanticdb".format(ctx.label.name)
@@ -47,7 +47,7 @@ def phase_semanticdb(ctx, g):
         if len(outputs) == 0:
             return
 
-        if scala_configuration.version.startswith("2"):
+        if toolchain.scala_configuration.version.startswith("2"):
             arguments.add("--compiler_option=-P:semanticdb:failures:error")
             arguments.add("--compiler_option_referencing_path=-P:semanticdb:sourceroot:${workDir}")
             arguments.add_all(

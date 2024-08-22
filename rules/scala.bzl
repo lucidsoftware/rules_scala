@@ -7,12 +7,7 @@ load(
     "@rules_scala_annex//rules:jvm.bzl",
     _labeled_jars = "labeled_jars",
 )
-load(
-    "@rules_scala_annex//rules:providers.bzl",
-    _ScalaConfiguration = "ScalaConfiguration",
-    _ScalaRulePhase = "ScalaRulePhase",
-    _ZincConfiguration = "ZincConfiguration",
-)
+load("@rules_scala_annex//rules:providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
 load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
@@ -136,11 +131,6 @@ _compile_attributes = {
     "resource_jars": attr.label_list(
         allow_files = [".jar"],
         doc = "The JARs to merge into the output JAR.",
-    ),
-    "scala": attr.label(
-        default = "//external:default_scala",
-        doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
-        providers = [_ScalaConfiguration],
     ),
     "scalacopts": attr.string_list(
         doc = "The Scalac options.",
@@ -267,7 +257,10 @@ def make_scala_library(*extras):
             *[extra["outputs"] for extra in extras]
         ),
         implementation = _scala_library_implementation,
-        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+        toolchains = [
+            "//rules/scala:toolchain_type",
+            "@bazel_tools//tools/jdk:toolchain_type",
+        ],
     )
 
 scala_library = make_scala_library()
@@ -308,7 +301,10 @@ To run the program: `bazel run <target>`
             *[extra["outputs"] for extra in extras]
         ),
         implementation = _scala_binary_implementation,
-        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+        toolchains = [
+            "//rules/scala:toolchain_type",
+            "@bazel_tools//tools/jdk:toolchain_type",
+        ],
     )
 
 scala_binary = make_scala_binary()
@@ -373,7 +369,10 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
         ),
         test = True,
         implementation = _scala_test_implementation,
-        toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+        toolchains = [
+            "//rules/scala:toolchain_type",
+            "@bazel_tools//tools/jdk:toolchain_type",
+        ],
     )
 
 scala_test = make_scala_test()
@@ -406,11 +405,6 @@ scala_repl = rule(
             "jvm_flags": attr.string_list(
                 doc = "The JVM runtime flags.",
             ),
-            "scala": attr.label(
-                default = "//external:default_scala",
-                doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
-                providers = [_ScalaConfiguration, _ZincConfiguration],
-            ),
             "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
         },
     ),
@@ -424,7 +418,10 @@ To run: `bazel run <target>`
         "bin": "%{name}-bin",
     },
     implementation = _scala_repl_implementation,
-    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+    toolchains = [
+        "//rules/scala:toolchain_type",
+        "@bazel_tools//tools/jdk:toolchain_type",
+    ],
 )
 
 scala_import = rule(
@@ -487,20 +484,15 @@ scaladoc = rule(
                 ],
                 doc = "Sources from which to generate Scaladoc. These may include `*.java` files, `*.scala` files, and source JARs.",
             ),
-            "scala": attr.label(
-                default = "//external:default_scala",
-                doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
-                providers = [
-                    _ScalaConfiguration,
-                    _ZincConfiguration,
-                ],
-            ),
             "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
             "title": attr.string(doc = "The name of the project. If none is provided, the target label will be used."),
         },
     ),
     doc = "Generates Scaladoc.",
-    toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
+    toolchains = [
+        "//rules/scala:toolchain_type",
+        "@bazel_tools//tools/jdk:toolchain_type",
+    ],
     implementation = _scaladoc_implementation,
 )
 

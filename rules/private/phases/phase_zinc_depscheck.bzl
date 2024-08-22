@@ -16,10 +16,7 @@ load(
 #
 
 def phase_zinc_depscheck(ctx, g):
-    if _DepsConfiguration not in ctx.attr.scala:
-        return
-
-    deps_configuration = ctx.attr.scala[_DepsConfiguration]
+    deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
     worker_inputs, _, worker_input_manifests = ctx.resolve_command(tools = [deps_configuration.worker])
     outputs = []

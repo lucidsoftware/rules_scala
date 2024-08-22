@@ -204,3 +204,23 @@ def _make_register_toolchain(configuration_rule):
 
 register_bootstrap_toolchain = _make_register_toolchain(_bootstrap_configuration)
 register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
+
+def _scala_toolchain_transition_impl(_, attr):
+    if attr.scala_toolchain_name == "":
+        return {}
+
+    return {
+        "//rules/scala:scala-toolchain": attr.scala_toolchain_name,
+    }
+
+scala_toolchain_transition = transition(
+    implementation = _scala_toolchain_transition_impl,
+    inputs = [],
+    outputs = ["//rules/scala:scala-toolchain"],
+)
+
+scala_toolchain_transition_attributes = {
+    "scala_toolchain_name": attr.string(
+        doc = "The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)",
+    ),
+}

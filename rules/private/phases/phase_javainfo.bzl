@@ -29,7 +29,7 @@ def phase_javainfo(ctx, g):
         java_info = java_common.merge([g.classpaths.sdeps, sexports, sruntime_deps])
     else:
         compile_jar = ctx.outputs.jar
-        if (ctx.attr.scala[_ScalaConfiguration].use_ijar):
+        if (ctx.toolchains["//rules/scala:toolchain_type"].scala_configuration.use_ijar):
             compile_jar = java_common.run_ijar(
                 ctx.actions,
                 jar = ctx.outputs.jar,

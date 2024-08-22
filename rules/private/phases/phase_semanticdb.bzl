@@ -8,9 +8,9 @@ load("@rules_scala_annex//rules:providers.bzl", _ScalaConfiguration = "ScalaConf
 # SemanticDB compiler plugin being enabled.
 #
 def phase_semanticdb(ctx, g):
-    scala_configuration = ctx.attr.scala[_ScalaConfiguration]
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
 
-    if scala_configuration.semanticdb_bundle:
+    if toolchain.scala_configuration.semanticdb_bundle:
         return struct(outputs = [], scalacopts = [])
 
     outputs = []
@@ -28,7 +28,7 @@ def phase_semanticdb(ctx, g):
 
             outputs.append(ctx.actions.declare_file(output_filename))
 
-    if scala_configuration.version.startswith("2"):
+    if toolchain.scala_configuration.version.startswith("2"):
         scalacopts = [
             "-P:semanticdb:failures:error",
             "-P:semanticdb:targetroot:{}".format(semanticdb_target_root),

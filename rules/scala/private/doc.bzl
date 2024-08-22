@@ -18,11 +18,9 @@ scaladoc_private_attributes = {
 }
 
 def scaladoc_implementation(ctx):
-    scala_configuration = ctx.attr.scala[_ScalaConfiguration]
-    zinc_configuration = ctx.attr.scala[_ZincConfiguration]
-
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     scompiler_classpath = java_common.merge(
-        _collect(JavaInfo, scala_configuration.compiler_classpath),
+        _collect(JavaInfo, toolchain.scala_configuration.compiler_classpath),
     )
 
     html = ctx.actions.declare_directory("html")
@@ -46,7 +44,7 @@ def scaladoc_implementation(ctx):
     scalacopts = ["-doc-title", ctx.attr.title or ctx.label] + ctx.attr.scalacopts
 
     args = ctx.actions.args()
-    args.add("--compiler_bridge", zinc_configuration.compiler_bridge)
+    args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", compiler_classpath)
     args.add_all("--classpath", classpath)
     args.add_all(scalacopts, format_each = "--option=%s")
@@ -73,7 +71,7 @@ def scaladoc_implementation(ctx):
         ),
         input_manifests = input_manifests,
         inputs = depset(
-            src_jars + srcs + [zinc_configuration.compiler_bridge],
+            src_jars + srcs + [toolchain.zinc_configuration.compiler_bridge],
             transitive = [classpath, compiler_classpath],
         ),
         mnemonic = "ScalaDoc",

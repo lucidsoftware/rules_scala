@@ -20,9 +20,7 @@ load(
 #
 
 def phase_zinc_compile(ctx, g):
-    scala_configuration = ctx.attr.scala[_ScalaConfiguration]
-    zinc_configuration = ctx.attr.scala[_ZincConfiguration]
-
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     analysis_store = ctx.actions.declare_file("{}/analysis_store.gz".format(ctx.label.name))
     analysis_store_text = ctx.actions.declare_file("{}/analysis_store.text.gz".format(ctx.label.name))
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
@@ -37,12 +35,15 @@ def phase_zinc_compile(ctx, g):
     ]
 
     zincs = [dep[_ZincInfo] for dep in ctx.attr.deps if _ZincInfo in dep]
-    common_scalacopts = scala_configuration.global_scalacopts + ctx.attr.scalacopts + g.semanticdb.scalacopts
+    common_scalacopts = \
+        toolchain.scala_configuration.global_scalacopts + \
+        ctx.attr.scalacopts + \
+        g.semanticdb.scalacopts
 
     args = ctx.actions.args()
 
     args.add_all(depset(transitive = [zinc.deps for zinc in zincs]), map_each = _compile_analysis)
-    args.add("--compiler_bridge", zinc_configuration.compiler_bridge)
+    args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
     args.add_all("--classpath", g.classpaths.compile)
     args.add_all(common_scalacopts, format_each = "--compiler_option=%s")
@@ -56,16 +57,16 @@ def phase_zinc_compile(ctx, g):
     args.add_all("--source_jars", g.classpaths.src_jars)
     args.add("--tmp", tmp.path)
 
-    args.add("--log_level", zinc_configuration.log_level)
+    args.add("--log_level", toolchain.zinc_configuration.log_level)
     args.add_all("--", g.classpaths.srcs)
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
 
-    worker = zinc_configuration.compile_worker
+    worker = toolchain.zinc_configuration.compile_worker
 
     worker_inputs, _, input_manifests = ctx.resolve_command(tools = [worker])
     inputs = depset(
-        [zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs,
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs,
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
@@ -92,7 +93,7 @@ def phase_zinc_compile(ctx, g):
     # Disable several things if incremental compilation features are going to be used
     # because incremental compilation require stashing files outside the sandbox that
     # Bazel isn't aware of and is less deterministic than ideal.
-    if zinc_configuration.incremental:
+    if toolchain.zinc_configuration.incremental:
         execution_requirements_tags["no-sandbox"] = "1"
         execution_requirements_tags["no-cache"] = "1"
         execution_requirements_tags["no-remote"] = "1"

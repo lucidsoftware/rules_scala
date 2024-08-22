@@ -5,32 +5,39 @@ load(
 )
 
 def run_phases(ctx, phases):
-    phase_providers = [
-        p[_ScalaRulePhase]
-        for p in [ctx.attr.scala] + ctx.attr.plugins + ctx.attr._phase_providers
-        if _ScalaRulePhase in p
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
+    phase_providers = [toolchain.scala_rule_phases] + [
+        phase_provider[_ScalaRulePhase]
+        for phase_provider in ctx.attr.plugins + ctx.attr._phase_providers
+        if _ScalaRulePhase in phase_provider
     ]
 
     if phase_providers != []:
-        phases = adjust_phases(phases, [p for pp in phase_providers for p in pp.phases])
+        phases = adjust_phases(
+            phases,
+            [phase for phase_provider in phase_providers for phase in phase_provider.phases],
+        )
 
-    gd = {
+    result_dict = {
         "init": struct(
-            scala_configuration = ctx.attr.scala[_ScalaConfiguration],
+            scala_configuration = toolchain.scala_configuration,
         ),
         "out": struct(
             output_groups = {},
             providers = [],
         ),
     }
-    g = struct(**gd)
-    for (name, function) in phases:
-        p = function(ctx, g)
-        if p != None:
-            gd[name] = p
-            g = struct(**gd)
 
-    return g
+    result = struct(**result_dict)
+
+    for (name, function) in phases:
+        addition = function(ctx, result)
+
+        if addition != None:
+            result_dict[name] = addition
+            result = struct(**result_dict)
+
+    return result
 
 def adjust_phases(phases, adjustments):
     if len(adjustments) == 0:

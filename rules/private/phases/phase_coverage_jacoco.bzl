@@ -15,10 +15,6 @@ def phase_coverage_jacoco(ctx, g):
     if not ctx.configuration.coverage_enabled:
         return
 
-    if _CodeCoverageConfiguration not in ctx.attr.scala:
-        #print("WARNING: code coverage is not supported by scala configuration: %s " % ctx.attr.scala)
-        return
-
     code_coverage_configuration = ctx.attr.scala[_CodeCoverageConfiguration]
 
     worker_inputs, _, worker_input_manifests = ctx.resolve_command(

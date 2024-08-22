@@ -9,6 +9,7 @@ load(
 load(
     "//rules/private:phases.bzl",
     "phase_bootstrap_compile",
+    "phase_coverage_jacoco",
     "phase_semanticdb",
     "phase_zinc_compile",
     "phase_zinc_depscheck",
@@ -28,7 +29,7 @@ def _bootstrap_configuration_impl(ctx):
             ),
             scala_rule_phases = ScalaRulePhase(
                 phases = [
-                    ("=", "compile", "compile", phase_bootstrap_compile),
+                    ("+", "javainfo", "compile", phase_bootstrap_compile),
                 ],
             ),
         ),
@@ -92,9 +93,10 @@ def _zinc_configuration_impl(ctx):
             ),
             scala_rule_phases = ScalaRulePhase(
                 phases = [
-                    ("-", "compile", "semanticdb", phase_semanticdb),
-                    ("=", "compile", "compile", phase_zinc_compile),
-                    ("+", "compile", "depscheck", phase_zinc_depscheck),
+                    ("+", "javainfo", "semanticdb", phase_semanticdb),
+                    ("+", "javainfo", "compile", phase_zinc_compile),
+                    ("+", "javainfo", "depscheck", phase_zinc_depscheck),
+                    ("+", "singlejar", "coverage", phase_coverage_jacoco),
                 ],
             ),
         ),

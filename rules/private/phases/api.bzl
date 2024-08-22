@@ -35,14 +35,19 @@ def run_phases(ctx, phases):
 def adjust_phases(phases, adjustments):
     if len(adjustments) == 0:
         return phases
-    phases = phases[:]
+
+    result = phases[:]
+
     for (relation, peer_name, name, function) in adjustments:
-        for idx, (needle, _) in enumerate(phases):
-            if needle == peer_name:
-                if relation in ["-", "before"]:
-                    phases.insert(idx, (name, function))
-                elif relation in ["+", "after"]:
-                    phases.insert(idx + 1, (name, function))
-                elif relation in ["=", "replace"]:
-                    phases[idx] = (name, function)
-    return phases
+        for i, (needle, _) in enumerate(result):
+            if needle == peer_name and relation in ["-", "before"]:
+                result.insert(i, (name, function))
+
+    # We iterate through the additions in reverse order so they're added in the same order as
+    # they're defined
+    for (relation, peer_name, name, function) in adjustments[::-1]:
+        for i, (needle, _) in enumerate(result):
+            if needle == peer_name and relation in ["+", "after"]:
+                result.insert(i + 1, (name, function))
+
+    return result

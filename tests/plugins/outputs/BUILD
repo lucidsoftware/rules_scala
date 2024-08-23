@@ -4,7 +4,7 @@ load(":rules.bzl", "my_plugin")
 scala_library(
     name = "my_plugin_lib",
     srcs = ["plugin.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
 )
 
@@ -22,6 +22,6 @@ scala_library(
     plugins = [
         ":my_plugin",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
 )

@@ -5,7 +5,7 @@ scala_binary(
     name = "deps",
     srcs = glob(["**/*.scala"]),
     main_class = "higherkindness.rules_scala.workers.deps.DepsRunner",
-    scala = "//src/main/scala:bootstrap",
+    scala_toolchain_name = "bootstrap_2_13",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",

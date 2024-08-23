@@ -4,7 +4,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 scala_library(
     name = "plugin-lib",
     srcs = ["plugin-lib.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
 )
 
@@ -36,7 +36,7 @@ scala_library(
     resource_jars = [
         ":resources",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         ":plugin-lib",
@@ -51,6 +51,6 @@ scala_library(
     plugins = [
         ":plugin",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
 )

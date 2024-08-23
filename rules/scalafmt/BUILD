@@ -21,7 +21,7 @@ scala_binary(
     name = "scalafmt",
     srcs = glob(["scalafmt/**/*.scala"]),
     main_class = "annex.scalafmt.ScalafmtRunner",
-    scala = "//src/main/scala:bootstrap",
+    scala_toolchain_name = "bootstrap_2_13",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",

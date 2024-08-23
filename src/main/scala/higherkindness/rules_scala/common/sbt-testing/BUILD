@@ -12,7 +12,7 @@ _common_srcs = [
 scala_library(
     name = "subprocess",
     srcs = _subprocess_srcs,
-    scala = "//src/main/scala:zinc",
+    scala_toolchain_name = "zinc_2_13",
     visibility = ["//visibility:public"],
     deps = [
         ":common",
@@ -27,7 +27,7 @@ scala_library(
     deps_used_whitelist = [
         "@annex//:org_scala_lang_scala_library",
     ],
-    scala = "//src/main/scala:zinc",
+    scala_toolchain_name = "zinc_2_13",
     visibility = ["//visibility:public"],
     deps = [
         "@annex//:org_scala_lang_modules_scala_xml_2_13",

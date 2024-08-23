@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_binary", "scala_library")
 scala_library(
     name = "bad_compile",
     srcs = ["TestMacro.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":macro_bad",
         "@annex//:org_scala_lang_scala_reflect",
@@ -14,7 +14,7 @@ scala_library(
     name = "macro",
     srcs = ["Macro.scala"],
     macro = True,
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":util",
         "@annex//:org_scala_lang_scala_reflect",
@@ -25,7 +25,7 @@ scala_library(
     name = "macro_only",
     srcs = ["MacroOnly.scala"],
     macro = True,
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":macro",
         "@annex//:org_scala_lang_scala_reflect",
@@ -35,7 +35,7 @@ scala_library(
 scala_library(
     name = "macro_bad",
     srcs = ["Macro.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":util",
         "@annex//:org_scala_lang_scala_reflect",
@@ -45,7 +45,7 @@ scala_library(
 scala_library(
     name = "util",
     srcs = ["MacroUtil.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         "@annex//:org_scala_lang_scala_reflect",
     ],
@@ -54,7 +54,7 @@ scala_library(
 scala_binary(
     name = "test_macro",
     srcs = ["TestMacro.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [":macro"],
 )
 
@@ -64,7 +64,7 @@ scala_binary(
     deps_used_whitelist = [
         ":macro_only",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":macro",
         ":macro_only",

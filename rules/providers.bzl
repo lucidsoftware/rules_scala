@@ -52,44 +52,6 @@ ScalaRulePhase = provider(
     },
 )
 
-def _reconfigure_deps_configuration_implementation(ctx):
-    original_config = ctx.attr.provider[DepsConfiguration]
-
-    direct = original_config.direct
-    if ctx.attr.direct != "inherit":
-        direct = ctx.attr.direct
-    used = original_config.used
-    if ctx.attr.used != "inherit":
-        used = ctx.attr.used
-
-    providers = [DepsConfiguration(
-        direct = direct,
-        used = used,
-        worker = original_config.worker,
-    )]
-    if ScalaConfiguration in ctx.attr.provider:
-        providers += [ctx.attr.provider[ScalaConfiguration]]
-    if ZincConfiguration in ctx.attr.provider:
-        providers += [ctx.attr.provider[ZincConfiguration]]
-    if ScalaRulePhase in ctx.attr.provider:
-        providers += [ctx.attr.provider[ScalaRulePhase]]
-
-    return providers
-
-reconfigure_deps_configuration = rule(
-    attrs = {
-        "provider": attr.label(
-            mandatory = True,
-            providers = [
-                [DepsConfiguration],
-            ],
-        ),
-        "direct": attr.string(default = "inherit"),
-        "used": attr.string(default = "inherit"),
-    },
-    implementation = _reconfigure_deps_configuration_implementation,
-)
-
 ZincInfo = provider(
     doc = "Zinc-specific outputs.",
     fields = {

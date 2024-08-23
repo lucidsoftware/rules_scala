@@ -79,6 +79,11 @@ def scala_repositories(
         ],
     )
 
-def scala_register_toolchains():
-    # reserved for future use
-    return ()
+def scala_register_toolchains(*args):
+    native.register_toolchains(
+        "//src/main/scala:bootstrap_2_13",
+        "//src/main/scala:bootstrap_3",
+        "//src/main/scala:zinc_2_13",
+        "//src/main/scala:zinc_3",
+        *args,
+    )

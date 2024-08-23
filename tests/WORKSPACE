@@ -93,7 +93,17 @@ load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
 
 annex_pinned_maven_install()
 
-scala_register_toolchains()
+scala_register_toolchains(
+    "@@//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
+    "@@//scala:test_bootstrap_2_12",
+    "@@//scala:test_bootstrap_2_13",
+    "@@//scala:test_bootstrap_3",
+    "@@//scala:test_zinc_2_12",
+    "@@//scala:test_zinc_2_13",
+    "@@//scala:test_zinc_3",
+    "@@//scala:test_zinc_2_13_fatal_deprecation_opt",
+    "@@//scala:test_zinc_2_13_log_level_debug",
+)
 
 #  Scala 2.12
 load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_repositories")
@@ -187,11 +197,6 @@ jvm_maven_import_external(
     artifact_sha256 = "29e923226a0d10e9142bbd81073ef52f601277001fcf9014389bf0af3dc33dc3",
     licenses = ["notice"],
     server_urls = ["https://repo.maven.apache.org/maven2"],
-)
-
-bind(
-    name = "default_scala",
-    actual = "//scala:zinc_2_13",
 )
 
 http_file(

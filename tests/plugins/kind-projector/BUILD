@@ -1,4 +1,5 @@
-load("@rules_scala_annex//rules:scala.bzl", "configure_zinc_scala", "scala_library")
+load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
+load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version")
 
 scala_library(
@@ -10,8 +11,8 @@ scala_library(
     tags = ["manual"],
 )
 
-configure_zinc_scala(
-    name = "scala_2_13_with_kind_projector",
+register_zinc_toolchain(
+    name = "test_zinc_2_13_with_kind_projector",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
         "@annex//:org_scala_lang_scala_compiler",
@@ -30,6 +31,6 @@ configure_zinc_scala(
 scala_library(
     name = "kind-projector-via-global-plugins",
     srcs = ["KindProjector.scala"],
-    scala = ":scala_2_13_with_kind_projector",
+    scala_toolchain_name = "test_zinc_2_13_with_kind_projector",
     tags = ["manual"],
 )

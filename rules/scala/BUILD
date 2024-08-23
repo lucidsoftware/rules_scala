@@ -8,7 +8,7 @@ filegroup(
 
 string_setting(
     name = "scala-toolchain",
-    build_setting_default = "default-scala",
+    build_setting_default = "zinc_3",
     visibility = ["//visibility:public"],
 )
 

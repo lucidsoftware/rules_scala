@@ -6,7 +6,7 @@ scala_binary(
     srcs = [
         "RunnerThatPrintsVerbosity.scala",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sandbox",

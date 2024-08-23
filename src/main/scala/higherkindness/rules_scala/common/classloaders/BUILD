@@ -4,7 +4,7 @@ load("//rules:scalafmt.bzl", "scala_format_test")
 scala_library(
     name = "classloaders",
     srcs = glob(["**/*.scala"]),
-    scala = "//src/main/scala:bootstrap",
+    scala_toolchain_name = "bootstrap_2_13",
     visibility = ["//visibility:public"],
 )
 

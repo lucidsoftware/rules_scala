@@ -5,7 +5,7 @@ scala_library(
     name = "plain",
     resource_strip_prefix = "resources/reference_conf",
     resources = ["reference.conf"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
 )
 
 java_library(

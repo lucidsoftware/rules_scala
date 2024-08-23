@@ -188,7 +188,7 @@ def _make_register_toolchain(configuration_rule):
         native.config_setting(
             name = "{}-setting".format(name),
             flag_values = {
-                "@rules_scala_annex//rules/scala:scala-toolchain": name,
+                "@rules_scala_annex_scala_toolchain//:scala-toolchain": name,
             },
         )
 
@@ -210,13 +210,13 @@ def _scala_toolchain_transition_impl(_, attr):
         return {}
 
     return {
-        "//rules/scala:scala-toolchain": attr.scala_toolchain_name,
+        "@rules_scala_annex_scala_toolchain//:scala-toolchain": attr.scala_toolchain_name,
     }
 
 scala_toolchain_transition = transition(
     implementation = _scala_toolchain_transition_impl,
     inputs = [],
-    outputs = ["//rules/scala:scala-toolchain"],
+    outputs = ["@rules_scala_annex_scala_toolchain//:scala-toolchain"],
 )
 
 scala_toolchain_transition_attributes = {

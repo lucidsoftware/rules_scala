@@ -119,7 +119,7 @@ load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
 
 annex_pinned_maven_install()
 
-scala_register_toolchains()
+scala_register_toolchains(default_scala_toolchain_name = "zinc_2_13")
 
 #  Scala 2.12
 

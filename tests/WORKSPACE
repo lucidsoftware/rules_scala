@@ -94,17 +94,20 @@ load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
 annex_pinned_maven_install()
 
 scala_register_toolchains(
-    "@@//dependencies/indirect:test_zinc_2_13_direct_deps_off",
-    "@@//dependencies/indirect:test_zinc_2_13_used_deps_off",
-    "@@//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
-    "@@//scala:test_bootstrap_2_12",
-    "@@//scala:test_bootstrap_2_13",
-    "@@//scala:test_bootstrap_3",
-    "@@//scala:test_zinc_2_12",
-    "@@//scala:test_zinc_2_13",
-    "@@//scala:test_zinc_3",
-    "@@//scala:test_zinc_2_13_fatal_deprecation_opt",
-    "@@//scala:test_zinc_2_13_log_level_debug",
+    default_scala_toolchain_name = "test_zinc_2_13",
+    toolchains = [
+        "@@//dependencies/indirect:test_zinc_2_13_direct_deps_off",
+        "@@//dependencies/indirect:test_zinc_2_13_used_deps_off",
+        "@@//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
+        "@@//scala:test_bootstrap_2_12",
+        "@@//scala:test_bootstrap_2_13",
+        "@@//scala:test_bootstrap_3",
+        "@@//scala:test_zinc_2_12",
+        "@@//scala:test_zinc_2_13",
+        "@@//scala:test_zinc_3",
+        "@@//scala:test_zinc_2_13_fatal_deprecation_opt",
+        "@@//scala:test_zinc_2_13_log_level_debug",
+    ],
 )
 
 #  Scala 2.12

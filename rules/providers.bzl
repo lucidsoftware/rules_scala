@@ -1,9 +1,3 @@
-load(
-    "//rules/common:private/utils.bzl",
-    _collect = "collect",
-    _collect_optionally = "collect_optionally",
-)
-
 ScalaConfiguration = provider(
     doc = "Scala compile-time and runtime configuration",
     fields = {
@@ -15,47 +9,6 @@ ScalaConfiguration = provider(
         "use_ijar": "Whether to use ijars for this Scala compiler",
         "version": "The Scala full version.",
     },
-)
-
-def _declare_scala_configuration_implementation(ctx):
-    return [
-        java_common.merge(_collect(JavaInfo, ctx.attr.compiler_classpath)),
-        ScalaConfiguration(
-            compiler_classpath = ctx.attr.compiler_classpath,
-            global_plugins = ctx.attr.global_plugins,
-            global_scalacopts = ctx.attr.global_scalacopts,
-            runtime_classpath = ctx.attr.runtime_classpath,
-            semanticdb_bundle = ctx.attr.semanticdb_bundle,
-            use_ijar = ctx.attr.use_ijar,
-            version = ctx.attr.version,
-        ),
-    ]
-
-declare_scala_configuration = rule(
-    attrs = {
-        "compiler_classpath": attr.label_list(
-            mandatory = True,
-            providers = [JavaInfo],
-        ),
-        "global_plugins": attr.label_list(
-            doc = "Scalac plugins that will always be enabled.",
-            providers = [JavaInfo],
-        ),
-        "global_scalacopts": attr.string_list(
-            doc = "Scalac options that will always be enabled.",
-        ),
-        "runtime_classpath": attr.label_list(
-            mandatory = True,
-            providers = [JavaInfo],
-        ),
-        "semanticdb_bundle": attr.bool(
-            default = True,
-            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
-        ),
-        "version": attr.string(mandatory = True),
-    },
-    doc = "Creates a `ScalaConfiguration`.",
-    implementation = _declare_scala_configuration_implementation,
 )
 
 ScalaInfo = provider(
@@ -137,29 +90,6 @@ reconfigure_deps_configuration = rule(
     implementation = _reconfigure_deps_configuration_implementation,
 )
 
-def _declare_zinc_configuration_implementation(ctx):
-    return [ZincConfiguration(
-        compile_worker = ctx.attr._compile_worker,
-        compiler_bridge = ctx.files.compiler_bridge,
-    )]
-
-declare_zinc_configuration = rule(
-    attrs = {
-        "compiler_bridge": attr.label(
-            allow_single_file = True,
-            mandatory = True,
-        ),
-        "_compile_worker": attr.label(
-            default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/compile",
-            allow_files = True,
-            executable = True,
-            cfg = "host",
-        ),
-    },
-    doc = "Creates a `ZincConfiguration`.",
-    implementation = _declare_zinc_configuration_implementation,
-)
-
 ZincInfo = provider(
     doc = "Zinc-specific outputs.",
     fields = {
@@ -168,25 +98,6 @@ ZincInfo = provider(
         "deps_files": "The depset of all Zinc files.",
         "label": "The label for this output.",
     },
-)
-
-def _join_configurations_implementation(ctx):
-    return (
-        _collect_optionally(ScalaConfiguration, ctx.attr.configurations) +
-        _collect_optionally(ZincConfiguration, ctx.attr.configurations)
-    )
-
-join_configurations = rule(
-    attrs = {
-        "configurations": attr.label_list(
-            mandatory = True,
-            providers = [
-                [ScalaConfiguration],
-                [ZincConfiguration],
-            ],
-        ),
-    },
-    implementation = _join_configurations_implementation,
 )
 
 # TODO: move these to another file?

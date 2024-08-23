@@ -7,12 +7,6 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
 load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_version")
 
-alias(
-    name = "2_13",
-    actual = ":zinc_2_13",
-    visibility = ["//visibility:public"],
-)
-
 # zinc 2.12
 
 compiler_classpath_2_12 = [

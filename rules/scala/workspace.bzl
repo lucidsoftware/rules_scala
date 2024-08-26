@@ -82,11 +82,18 @@ def _toolchain_configuration_repository_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
         """\
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "string_setting")
 
 string_setting(
     name = "scala-toolchain",
     build_setting_default = "{}",
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "default",
+    srcs = ["default.bzl"],
     visibility = ["//visibility:public"],
 )
 """.format(repository_ctx.attr.default_scala_toolchain_name),
@@ -101,6 +108,13 @@ _toolchain_configuration_repository = repository_rule(
 )
 
 def scala_register_toolchains(default_scala_toolchain_name, toolchains = []):
+    """Registers the provided Scala toolchains with Bazel and sets a default one to use.
+
+    Args:
+        default_scala_toolchain_name: The name of the default Scala toolchain to use.
+        toolchains: The toolchains to register.
+    """
+
     _toolchain_configuration_repository(
         name = "rules_scala_annex_scala_toolchain",
         default_scala_toolchain_name = default_scala_toolchain_name,

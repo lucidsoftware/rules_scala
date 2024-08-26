@@ -9,7 +9,7 @@
 <pre>
 load("@//rules:rules_scala.bzl", "emulate_rules_scala")
 
-emulate_rules_scala(<a href="#emulate_rules_scala-scala">scala</a>, <a href="#emulate_rules_scala-scalatest">scalatest</a>, <a href="#emulate_rules_scala-extra_deps">extra_deps</a>)
+emulate_rules_scala(<a href="#emulate_rules_scala-scalatest">scalatest</a>, <a href="#emulate_rules_scala-extra_deps">extra_deps</a>)
 </pre>
 
 
@@ -19,7 +19,6 @@ emulate_rules_scala(<a href="#emulate_rules_scala-scala">scala</a>, <a href="#em
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="emulate_rules_scala-scala"></a>scala |  <p align="center"> - </p>   |  none |
 | <a id="emulate_rules_scala-scalatest"></a>scalatest |  <p align="center"> - </p>   |  none |
 | <a id="emulate_rules_scala-extra_deps"></a>extra_deps |  <p align="center"> - </p>   |  `[]` |
 

@@ -74,7 +74,7 @@ load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains
 scala_repositories()
 load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
 annex_pinned_maven_install()
-scala_register_toolchains()
+scala_register_toolchains(default_scala_toolchain_name = "zinc_3")
 
 load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config", "scalafmt_repositories")
 scalafmt_repositories()

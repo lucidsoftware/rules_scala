@@ -49,7 +49,14 @@ def scala_proto_library_implementation(ctx):
         tools = compiler_inputs,
         input_manifests = input_manifests,
         progress_message = "Compiling %{label} protobuf into Scala source",
-        execution_requirements = _resolve_execution_reqs(ctx, {"supports-workers": supports_workers}),
+        execution_requirements = _resolve_execution_reqs(
+            ctx,
+            {
+                "supports-multiplex-workers": supports_workers,
+                "supports-workers": supports_workers,
+                "supports-multiplex-sandboxing": supports_workers,
+            },
+        ),
         arguments = [args],
     )
 

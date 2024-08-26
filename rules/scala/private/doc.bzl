@@ -62,7 +62,14 @@ def scaladoc_implementation(ctx):
     ctx.actions.run(
         arguments = [args],
         executable = ctx.attr._runner.files_to_run.executable,
-        execution_requirements = _resolve_execution_reqs(ctx, {"supports-workers": "1"}),
+        execution_requirements = _resolve_execution_reqs(
+            ctx,
+            {
+                "supports-multiplex-workers": "1",
+                "supports-workers": "1",
+                "supports-multiplex-sandboxing": "1",
+            },
+        ),
         input_manifests = input_manifests,
         inputs = depset(
             src_jars + srcs + [zinc_configuration.compiler_bridge],

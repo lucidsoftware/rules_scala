@@ -55,7 +55,7 @@ def phase_bootstrap_compile(ctx, g):
             jar_creator = ctx.executable._jar_creator.path,
             main_class = main_class,
             output_jar = g.classpaths.jar.path,
-            scalacopts = " ".join(ctx.attr.scalacopts + g.semanticdb.scalacopts),
+            scalacopts = " ".join(ctx.attr.scalacopts),
             srcs = srcs,
             tmp = tmp.path,
         ),
@@ -65,7 +65,7 @@ def phase_bootstrap_compile(ctx, g):
         inputs = inputs,
         tools = [ctx.executable._jar_creator],
         mnemonic = "BootstrapScalacompile",
-        outputs = [g.classpaths.jar, tmp] + g.semanticdb.outputs,
+        outputs = [g.classpaths.jar, tmp],
         command = command,
         execution_requirements = _resolve_execution_reqs(ctx, {}),
     )

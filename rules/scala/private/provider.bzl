@@ -9,6 +9,7 @@ load(
 load(
     "//rules/private:phases.bzl",
     _phase_bootstrap_compile = "phase_bootstrap_compile",
+    _phase_semanticdb = "phase_semanticdb",
     _phase_zinc_compile = "phase_zinc_compile",
     _phase_zinc_depscheck = "phase_zinc_depscheck",
 )
@@ -58,6 +59,7 @@ def configure_zinc_scala_implementation(ctx):
         ),
         _ScalaRulePhase(
             phases = [
+                ("+", "classpaths", "semanticdb", _phase_semanticdb),
                 ("=", "compile", "compile", _phase_zinc_compile),
                 ("+", "compile", "depscheck", _phase_zinc_depscheck),
             ],

@@ -199,7 +199,7 @@ public class JarHelper {
   protected void copyEntry(JarOutputStream out, String name, Path path) throws IOException {
     if (!names.contains(name)) {
       if (!Files.exists(path)) {
-        throw new FileNotFoundException(path.toAbsolutePath() + " (No such file or directory)");
+        throw new FileNotFoundException(path.toAbsolutePath().normalize() + " (No such file or directory)");
       }
       boolean isDirectory = Files.isDirectory(path);
       if (isDirectory && !name.endsWith("/")) {

@@ -1,17 +1,80 @@
 package higherkindness.rules_scala
 package workers.deps
 
+import common.args.ArgsUtil
+import common.args.ArgsUtil.PathArgumentType
 import common.args.implicits._
 import common.worker.WorkerMain
-
+import common.sandbox.SandboxUtil
+import workers.common.AnnexMapper
+import workers.common.FileUtil
 import java.io.{File, PrintStream}
-import java.nio.file.{FileAlreadyExistsException, Files}
+import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
+import net.sourceforge.argparse4j.inf.Namespace
+import scala.collection.mutable.Buffer
 import scala.jdk.CollectionConverters._
 
 object DepsRunner extends WorkerMain[Unit] {
+
+  private[this] class DepsRunnerRequest private (
+    val checkDirect: Boolean,
+    val checkUsed: Boolean,
+    val directDepLabels: List[String],
+    val groups: List[Group],
+    val label: String,
+    val usedDepWhitelist: List[String],
+    val unusedDepWhitelist: List[String],
+    val usedDepsFile: Path,
+    val successFile: Path,
+  )
+
+  private[this] object DepsRunnerRequest {
+    def apply(workDir: Path, namespace: Namespace): DepsRunnerRequest = {
+      val groups = Option(namespace.getList[java.util.List[String]]("group"))
+        .map(_.asScala)
+        .getOrElse(List.empty)
+        .view
+        .map { group =>
+          group.asScala match {
+            case Buffer(label, jars @ _*) => Group.apply(workDir, label, jars)
+            case _                        => throw new Exception(s"Unexpected case in DepsRunner")
+          }
+        }
+        .toList
+
+      new DepsRunnerRequest(
+        checkDirect = namespace.getBoolean("check_direct"),
+        checkUsed = namespace.getBoolean("check_used"),
+        directDepLabels = namespace.getList[String]("direct").asScala.view.map(_.tail).toList,
+        groups = groups,
+        label = namespace.getString("label").tail,
+        usedDepsFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("used")),
+        usedDepWhitelist = namespace.getList[String]("used_whitelist").asScala.view.map(_.tail).toList,
+        unusedDepWhitelist = namespace.getList[String]("unused_whitelist").asScala.view.map(_.tail).toList,
+        successFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("success")),
+      )
+    }
+  }
+
+  private[this] class Group private (
+    val label: String,
+    val jars: Set[Path],
+  )
+
+  private[this] object Group {
+    def apply(workDir: Path, prependedLabel: String, jars: Seq[String]): Group = {
+      new Group(
+        prependedLabel.tail,
+        jars.view.map { jar =>
+          SandboxUtil.getSandboxPath(workDir, Paths.get(jar))
+        }.toSet,
+      )
+    }
+  }
+
   private[this] val argParser = {
     val parser = ArgumentParsers.newFor("deps").addHelp(true).fromFilePrefix("@").build
     parser.addArgument("--check_direct").`type`(Arguments.booleanType)
@@ -41,72 +104,80 @@ object DepsRunner extends WorkerMain[Unit] {
       .metavar("label")
       .nargs("*")
       .setDefault_(Collections.emptyList)
-    parser.addArgument("used").help("Manifest of used").`type`(Arguments.fileType.verifyCanRead().verifyIsFile())
-    parser.addArgument("success").help("Success file").`type`(Arguments.fileType.verifyCanCreate())
+    parser.addArgument("used").help("Manifest of used").`type`(PathArgumentType.apply())
+    parser.addArgument("success").help("Success file").`type`(PathArgumentType.apply())
     parser
   }
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
-    val namespace = argParser.parseArgs(args)
+  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
+    val workRequest = DepsRunnerRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
 
-    val label = namespace.getString("label").tail
-    val directLabels = namespace.getList[String]("direct").asScala.map(_.tail).toList
-    val groups = Option(namespace.getList[java.util.List[String]]("group"))
-      .fold[Seq[List[String]]](Nil)(_.asScala.toSeq.map(_.asScala.toList))
-      .map {
-        case label +: jars => label.tail -> jars.toSet
-        case _             => throw new Exception(s"Unexpected case in DepsRunner")
-      }
-    val labelToPaths = groups.toMap
-    def pathsForLabel(depLabel: String): Seq[String] = {
+    val groupLabelToJarPaths = workRequest.groups.map { group =>
+      // Use absolute path because the read mapper uses absolute path.
+      group.label -> group.jars.map(_.toAbsolutePath().normalize().toString())
+    }.toMap
+    def pathsForLabel(depLabel: String): List[String] = {
       // A label could have no @ prefix, a single @ prefix, or a double @@ prefix.
       // In an ideal world, the label we see here would always match the label in
       // the --group, but that's not always the case. So we need to be able to handle
       // moving from any of the forms to any of the other forms.
       val potentialLabels = if (depLabel.startsWith("@@")) {
-        Seq(depLabel.stripPrefix("@@"), depLabel.stripPrefix("@"), depLabel)
+        List(depLabel.stripPrefix("@@"), depLabel.stripPrefix("@"), depLabel)
       } else if (depLabel.startsWith("@")) {
-        Seq(depLabel.stripPrefix("@"), depLabel, s"@${depLabel}")
+        List(depLabel.stripPrefix("@"), depLabel, s"@${depLabel}")
       } else {
-        Seq(depLabel, s"@${depLabel}", s"@@${depLabel}")
+        List(depLabel, s"@${depLabel}", s"@@${depLabel}")
       }
 
-      potentialLabels.collect(labelToPaths).flatten
+      potentialLabels.collect(groupLabelToJarPaths).flatten
     }
-    val usedPaths = Files.readAllLines(namespace.get[File]("used").toPath).asScala.toSet
-
-    val remove = if (namespace.getBoolean("check_used") == true) {
-      val usedWhitelist = namespace.getList[String]("used_whitelist").asScala.map(_.tail).toList
-      directLabels
-        .diff(usedWhitelist)
+    val readWriteMappers = AnnexMapper.mappers(workDir, isIncremental = false)
+    val readMapper = readWriteMappers.getReadMapper()
+    val usedPaths = Files
+      .readAllLines(workRequest.usedDepsFile)
+      .asScala
+      .view
+      // Use the read mapper on the used classpath entries in order to keep
+      // comparisons consistent.
+      .map { usedDep =>
+        readMapper.mapClasspathEntry(Paths.get(usedDep)).toString
+      }
+      .toSet
+    val labelsToRemove = if (workRequest.checkUsed) {
+      workRequest.directDepLabels
+        .diff(workRequest.usedDepWhitelist)
         .filterNot(label => pathsForLabel(label).exists(usedPaths))
-    } else Nil
-    remove.foreach { depLabel =>
+    } else {
+      Nil
+    }
+    labelsToRemove.foreach { depLabel =>
       out.println(s"Target '$depLabel' not used, please remove it from the deps.")
       out.println(s"You can use the following buildozer command:")
-      out.println(s"buildozer 'remove deps $depLabel' $label")
+      out.println(s"buildozer 'remove deps $depLabel' ${workRequest.label}")
     }
 
-    val add = if (namespace.getBoolean("check_direct") == true) {
-      val unusedWhitelist = namespace.getList[String]("unused_whitelist").asScala.map(_.tail).toList
-      (usedPaths -- (directLabels :++ unusedWhitelist).flatMap(pathsForLabel))
+    val labelsToAdd = if (workRequest.checkDirect) {
+      (usedPaths -- (workRequest.directDepLabels :++ workRequest.unusedDepWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
-          groups.collectFirst { case (myLabel, paths) if paths(path) => myLabel }.orElse {
-            System.err.println(s"Warning: There is a reference to $path, but no dependency of $label provides it")
+          groupLabelToJarPaths.collectFirst { case (myLabel, paths) if paths(path) => myLabel }.orElse {
+            System.err
+              .println(s"Warning: There is a reference to $path, but no dependency of ${workRequest.label} provides it")
             None
           }
         }
-    } else Nil
-    add.foreach { depLabel =>
+    } else {
+      Nil
+    }
+    labelsToAdd.foreach { depLabel =>
       out.println(s"Target '$depLabel' is used but isn't explicitly declared, please add it to the deps.")
       out.println(s"You can use the following buildozer command:")
-      out.println(s"buildozer 'add deps $depLabel' $label")
+      out.println(s"buildozer 'add deps $depLabel' ${workRequest.label}")
     }
 
-    if (add.isEmpty && remove.isEmpty) {
-      try Files.createFile(namespace.get[File]("success").toPath)
+    if (labelsToAdd.isEmpty && labelsToRemove.isEmpty) {
+      try Files.createFile(workRequest.successFile)
       catch { case _: FileAlreadyExistsException => }
     }
 

@@ -44,7 +44,14 @@ def phase_coverage_jacoco(ctx, g):
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
         executable = code_coverage_configuration.instrumentation_worker.files_to_run.executable,
         input_manifests = worker_input_manifests,
-        execution_requirements = _resolve_execution_reqs(ctx, {"supports-workers": "1"}),
+        execution_requirements = _resolve_execution_reqs(
+            ctx,
+            {
+                "supports-multiplex-workers": "1",
+                "supports-workers": "1",
+                "supports-multiplex-sandboxing": "1",
+            },
+        ),
         arguments = [args],
     )
 

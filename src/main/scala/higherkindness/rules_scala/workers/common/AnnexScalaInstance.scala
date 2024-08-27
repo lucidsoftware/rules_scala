@@ -4,13 +4,27 @@ package workers.common
 import xsbti.compile.ScalaInstance
 import java.io.File
 import java.net.URLClassLoader
+import java.nio.file.{Files, Path, Paths}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
+import scala.collection.immutable.Map
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
   private val instanceCache: ConcurrentHashMap[String, AnnexScalaInstance] =
     new ConcurrentHashMap[String, AnnexScalaInstance]()
+
+  /**
+   * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
+   * worker. Otherwise just create the AnnexScalaInstance and be done with it because the process won't be long lived.
+   */
+  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean): AnnexScalaInstance = {
+    if (isWorker) {
+      getAnnexScalaInstance(allJars, workDir)
+    } else {
+      new AnnexScalaInstance(allJars)
+    }
+  }
 
   /**
    * Given a set of jars, get back an AnnexScalaInstance for those jars. If an instance for those jars is already stored
@@ -52,11 +66,46 @@ object AnnexScalaInstance {
    * Using this cache and the Scala compiler cache, but disabling Zinc's classloader cache works, but doesn't seem to be
    * any different from leaving Zinc's cache enabled.
    */
-  def getAnnexScalaInstance(allJars: Array[File]): AnnexScalaInstance = {
-    val key = allJars.map(_.getCanonicalPath).mkString(":")
+  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
+    // We need to remove the sandbox prefix from the paths in order to compare them.
+    val mapBuilder = Map.newBuilder[Path, Path]
+    allJars.foreach { jar =>
+      val comparableJarPath = jar.toPath().toAbsolutePath().normalize()
+      mapBuilder.addOne(jar.toPath -> workDir.toAbsolutePath().normalize().relativize(comparableJarPath))
+    }
+    val workRequestJarToWorkerJar = mapBuilder.result()
+
+    // Because we're just using file names here, theres's a problem  if the contents of the jars
+    // on the classpath for a particular version of the compiler change and we already have a
+    // ScalaInstance created and cached for the filenames on that classpath. In that case we'll use
+    // the cached ScalaInstance rather than create a new one.
+    //
+    // We could get around this problem by hashing all the jars and using that as the cache key,
+    // but that would require hashing the all the classpath jars on every compilation request. I
+    // imagine that would cause a performance hit.
+    //
+    // I also imagine it is extremeley rare to be mutating the contents of compiler classpath jars
+    // while keeping the names the same, e.g., generating new scala library jar for scala 2.13.14.
+    // As a result I'm leaving this string based for now.
+    val key = workRequestJarToWorkerJar.values.mkString(":")
 
     Option(instanceCache.get(key)).getOrElse {
-      val instance = new AnnexScalaInstance(allJars)
+      // Copy all the jars to the worker's directory because in a sandboxed world the
+      // jars can go away after the work request, so we can't rely on them sticking around.
+      // This should only happen once per compiler version, so it shouldn't happen often.
+      workRequestJarToWorkerJar.foreach { case (workRequestJar, workerJar) =>
+        this.synchronized {
+          // Check for existence of the file just in case another request is also writing these jars
+          // Copying a file is not atomic, so we don't want to end up in a funky state where two
+          // copies of the same file happen at the same time and cause something bad to happen.
+          if (!Files.exists(workerJar)) {
+            Files.createDirectories(workerJar.getParent())
+            Files.copy(workRequestJar, workerJar)
+          }
+        }
+      }
+
+      val instance = new AnnexScalaInstance(Array.from(workRequestJarToWorkerJar.values.map(_.toFile())))
       val instanceInsertedByOtherThreadOrNull = instanceCache.putIfAbsent(key, instance)
 
       // putIfAbsent is atomic, but there exists time between the get and the putIfAbsent.

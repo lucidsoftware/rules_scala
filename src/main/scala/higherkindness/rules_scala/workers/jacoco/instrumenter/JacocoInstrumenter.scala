@@ -1,6 +1,9 @@
 package higherkindness.rules_scala
 package workers.jacoco.instrumenter
 
+import common.args.ArgsUtil
+import common.error.AnnexWorkerError
+import common.sandbox.SandboxUtil
 import common.worker.WorkerMain
 import java.io.{BufferedInputStream, BufferedOutputStream, PrintStream}
 import java.net.URI
@@ -15,13 +18,42 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.Collections
 import java.util.{List => JList}
 import net.sourceforge.argparse4j.ArgumentParsers
+import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import net.sourceforge.argparse4j.impl.Arguments
 import org.jacoco.core.instr.Instrumenter
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator
 import scala.jdk.CollectionConverters._
 
 object JacocoInstrumenter extends WorkerMain[Unit] {
-  private[this] val argParser = {
+
+  private[this] class JacocoRequest private (
+    val jars: List[(Path, Path)],
+  )
+
+  private[this] object JacocoRequest {
+    def apply(workDir: Path, namespace: Namespace): JacocoRequest = {
+      val pathPairs = namespace
+        .getList[JList[String]]("jar")
+        .asScala
+        .flatMap(_.asScala)
+        .map(other =>
+          other.split("=") match {
+            case Array(in, out) =>
+              (
+                SandboxUtil.getSandboxPath(workDir, Paths.get(in)),
+                SandboxUtil.getSandboxPath(workDir, Paths.get(out)),
+              )
+            case _ =>
+              throw new AnnexWorkerError(1, "expected input=output for argument: " + other)
+          },
+        )
+        .toList
+
+      new JacocoRequest(jars = pathPairs)
+    }
+  }
+
+  private[this] val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("jacoco-instrumenter").addHelp(true).fromFilePrefix("@").build
     parser
       .addArgument("--jar")
@@ -34,25 +66,12 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream): Unit = {
-    val namespace = argParser.parseArgs(args)
-
-    val pathPairs: List[(Path, Path)] = namespace
-      .getList[JList[String]]("jar")
-      .asScala
-      .flatMap(_.asScala)
-      .map(other =>
-        other.split("=") match {
-          case Array(in, out) => (Paths.get(in), Paths.get(out))
-          case _ =>
-            sys.error("expected input=output for argument: " + other)
-        },
-      )
-      .toList
+  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
+    val workRequest = JacocoRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
 
     val jacoco = new Instrumenter(new OfflineInstrumentationAccessGenerator)
 
-    pathPairs.foreach { case (inPath, outPath) =>
+    workRequest.jars.foreach { case (inPath, outPath) =>
       val inFS = FileSystems.newFileSystem(inPath, null: ClassLoader)
       val outFS =
         FileSystems.newFileSystem(URI.create("jar:" + outPath.toUri), Collections.singletonMap("create", "true"))

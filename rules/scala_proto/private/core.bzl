@@ -55,6 +55,7 @@ def scala_proto_library_implementation(ctx):
                 "supports-multiplex-workers": supports_workers,
                 "supports-workers": supports_workers,
                 "supports-multiplex-sandboxing": supports_workers,
+                "supports-worker-cancellation": supports_workers,
             },
         ),
         arguments = [args],

@@ -2,6 +2,7 @@ package annex.scalafmt
 
 import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import higherkindness.rules_scala.common.worker.WorkerMain
 import higherkindness.rules_scala.workers.common.Color
@@ -46,12 +47,14 @@ object ScalafmtRunner extends WorkerMain[Unit] {
 
   protected[this] def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
     val workRequest = ScalafmtRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
+    InterruptUtil.throwIfInterrupted()
 
     val source = FileOps.readFile(workRequest.inputFile)(Codec.UTF8)
 
     val config = ScalafmtConfig.fromHoconFile(workRequest.configFile).get
     @tailrec
     def format(code: String): String = {
+      InterruptUtil.throwIfInterrupted()
       val formatted = Scalafmt.format(code, config).get
       if (code == formatted) code else format(formatted)
     }
@@ -73,6 +76,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
       }
 
     Files.write(workRequest.outputFile, output.getBytes)
+    InterruptUtil.throwIfInterrupted()
   }
 
 }

@@ -56,6 +56,7 @@ def build_format(ctx):
                         "supports-multiplex-workers": "1",
                         "supports-workers": "1",
                         "supports-multiplex-sandboxing": "1",
+                        "supports-worker-cancellation": "1",
                     },
                 ),
                 mnemonic = "ScalaFmt",

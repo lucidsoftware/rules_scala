@@ -3,6 +3,7 @@ package annex.scala.proto
 import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits._
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import higherkindness.rules_scala.common.worker.WorkerMain
@@ -65,6 +66,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
   protected def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
     val workRequest = ScalaProtoRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
+    InterruptUtil.throwIfInterrupted()
 
     val scalaOut = workRequest.outputDir
     Files.createDirectories(scalaOut)
@@ -83,6 +85,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
       }
     }
 
+    InterruptUtil.throwIfInterrupted()
     val exitCode = ProtocBridge.runWithGenerators(
       new MyProtocRunner,
       namedGenerators = List("scala" -> ScalaPbCodeGenerator),
@@ -91,6 +94,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
     if (exitCode != 0) {
       throw new AnnexWorkerError(exitCode)
     }
+    InterruptUtil.throwIfInterrupted()
   }
 
 }

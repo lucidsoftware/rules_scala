@@ -2,6 +2,7 @@ package higherkindness.rules_scala
 package workers.zinc.compile
 
 import common.args.ArgsUtil
+import common.interrupt.InterruptUtil
 import common.error.AnnexWorkerError
 import common.worker.WorkerMain
 import workers.common.{AnalysisUtil, AnnexLogger, AnnexMapper, AnnexScalaInstance, CommonArguments, FileUtil, LoggedReporter}
@@ -107,6 +108,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     workDir: Path,
   ): Unit = {
     val workRequest = CommonArguments(ArgsUtil.parseArgsOrFailSafe(args, parser, out), workDir)
+    InterruptUtil.throwIfInterrupted()
 
     // These two paths must only be used when persistence is enabled because they escape the sandbox.
     // Sandboxing is disabled if persistence is enabled.
@@ -153,6 +155,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       }
       Dep.create(extractedFileCache, workRequest.classpath, analyses)
     }
+    InterruptUtil.throwIfInterrupted()
 
     val debug = workRequest.debug
     val analysisStorePath = workRequest.outputAnalysisStore
@@ -274,6 +277,8 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     val inputs = Inputs.of(compilers, compileOptions, setup, previousResult)
 
+    InterruptUtil.throwIfInterrupted()
+
     // compile
     val incrementalCompiler = new IncrementalCompilerImpl()
     val compileResult =
@@ -292,6 +297,8 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
           throw new Error("StackOverflowError", e)
         }
       }
+
+    InterruptUtil.throwIfInterrupted()
 
     // create analyses
     val pathString = analysisStorePath.toAbsolutePath().normalize().toString()
@@ -372,6 +379,8 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     // clear temporary files
     FileUtil.delete(tmpDir)
     Files.createDirectory(tmpDir)
+
+    InterruptUtil.throwIfInterrupted()
   }
 }
 

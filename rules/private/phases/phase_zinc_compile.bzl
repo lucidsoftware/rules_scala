@@ -86,6 +86,7 @@ def phase_zinc_compile(ctx, g):
         "supports-multiplex-workers": "1",
         "supports-workers": "1",
         "supports-multiplex-sandboxing": "1",
+        "supports-worker-cancellation": "1",
     }
 
     # Disable several things if incremental compilation features are going to be used

@@ -68,6 +68,7 @@ def scaladoc_implementation(ctx):
                 "supports-multiplex-workers": "1",
                 "supports-workers": "1",
                 "supports-multiplex-sandboxing": "1",
+                "supports-worker-cancellation": "1",
             },
         ),
         input_manifests = input_manifests,

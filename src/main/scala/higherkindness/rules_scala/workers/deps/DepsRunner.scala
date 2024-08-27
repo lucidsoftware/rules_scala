@@ -4,6 +4,7 @@ package workers.deps
 import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
 import common.args.implicits._
+import common.interrupt.InterruptUtil
 import common.worker.WorkerMain
 import common.sandbox.SandboxUtil
 import workers.common.AnnexMapper
@@ -113,6 +114,7 @@ object DepsRunner extends WorkerMain[Unit] {
 
   override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
     val workRequest = DepsRunnerRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
+    InterruptUtil.throwIfInterrupted()
 
     val groupLabelToJarPaths = workRequest.groups.map { group =>
       // Use absolute path because the read mapper uses absolute path.
@@ -135,6 +137,8 @@ object DepsRunner extends WorkerMain[Unit] {
     }
     val readWriteMappers = AnnexMapper.mappers(workDir, isIncremental = false)
     val readMapper = readWriteMappers.getReadMapper()
+
+    InterruptUtil.throwIfInterrupted()
     val usedPaths = Files
       .readAllLines(workRequest.usedDepsFile)
       .asScala
@@ -158,6 +162,7 @@ object DepsRunner extends WorkerMain[Unit] {
       out.println(s"buildozer 'remove deps $depLabel' ${workRequest.label}")
     }
 
+    InterruptUtil.throwIfInterrupted()
     val labelsToAdd = if (workRequest.checkDirect) {
       (usedPaths -- (workRequest.directDepLabels :++ workRequest.unusedDepWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
@@ -180,6 +185,6 @@ object DepsRunner extends WorkerMain[Unit] {
       try Files.createFile(workRequest.successFile)
       catch { case _: FileAlreadyExistsException => }
     }
-
+    InterruptUtil.throwIfInterrupted()
   }
 }

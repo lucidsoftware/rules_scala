@@ -484,12 +484,7 @@ Generates Scaladocs.
 
 configure_bootstrap_scala = rule(
     attrs = {
-        "version": attr.string(mandatory = True),
         "compiler_classpath": attr.label_list(
-            mandatory = True,
-            providers = [JavaInfo],
-        ),
-        "runtime_classpath": attr.label_list(
             mandatory = True,
             providers = [JavaInfo],
         ),
@@ -500,29 +495,35 @@ configure_bootstrap_scala = rule(
         "global_scalacopts": attr.string_list(
             doc = "Scalac options that will always be enabled.",
         ),
+        "runtime_classpath": attr.label_list(
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "semanticdb_bundle": attr.bool(
+            default = True,
+            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
+        ),
         "use_ijar": attr.bool(
             doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
+        "version": attr.string(mandatory = True),
     },
     implementation = _configure_bootstrap_scala_implementation,
 )
 
 _configure_zinc_scala = rule(
     attrs = {
-        "version": attr.string(mandatory = True),
-        "runtime_classpath": attr.label_list(
+        "compiler_bridge": attr.label(
+            allow_single_file = True,
             mandatory = True,
-            providers = [JavaInfo],
         ),
         "compiler_classpath": attr.label_list(
             mandatory = True,
             providers = [JavaInfo],
         ),
-        "compiler_bridge": attr.label(
-            allow_single_file = True,
-            mandatory = True,
-        ),
+        "deps_direct": attr.string(default = "error"),
+        "deps_used": attr.string(default = "error"),
         "global_plugins": attr.label_list(
             doc = "Scalac plugins that will always be enabled.",
             providers = [JavaInfo],
@@ -530,19 +531,32 @@ _configure_zinc_scala = rule(
         "global_scalacopts": attr.string_list(
             doc = "Scalac options that will always be enabled.",
         ),
+        "incremental": attr.bool(
+            doc = "Whether Zinc's incremental compilation will be available for this Zinc compiler. If True, this requires additional configuration to use incremental compilation.",
+            default = False,
+        ),
         "log_level": attr.string(
             doc = "Compiler log level",
             default = "warn",
+        ),
+        "runtime_classpath": attr.label_list(
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "semanticdb_bundle": attr.bool(
+            default = True,
+            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
         ),
         "use_ijar": attr.bool(
             doc = "Whether to use ijars for this compiler.",
             default = True,
         ),
-        "deps_direct": attr.string(default = "error"),
-        "deps_used": attr.string(default = "error"),
-        "incremental": attr.bool(
-            doc = "Whether Zinc's incremental compilation will be available for this Zinc compiler. If True, this requires additional configuration to use incremental compilation.",
-            default = False,
+        "version": attr.string(mandatory = True),
+        "_code_coverage_instrumentation_worker": attr.label(
+            default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/jacoco/instrumenter",
+            allow_files = True,
+            executable = True,
+            cfg = "host",
         ),
         "_compile_worker": attr.label(
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/compile",
@@ -552,12 +566,6 @@ _configure_zinc_scala = rule(
         ),
         "_deps_worker": attr.label(
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/deps",
-            allow_files = True,
-            executable = True,
-            cfg = "host",
-        ),
-        "_code_coverage_instrumentation_worker": attr.label(
-            default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/jacoco/instrumenter",
             allow_files = True,
             executable = True,
             cfg = "host",

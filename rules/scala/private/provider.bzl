@@ -9,6 +9,7 @@ load(
 load(
     "//rules/private:phases.bzl",
     _phase_bootstrap_compile = "phase_bootstrap_compile",
+    _phase_semanticdb = "phase_semanticdb",
     _phase_zinc_compile = "phase_zinc_compile",
     _phase_zinc_depscheck = "phase_zinc_depscheck",
 )
@@ -20,8 +21,9 @@ def configure_bootstrap_scala_implementation(ctx):
             global_plugins = ctx.attr.global_plugins,
             global_scalacopts = ctx.attr.global_scalacopts,
             runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
+            semanticdb_bundle = ctx.attr.semanticdb_bundle,
             use_ijar = ctx.attr.use_ijar,
+            version = ctx.attr.version,
         ),
         _ScalaRulePhase(
             phases = [
@@ -37,8 +39,9 @@ def configure_zinc_scala_implementation(ctx):
             global_plugins = ctx.attr.global_plugins,
             global_scalacopts = ctx.attr.global_scalacopts,
             runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
+            semanticdb_bundle = ctx.attr.semanticdb_bundle,
             use_ijar = ctx.attr.use_ijar,
+            version = ctx.attr.version,
         ),
         _CodeCoverageConfiguration(
             instrumentation_worker = ctx.attr._code_coverage_instrumentation_worker,
@@ -56,6 +59,7 @@ def configure_zinc_scala_implementation(ctx):
         ),
         _ScalaRulePhase(
             phases = [
+                ("+", "classpaths", "semanticdb", _phase_semanticdb),
                 ("=", "compile", "compile", _phase_zinc_compile),
                 ("+", "compile", "depscheck", _phase_zinc_depscheck),
             ],

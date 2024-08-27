@@ -11,6 +11,7 @@ load(":phases/phase_library_defaultinfo.bzl", _phase_library_defaultinfo = "phas
 load(":phases/phase_noop.bzl", _phase_noop = "phase_noop")
 load(":phases/phase_resources.bzl", _phase_resources = "phase_resources")
 load(":phases/phase_scalafmt_nondefault_outputs.bzl", _phase_scalafmt_nondefault_outputs = "phase_scalafmt_nondefault_outputs")
+load(":phases/phase_semanticdb.bzl", _phase_semanticdb = "phase_semanticdb")
 load(":phases/phase_singlejar.bzl", _phase_singlejar = "phase_singlejar")
 load(":phases/phase_test_launcher.bzl", _phase_test_launcher = "phase_test_launcher")
 load(":phases/phase_zinc_compile.bzl", _phase_zinc_compile = "phase_zinc_compile")
@@ -19,6 +20,10 @@ load(":phases/phase_zinc_depscheck.bzl", _phase_zinc_depscheck = "phase_zinc_dep
 adjust_phases = _adjust_phases
 
 run_phases = _run_phases
+
+phase_binary_deployjar = _phase_binary_deployjar
+
+phase_binary_launcher = _phase_binary_launcher
 
 phase_bootstrap_compile = _phase_bootstrap_compile
 
@@ -30,24 +35,22 @@ phase_coverage_jacoco = _phase_coverage_jacoco
 
 phase_ijinfo = _phase_ijinfo
 
-phase_noop = _phase_noop
-
-phase_resources = _phase_resources
-
-phase_zinc_compile = _phase_zinc_compile
-
-phase_zinc_depscheck = _phase_zinc_depscheck
-
 phase_javainfo = _phase_javainfo
 
 phase_library_defaultinfo = _phase_library_defaultinfo
 
-phase_singlejar = _phase_singlejar
+phase_noop = _phase_noop
 
-phase_binary_deployjar = _phase_binary_deployjar
-
-phase_binary_launcher = _phase_binary_launcher
+phase_resources = _phase_resources
 
 phase_scalafmt_nondefault_outputs = _phase_scalafmt_nondefault_outputs
 
+phase_semanticdb = _phase_semanticdb
+
+phase_singlejar = _phase_singlejar
+
 phase_test_launcher = _phase_test_launcher
+
+phase_zinc_compile = _phase_zinc_compile
+
+phase_zinc_depscheck = _phase_zinc_depscheck

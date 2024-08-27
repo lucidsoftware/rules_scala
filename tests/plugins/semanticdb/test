@@ -1,0 +1,18 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+check_for_semanticdb_files() {
+	for filename in "A.scala.semanticdb" "B.scala.semanticdb"; do
+		path="../../bazel-bin/plugins/semanticdb/_semanticdb/semanticdb-$1/META-INF/semanticdb/plugins/semanticdb/$filename"
+
+		if [ ! -f "$path" ]; then
+			echo "Error: $path doesn't exist"
+			exit 1
+		fi
+	done
+}
+
+bazel build :semanticdb-2_13
+check_for_semanticdb_files 2_13
+bazel build :semanticdb-3
+check_for_semanticdb_files '3'

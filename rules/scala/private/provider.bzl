@@ -59,8 +59,8 @@ def configure_zinc_scala_implementation(ctx):
         ),
         _ScalaRulePhase(
             phases = [
-                ("+", "classpaths", "semanticdb", _phase_semanticdb),
                 ("=", "compile", "compile", _phase_zinc_compile),
+                ("-", "compile", "semanticdb", _phase_semanticdb),
                 ("+", "compile", "depscheck", _phase_zinc_depscheck),
             ],
         ),

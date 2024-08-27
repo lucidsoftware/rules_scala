@@ -49,6 +49,19 @@ object Analysis {
 }
 
 object CommonArguments {
+  private def adjustCompilerOptions(workDir: Path, options: List[String]) = {
+    def adjustStringPath(path: String) = SandboxUtil.getSandboxPath(workDir, Paths.get(path)).toString
+
+    options.flatMap {
+      case s"-P:semanticdb:targetroot:$path" =>
+        List(s"-P:semanticdb:sourceroot:${workDir.toString}", s"-P:semanticdb:targetroot:${adjustStringPath(path)}")
+
+      case s"-semanticdb-target:$path" =>
+        List(s"-semanticdb-target:${adjustStringPath(path)}", s"-sourceroot:${workDir.toString}")
+
+      case option => List(option)
+    }
+  }
 
   /**
    * Adds argument parsers for CommonArguments to the given ArgumentParser and then returns the mutated ArgumentParser.
@@ -178,8 +191,10 @@ object CommonArguments {
       analyses = analyses,
       compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
       compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
-      compilerOptions =
+      compilerOptions = adjustCompilerOptions(
+        workDir,
         Option(namespace.getList[String]("compiler_option")).map(_.asScala.toList).getOrElse(List.empty),
+      ),
       classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
       debug = namespace.getBoolean("debug"),
       javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toList,

@@ -52,7 +52,7 @@ register_zinc_toolchain(
 scala_library(
     name = "scala-sdk",
     deps_used_whitelist = compiler_classpath_2_13,
-    scala_toolchain_name = ":zinc_3",
+    scala_toolchain_name = "zinc_3",
     deps = compiler_classpath_2_13,
 )
 

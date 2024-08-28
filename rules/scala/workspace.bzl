@@ -12,7 +12,7 @@ filegroup(
 
 scala_2_13_version = "2.13.14"
 scala_3_version = "3.4.2"
-zinc_version = "1.10.0"
+zinc_version = "1.10.1"
 
 def scala_artifacts():
     return [
@@ -24,7 +24,7 @@ def scala_artifacts():
         "org.jacoco:org.jacoco.core:0.7.5.201505241946",
         "org.scala-sbt:test-interface:1.0",
         "org.scala-sbt:compiler-interface:{}".format(zinc_version),
-        "org.scala-sbt:io_2.13:{}".format(zinc_version),
+        "org.scala-sbt:io_2.13:1.10.0",
         "org.scala-sbt:util-interface:{}".format(zinc_version),
         "org.scala-sbt:util-logging_2.13:{}".format(zinc_version),
         "org.scala-sbt:zinc_2.13:{}".format(zinc_version),

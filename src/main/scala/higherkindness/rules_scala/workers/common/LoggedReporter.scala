@@ -2,18 +2,18 @@ package higherkindness.rules_scala
 package workers.common
 
 import xsbti.{Logger, Problem}
-import sbt.internal.inc.{LoggedReporter => SbtLoggedReporter}
+import sbt.internal.inc.{LoggedReporter => SbtLoggedReporter, ProblemStringFormats}
 
 class LoggedReporter(logger: Logger, versionString: String) extends SbtLoggedReporter(0, logger) {
-  // Scala 3 has great error messages, let's leave those alone, but still add color to the Scala 2 messages
-  val shouldEnhanceMessage = if (versionString.startsWith("0.") || versionString.startsWith("3")) false else true
+  private val problemStringFormats = new ProblemStringFormats {}
 
-  def doLog(problem: Problem, colorFunc: Problem => String): String = {
-    if (shouldEnhanceMessage) {
-      colorFunc(problem)
-    } else {
-      problem.rendered().orElse(problem.toString)
-    }
+  // Scala 3 has great error messages, let's leave those alone, but still add color to the Scala 2 messages
+  private val shouldEnhanceMessage = !versionString.startsWith("0.") && !versionString.startsWith("3")
+
+  private def doLog(problem: Problem, colorFunction: String => String): String = {
+    val formattedProblem = problemStringFormats.ProblemStringFormat.showLines(problem).mkString("\n")
+
+    if (shouldEnhanceMessage) colorFunction(formattedProblem) else formattedProblem
   }
 
   override protected def logError(problem: Problem): Unit = {

@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+"""
+This test is written in Python because Bash makes it unnecessarily difficult to check that the output of a command
+includes a multiline string.
+"""
+
+import os
+import subprocess
+
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+def output_from_failed_build(target: str) -> str:
+    result = subprocess.run(["bazel", "build", target], stderr=subprocess.PIPE, text=True)
+
+    assert result.returncode != 0
+
+    return result.stderr
+
+def string_must_contain(string: str, expected_substring: str):
+    if expected_substring not in string:
+        print(f'Expected """{string}""" to contain """{expected_substring}"""')
+
+        assert False
+
+string_must_contain(
+    output_from_failed_build(":error_reporting_2_13"),
+    """\
+[\x1b[31mError\x1b[0m] zinc/ErrorReporting.scala:4:65: type mismatch;
+[\x1b[31mError\x1b[0m]  found   : Seq[String]
+[\x1b[31mError\x1b[0m]  required: List[String]
+[\x1b[31mError\x1b[0m]   def main(arguments: Array[String]): Unit = printZooAnimals(Seq("kangaroos", "giraffes"))
+[\x1b[31mError\x1b[0m]                                                                 ^
+one error found
+"""
+)
+
+string_must_contain(
+    output_from_failed_build(":error_reporting_bootstrap_3"),
+    """\
+\x1b[31m\x1b[31m-- [E007] Type Mismatch Error: zinc/ErrorReporting.scala:4:64 ------------------\x1b[0m\x1b[0m
+\x1b[31m4 |\x1b[0m  \x1b[33mdef\x1b[0m \x1b[36mmain\x1b[0m(\x1b[36marguments\x1b[0m: \x1b[35mArray\x1b[0m[\x1b[35mString\x1b[0m]): \x1b[35mUnit\x1b[0m = printZooAnimals(Seq(\x1b[31m"kangaroos"\x1b[0m, \x1b[31m"giraffes"\x1b[0m))
+\x1b[31m\x1b[31m  |\x1b[0m                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\x1b[0m
+\x1b[31m  |\x1b[0m                                                    Found:    \x1b[1m\x1b[31mSeq\x1b[0m[String]
+\x1b[31m  |\x1b[0m                                                    Required: \x1b[1m\x1b[32mList\x1b[0m[String]
+\x1b[31m  |\x1b[0m
+\x1b[31m  |\x1b[0m longer explanation available when compiling with `-explain`
+1 error found
+"""
+)
+
+string_must_contain(
+    output_from_failed_build(":error_reporting_zinc_3"),
+    """\
+\x1b[31m\x1b[31m-- [E007] Type Mismatch Error: zinc/ErrorReporting.scala:4:64 \x1b[0m\x1b[0m
+\x1b[31m4 |\x1b[0m  \x1b[33mdef\x1b[0m \x1b[36mmain\x1b[0m(\x1b[36marguments\x1b[0m: \x1b[35mArray\x1b[0m[\x1b[35mString\x1b[0m]): \x1b[35mUnit\x1b[0m = printZooAnimals(Seq(\x1b[31m"kangaroos"\x1b[0m, \x1b[31m"giraffes"\x1b[0m))
+\x1b[31m\x1b[31m  |\x1b[0m                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\x1b[0m
+\x1b[31m  |\x1b[0m                                                    Found:    \x1b[1m\x1b[31mSeq\x1b[0m[String]
+\x1b[31m  |\x1b[0m                                                    Required: \x1b[1m\x1b[32mList\x1b[0m[String]
+\x1b[31m  |\x1b[0m
+\x1b[31m  |\x1b[0m longer explanation available when compiling with `-explain`
+one error found
+"""
+)

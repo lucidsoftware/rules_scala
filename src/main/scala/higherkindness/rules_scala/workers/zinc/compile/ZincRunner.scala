@@ -52,14 +52,12 @@ object ZincRunnerWorkerConfig {
   }
 }
 
-// The list in this docstring gets clobbered by the formatter, unfortunately.
-//format: off
 /**
  * <strong>Caching</strong>
  *
  * Zinc has two caches:
  *   1. a ClassLoaderCache which is a soft reference cache for classloaders of Scala compilers.
- *   2. a CompilerCache which is a hard reference cache for (I think) Scala compiler instances.
+ *   1. a CompilerCache which is a hard reference cache for (I think) Scala compiler instances.
  *
  * The CompilerCache has reproducibility issues, so it needs to be a no-op. The ClassLoaderCache needs to be reused else
  * JIT reuse (i.e. the point of the worker strategy) doesn't happen.
@@ -75,7 +73,6 @@ object ZincRunnerWorkerConfig {
  * that Zinc caches. We do so to prevent non-determinism in Zinc's analysis store files. Check the comments in
  * AnnexScalaInstance for more info.
  */
- //format: on
 object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
   private[this] val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))

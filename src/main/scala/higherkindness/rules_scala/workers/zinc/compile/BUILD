@@ -12,6 +12,7 @@ scala_binary(
     ],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/error",
+        "//src/main/scala/higherkindness/rules_scala/common/interrupt",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "//src/main/scala/higherkindness/rules_scala/workers/common",
         "//third_party/bazel/src/java_tools/buildjar/java/com/google/devtools/build/buildjar/jarhelper",

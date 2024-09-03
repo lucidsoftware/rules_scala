@@ -8,6 +8,7 @@ scala_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",
+        "//src/main/scala/higherkindness/rules_scala/common/interrupt",
         "//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "//src/main/scala/higherkindness/rules_scala/workers/common",

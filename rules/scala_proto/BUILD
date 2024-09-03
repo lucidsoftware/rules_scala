@@ -21,6 +21,7 @@ scala_binary(
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",
         "//src/main/scala/higherkindness/rules_scala/common/error",
+        "//src/main/scala/higherkindness/rules_scala/common/interrupt",
         "//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "@annex//:net_sourceforge_argparse4j_argparse4j",

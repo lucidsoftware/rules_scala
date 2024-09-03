@@ -4,6 +4,7 @@ package workers.zinc.doc
 import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
 import common.args.implicits._
+import common.interrupt.InterruptUtil
 import common.worker.WorkerMain
 import common.sandbox.SandboxUtil
 import workers.common.{AnnexLogger, AnnexScalaInstance, FileUtil, LogLevel, LoggedReporter}
@@ -116,6 +117,7 @@ object DocRunner extends WorkerMain[Unit] {
 
   override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
     val workRequest = DocRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
+    InterruptUtil.throwIfInterrupted()
 
     val tmpDir = workRequest.tmpDir
     try {
@@ -144,6 +146,8 @@ object DocRunner extends WorkerMain[Unit] {
       .scalaCompiler(scalaInstance, workRequest.compilerBridge)
       .withClassLoaderCache(classloaderCache)
 
+    InterruptUtil.throwIfInterrupted()
+
     val outputDir = workRequest.outputDir
     Files.createDirectories(outputDir)
     val reporter = new LoggedReporter(logger, scalaInstance.actualVersion)
@@ -163,5 +167,6 @@ object DocRunner extends WorkerMain[Unit] {
       case _: NoSuchFileException => {}
     }
     Files.createDirectory(tmpDir)
+    InterruptUtil.throwIfInterrupted()
   }
 }

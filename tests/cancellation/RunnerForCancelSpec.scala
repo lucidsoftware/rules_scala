@@ -11,7 +11,7 @@ class RunnerForCancelSpec(stdin: InputStream, stdout: PrintStream)
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
+  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
       var interrupted = false
       var i = 0
 

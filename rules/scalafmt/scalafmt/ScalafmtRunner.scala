@@ -45,7 +45,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
 
   protected[this] def init(args: Option[Array[String]]): Unit = {}
 
-  protected[this] def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
+  protected[this] def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
     val workRequest = ScalafmtRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
     InterruptUtil.throwIfInterrupted()
 

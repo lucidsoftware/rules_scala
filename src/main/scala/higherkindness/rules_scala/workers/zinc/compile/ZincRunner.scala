@@ -106,6 +106,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     args: Array[String],
     out: PrintStream,
     workDir: Path,
+    verbosity: Int,
   ): Unit = {
     val workRequest = CommonArguments(ArgsUtil.parseArgsOrFailSafe(args, parser, out), workDir)
     InterruptUtil.throwIfInterrupted()

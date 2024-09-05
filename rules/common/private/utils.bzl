@@ -1,5 +1,6 @@
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 
 #
 # Helper utilities
@@ -31,6 +32,19 @@ def _strip_margin_line(line, delim):
 
 _SINGLE_JAR_MNEMONIC = "SingleJar"
 
+def _format_jacoco_metadata_file(runfiles_enabled, workspace_prefix, metadata_file):
+    if runfiles_enabled:
+        return "export JACOCO_METADATA_JAR=\"$JAVA_RUNFILES/{}/{}\"".format(workspace_prefix, metadata_file.short_path)
+
+    return "export JACOCO_METADATA_JAR=$(rlocation " + paths.normalize(workspace_prefix + metadata_file.short_path) + ")"
+
+# This is from the Starlark Java builtins in Bazel
+def _format_classpath_entry(runfiles_enabled, workspace_prefix, file):
+    if runfiles_enabled:
+        return "${RUNPATH}" + file.short_path
+
+    return "$(rlocation " + paths.normalize(workspace_prefix + file.short_path) + ")"
+
 def write_launcher(
         ctx,
         prefix,
@@ -40,40 +54,48 @@ def write_launcher(
         jvm_flags,
         extra = "",
         jacoco_classpath = None):
-    """Macro that writes out a launcher script shell script.
+    """Macro that writes out a launcher script shell script. Some of this is from Bazel's Starlark Java builtins.
       Args:
         runtime_classpath: File containing the classpath required to launch this java target.
         main_class: the main class to launch.
         jvm_flags: The flags that should be passed to the jvm.
         args: Args that should be passed to the Binary.
     """
+    workspace_name = ctx.workspace_name
+    workspace_prefix = workspace_name + ("/" if workspace_name else "")
 
-    classpath_args = ctx.actions.args()
-    classpath_args.add_joined(runtime_classpath, format_each = "${RUNPATH}%s", join_with = ":", map_each = _short_path)
-    classpath_args.set_param_file_format("multiline")
-    classpath_file = ctx.actions.declare_file("{}classpath.params".format(prefix))
-    ctx.actions.write(classpath_file, classpath_args)
-
-    classpath = "\"$(eval echo \"$(cat ${{RUNPATH}}{})\")\"".format(classpath_file.short_path)
-
-    jvm_flags = " ".join(jvm_flags)
-    template = ctx.file._java_stub_template
+    # TODO: can we get this info?
+    # runfiles_enabled = ctx.configuration.runfiles_enabled()
     runfiles_enabled = False
 
-    java_executable = ctx.attr._target_jdk[java_common.JavaRuntimeInfo].java_executable_runfiles_path
-    java_path = str(java_executable)
-    if paths.is_absolute(java_path):
-        javabin = java_path
+    java_runtime_info = ctx.attr._target_jdk[java_common.JavaRuntimeInfo]
+    java_executable = java_runtime_info.java_executable_runfiles_path
+    if not paths.is_absolute(java_executable):
+        java_executable = workspace_name + "/" + java_executable
+    java_executable = paths.normalize(java_executable)
+
+    if runfiles_enabled:
+        prefix = "" if paths.is_absolute(java_executable) else "${JAVA_RUNFILES}/"
+        javabin = "JAVABIN=${JAVABIN:-" + prefix + java_executable + "}"
     else:
-        javabin = "$JAVA_RUNFILES/{}/{}".format(ctx.workspace_name, java_executable)
+        javabin = "JAVABIN=${JAVABIN:-$(rlocation " + java_executable + ")}"
+
+    template_dict = ctx.actions.template_dict()
+    template_dict.add_joined(
+        "%classpath%",
+        runtime_classpath,
+        map_each = lambda file: _format_classpath_entry(runfiles_enabled, workspace_prefix, file),
+        join_with = ctx.configuration.host_path_separator,
+        format_joined = "\"%s\"",
+        allow_closure = True,
+    )
 
     base_substitutions = {
-        "%classpath%": classpath,
-        "%javabin%": "JAVABIN=\"{}\"\n{}".format(javabin, extra),
-        "%jvm_flags%": jvm_flags,
-        "%needs_runfiles%": "1" if runfiles_enabled else "",
         "%runfiles_manifest_only%": "1" if runfiles_enabled else "",
-        "%workspace_prefix%": ctx.workspace_name + "/",
+        "%workspace_prefix%": workspace_prefix,
+        "%javabin%": "{}\n{}".format(javabin, extra),
+        "%needs_runfiles%": "0" if paths.is_absolute(java_runtime_info.java_executable_exec_path) else "1",
+        "%jvm_flags%": " ".join(jvm_flags),
         "%test_runtime_classpath_file%": "",
     }
 
@@ -86,9 +108,14 @@ def write_launcher(
             for jar in jacoco_classpath
         ]))
         more_outputs = [metadata_file]
+
+        template_dict.add(
+            "%set_jacoco_metadata%",
+            _format_jacoco_metadata_file(runfiles_enabled, workspace_prefix, metadata_file),
+        )
+
         more_substitutions = {
             "%java_start_class%": "com.google.testing.coverage.JacocoCoverageRunner",
-            "%set_jacoco_metadata%": "export JACOCO_METADATA_JAR=\"$JAVA_RUNFILES/{}/{}\"".format(ctx.workspace_name, metadata_file.short_path),
             "%set_jacoco_main_class%": """export JACOCO_MAIN_CLASS={}""".format(main_class),
             "%set_jacoco_java_runfiles_root%": """export JACOCO_JAVA_RUNFILES_ROOT=$JAVA_RUNFILES/{}/""".format(ctx.workspace_name),
             "%set_java_coverage_new_implementation%": """export JAVA_COVERAGE_NEW_IMPLEMENTATION=YES""",
@@ -104,13 +131,14 @@ def write_launcher(
         }
 
     ctx.actions.expand_template(
-        template = template,
+        template = ctx.file._java_stub_template,
         output = output,
         substitutions = dicts.add(base_substitutions, more_substitutions),
+        computed_substitutions = template_dict,
         is_executable = True,
     )
 
-    return more_outputs + [classpath_file]
+    return more_outputs
 
 def safe_name(value):
     return "".join([value[i] if value[i].isalnum() or value[i] == "." else "_" for i in range(len(value))])

@@ -1,0 +1,12 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../common.sh
+
+# We use modify_execution_info, nouse_action_cache, and  bazel shutdown here
+# in order to prevent the disk cache, skyframe cache, and persistent action cache
+# from being used for the verbosity spec worker actions and thus getting the
+# verbosity we want getting printed. The alternative is to bazel clean, which
+# takes much longer.
+bazel shutdown
+bazel build --modify_execution_info="VerbositySpecWorkerRun=+no-cache" --nouse_action_cache :verbosity-spec-target |& grep -q "Verbosity: 0"
+bazel shutdown
+bazel build --modify_execution_info="VerbositySpecWorkerRun=+no-cache" --nouse_action_cache --worker_verbose :verbosity-spec-target |& grep -q "Verbosity: 10"

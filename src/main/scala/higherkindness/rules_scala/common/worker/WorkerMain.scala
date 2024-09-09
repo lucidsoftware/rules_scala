@@ -14,7 +14,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
 
   protected[this] def init(args: Option[Array[String]]): S
 
-  protected[this] def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path): Unit
+  protected[this] def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit
 
   protected[this] var isWorker = false
 
@@ -101,6 +101,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           } else {
             val args = request.getArgumentsList.toArray(Array.empty[String])
             val sandboxDir = Path.of(request.getSandboxDir())
+            val verbosity = request.getVerbosity()
             System.err.println(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
 
             // We go through this hullabaloo with output streams being defined out here, so we can
@@ -114,7 +115,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
               outStream = new ByteArrayOutputStream
               out = new PrintStream(outStream)
               try {
-                work(ctx, args, out, sandboxDir)
+                work(ctx, args, out, sandboxDir, verbosity)
                 0
               } catch {
                 case e @ AnnexWorkerError(code, _, _) =>
@@ -210,6 +211,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
               args.toArray,
               out,
               workDir = Path.of(""),
+              verbosity = 0,
             )
           } catch {
             // This error means the work function encountered an error that we want to not be caught

@@ -64,7 +64,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  protected def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path): Unit = {
+  protected def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
     val workRequest = ScalaProtoRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
     InterruptUtil.throwIfInterrupted()
 

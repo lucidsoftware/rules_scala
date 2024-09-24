@@ -1,0 +1,18 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+
+bazel_cquery_output="$(
+    bazel cquery 'deps(:parent1 + :parent2, 1)' --output graph --nograph:factored |&
+        sed -nr 's/^ *"\/\/scala\/toolchain:child \(([0-9a-f]*)\)"$/\1/p'
+)"
+
+if [ "$(echo "$bazel_cquery_output" | wc -l)" -ne 1 ]; then
+    echo 'Expected //scala/toolchain:child to be built only once'
+    exit 1
+fi
+
+if echo "$bazel_cquery_output" | grep '@rules_scala_annex_scala_toolchain//:scala-toolchain'; then
+    echo 'Expected //scala/toolchain:child to be built with the default configuration'
+    exit 1
+fi

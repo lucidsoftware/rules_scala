@@ -83,14 +83,22 @@ def _toolchain_configuration_repository_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
         """\
+load(":default.bzl", "default_scala_toolchain_name")
 load("@bazel_skylib//rules:common_settings.bzl", "string_setting")
 
 string_setting(
     name = "scala-toolchain",
-    build_setting_default = "{}",
+    build_setting_default = default_scala_toolchain_name,
     visibility = ["//visibility:public"],
 )
-""".format(repository_ctx.attr.default_scala_toolchain_name),
+""",
+    )
+
+    repository_ctx.file(
+        "default.bzl",
+        "default_scala_toolchain_name = \"{}\"\n".format(
+            repository_ctx.attr.default_scala_toolchain_name,
+        ),
     )
 
 _toolchain_configuration_repository = repository_rule(

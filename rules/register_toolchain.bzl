@@ -14,6 +14,7 @@ load(
     "phase_zinc_compile",
     "phase_zinc_depscheck",
 )
+load("@rules_scala_annex_scala_toolchain//:default.bzl", "default_scala_toolchain_name")
 
 def _bootstrap_configuration_impl(ctx):
     return [
@@ -205,7 +206,7 @@ def _make_register_toolchain(configuration_rule):
 register_bootstrap_toolchain = _make_register_toolchain(_bootstrap_configuration)
 register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
 
-def _scala_toolchain_transition_impl(_, attr):
+def _scala_toolchain_incoming_transition_impl(settings, attr):
     if attr.scala_toolchain_name == "":
         return {}
 
@@ -213,13 +214,24 @@ def _scala_toolchain_transition_impl(_, attr):
         "@rules_scala_annex_scala_toolchain//:scala-toolchain": attr.scala_toolchain_name,
     }
 
-scala_toolchain_transition = transition(
-    implementation = _scala_toolchain_transition_impl,
+scala_toolchain_incoming_transition = transition(
+    implementation = _scala_toolchain_incoming_transition_impl,
+    inputs = ["@rules_scala_annex_scala_toolchain//:scala-toolchain"],
+    outputs = ["@rules_scala_annex_scala_toolchain//:scala-toolchain"],
+)
+
+def _scala_toolchain_outgoing_transition_impl(_1, _2):
+    return {
+        "@rules_scala_annex_scala_toolchain//:scala-toolchain": default_scala_toolchain_name,
+    }
+
+scala_toolchain_outgoing_transition = transition(
+    implementation = _scala_toolchain_outgoing_transition_impl,
     inputs = [],
     outputs = ["@rules_scala_annex_scala_toolchain//:scala-toolchain"],
 )
 
-scala_toolchain_transition_attributes = {
+scala_toolchain_attributes = {
     "scala_toolchain_name": attr.string(
         doc = "The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)",
     ),

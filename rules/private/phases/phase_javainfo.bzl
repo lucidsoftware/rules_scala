@@ -3,6 +3,7 @@ load(
     "find_java_runtime_toolchain",
     "find_java_toolchain",
 )
+load("@rules_java//java/common:java_common.bzl", "java_common")
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
@@ -34,7 +35,12 @@ def phase_javainfo(ctx, g):
                 ctx.actions,
                 jar = ctx.outputs.jar,
                 target_label = ctx.label,
-                java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain),
+
+                # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
+                # "When attaching a transition to an outgoing edge (regardless of whether the
+                # transition is a 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it
+                # isn't already. The order of elements in this list is unspecified."
+                java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
             )
 
         source_jar_name = ctx.outputs.jar.basename.replace(".jar", "-src.jar")
@@ -47,7 +53,7 @@ def phase_javainfo(ctx, g):
             ctx.actions,
             output_source_jar = output_source_jar,
             sources = ctx.files.srcs,
-            java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain),
+            java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
         )
 
         java_info = JavaInfo(

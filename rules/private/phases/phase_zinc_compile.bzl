@@ -30,7 +30,11 @@ def phase_zinc_compile(ctx, g):
     javacopts = [
         ctx.expand_location(option, ctx.attr.data)
         for option in ctx.attr.javacopts + java_common.default_javac_opts(
-            java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain),
+            # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
+            # "When attaching a transition to an outgoing edge (regardless of whether the transition
+            # is a 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it isn't already.
+            # The order of elements in this list is unspecified."
+            java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
         )
     ]
 

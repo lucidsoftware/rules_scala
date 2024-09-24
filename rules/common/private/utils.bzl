@@ -65,7 +65,11 @@ def write_launcher(
     # runfiles_enabled = ctx.configuration.runfiles_enabled()
     runfiles_enabled = False
 
-    java_runtime_info = ctx.attr._target_jdk[java_common.JavaRuntimeInfo]
+    # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
+    # "When attaching a transition to an outgoing edge (regardless of whether the transition is a
+    # 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it isn't already. The order of
+    # elements in this list is unspecified."
+    java_runtime_info = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo]
     java_executable = java_runtime_info.java_executable_runfiles_path
     if not paths.is_absolute(java_executable):
         java_executable = workspace_name + "/" + java_executable

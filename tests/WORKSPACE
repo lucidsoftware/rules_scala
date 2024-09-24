@@ -99,6 +99,8 @@ scala_register_toolchains(
         "@@//dependencies/indirect:test_zinc_2_13_direct_deps_off",
         "@@//dependencies/indirect:test_zinc_2_13_used_deps_off",
         "@@//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
+        "@@//plugins/semanticdb:scala_2_13_with_semanticdb",
+        "@@//plugins/semanticdb:scala_3_with_semanticdb",
         "@@//scala:test_bootstrap_2_12",
         "@@//scala:test_bootstrap_2_13",
         "@@//scala:test_bootstrap_3",

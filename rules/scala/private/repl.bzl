@@ -49,7 +49,12 @@ def scala_repl_implementation(ctx):
             runfiles = ctx.runfiles(
                 collect_default = True,
                 collect_data = True,
-                files = ctx.attr._target_jdk[java_common.JavaRuntimeInfo].files.to_list(),
+
+                # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
+                # "When attaching a transition to an outgoing edge (regardless of whether the
+                # transition is a 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it
+                # isn't already. The order of elements in this list is unspecified."
+                files = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo].files.to_list(),
                 transitive_files = files,
             ),
         ),

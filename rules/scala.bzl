@@ -43,12 +43,14 @@ load(":jvm.bzl", _labeled_jars = "labeled_jars")
 load(":providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
 load(
     ":register_toolchain.bzl",
-    _scala_toolchain_transition = "scala_toolchain_transition",
-    _scala_toolchain_transition_attributes = "scala_toolchain_transition_attributes",
+    _scala_toolchain_attributes = "scala_toolchain_attributes",
+    _scala_toolchain_incoming_transition = "scala_toolchain_incoming_transition",
+    _scala_toolchain_outgoing_transition = "scala_toolchain_outgoing_transition",
 )
 
 _compile_private_attributes = {
     "_java_toolchain": attr.label(
+        cfg = _scala_toolchain_outgoing_transition,
         default = Label("@bazel_tools//tools/jdk:current_java_toolchain"),
     ),
     "_host_javabase": attr.label(
@@ -77,6 +79,7 @@ _compile_private_attributes = {
 
 _compile_attributes = {
     "srcs": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).",
         allow_files = [
             ".scala",
@@ -88,10 +91,12 @@ _compile_attributes = {
         flags = ["DIRECT_COMPILE_TIME_INPUT"],
     ),
     "data": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The additional runtime files needed by this library.",
         allow_files = True,
     ),
     "deps": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         aspects = [
             _labeled_jars,
             _coverage_replacements_provider.aspect,
@@ -100,14 +105,17 @@ _compile_attributes = {
         providers = [JavaInfo],
     ),
     "deps_used_whitelist": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JVM library dependencies to always consider used for `scala_deps_used` checks.",
         providers = [JavaInfo],
     ),
     "deps_unused_whitelist": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JVM library dependencies to always consider unused for `scala_deps_direct` checks.",
         providers = [JavaInfo],
     ),
     "runtime_deps": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JVM runtime-only library dependencies.",
         providers = [JavaInfo],
     ),
@@ -115,6 +123,7 @@ _compile_attributes = {
         doc = "The Javac options.",
     ),
     "plugins": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The Scalac plugins.",
         providers = [JavaInfo],
     ),
@@ -123,10 +132,12 @@ _compile_attributes = {
     ),
     "resources": attr.label_list(
         allow_files = True,
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The files to include as classpath resources.",
     ),
     "resource_jars": attr.label_list(
         allow_files = [".jar"],
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JARs to merge into the output JAR.",
     ),
     "scalacopts": attr.string_list(
@@ -139,6 +150,7 @@ _library_attributes = {
         aspects = [
             _coverage_replacements_provider.aspect,
         ],
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JVM libraries to add as dependencies to any libraries dependent on this one.",
         providers = [JavaInfo],
     ),
@@ -157,6 +169,7 @@ _runtime_attributes = {
         doc = "The JVM runtime flags.",
     ),
     "runtime_deps": attr.label_list(
+        cfg = _scala_toolchain_outgoing_transition,
         doc = "The JVM runtime-only library dependencies.",
         providers = [JavaInfo],
     ),
@@ -164,10 +177,12 @@ _runtime_attributes = {
 
 _runtime_private_attributes = {
     "_target_jdk": attr.label(
+        cfg = _scala_toolchain_outgoing_transition,
         default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
         providers = [java_common.JavaRuntimeInfo],
     ),
     "_java_stub_template": attr.label(
+        cfg = _scala_toolchain_outgoing_transition,
         default = Label("@anx_java_stub_template//file"),
         allow_single_file = True,
     ),
@@ -243,11 +258,11 @@ def make_scala_library(*extras):
             _compile_attributes,
             _compile_private_attributes,
             _library_attributes,
-            _scala_toolchain_transition_attributes,
+            _scala_toolchain_attributes,
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
-        cfg = _scala_toolchain_transition,
+        cfg = _scala_toolchain_incoming_transition,
         doc = "Compiles a Scala JVM library.",
         implementation = _scala_library_implementation,
         outputs = _dicts.add(
@@ -271,7 +286,7 @@ def make_scala_binary(*extras):
             _compile_private_attributes,
             _runtime_attributes,
             _runtime_private_attributes,
-            _scala_toolchain_transition_attributes,
+            _scala_toolchain_attributes,
             {
                 "main_class": attr.string(
                     doc = "The main class. If not provided, it will be inferred by its type signature.",
@@ -280,7 +295,7 @@ def make_scala_binary(*extras):
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
-        cfg = _scala_toolchain_transition,
+        cfg = _scala_toolchain_incoming_transition,
         doc = """
 Compiles and links a Scala JVM executable.
 
@@ -317,7 +332,7 @@ def make_scala_test(*extras):
             _compile_private_attributes,
             _runtime_attributes,
             _runtime_private_attributes,
-            _scala_toolchain_transition_attributes,
+            _scala_toolchain_attributes,
             _testing_private_attributes,
             {
                 "isolation": attr.string(
@@ -331,6 +346,7 @@ def make_scala_test(*extras):
                 ),
                 "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
                 "shared_deps": attr.label_list(
+                    cfg = _scala_toolchain_outgoing_transition,
                     doc = "If isolation is \"classloader\", the list of deps to keep loaded between tests",
                     providers = [JavaInfo],
                 ),
@@ -345,13 +361,19 @@ def make_scala_test(*extras):
                     ],
                     doc = "The list of test frameworks to check for. These should conform to the sbt test interface (https://github.com/sbt/test-interface).",
                 ),
-                "runner": attr.label(default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test"),
-                "subprocess_runner": attr.label(default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"),
+                "runner": attr.label(
+                    cfg = _scala_toolchain_outgoing_transition,
+                    default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test",
+                ),
+                "subprocess_runner": attr.label(
+                    cfg = _scala_toolchain_outgoing_transition,
+                    default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess",
+                ),
             },
             _extras_attributes(extras),
             *[extra["attrs"] for extra in extras]
         ),
-        cfg = _scala_toolchain_transition,
+        cfg = _scala_toolchain_incoming_transition,
         doc = """
 Compiles and links a collection of Scala tests.
 
@@ -396,13 +418,15 @@ _scala_repl_private_attributes = _dicts.add(
 scala_repl = rule(
     attrs = _dicts.add(
         _scala_repl_private_attributes,
-        _scala_toolchain_transition_attributes,
+        _scala_toolchain_attributes,
         {
             "data": attr.label_list(
+                cfg = _scala_toolchain_outgoing_transition,
                 doc = "The additional runtime files needed by this REPL.",
                 allow_files = True,
             ),
             "deps": attr.label_list(
+                cfg = _scala_toolchain_outgoing_transition,
                 doc = "Dependencies that should be made available to the REPL.",
                 providers = [JavaInfo],
             ),
@@ -412,7 +436,7 @@ scala_repl = rule(
             "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
         },
     ),
-    cfg = _scala_toolchain_transition,
+    cfg = _scala_toolchain_incoming_transition,
     doc = """
 Launches a REPL with all given dependencies available.
 
@@ -469,14 +493,16 @@ Use this only for libraries with macros. Otherwise, use `java_import`.""",
 
 scaladoc = rule(
     attrs = _dicts.add(
-        _scala_toolchain_transition_attributes,
+        _scala_toolchain_attributes,
         _scaladoc_private_attributes,
         {
             "compiler_deps": attr.label_list(
+                cfg = _scala_toolchain_outgoing_transition,
                 doc = "JVM targets that should be included on the compile classpath.",
                 providers = [JavaInfo],
             ),
             "deps": attr.label_list(
+                cfg = _scala_toolchain_outgoing_transition,
                 doc = "Dependencies that should be made available to the Scaladoc tool. These may include libraries referenced in Scaladoc or public signatures.",
                 providers = [JavaInfo],
             ),
@@ -488,13 +514,14 @@ scaladoc = rule(
                     "-sources.jar",
                     "-src.jar",
                 ],
+                cfg = _scala_toolchain_outgoing_transition,
                 doc = "Sources from which to generate Scaladoc. These may include `*.java` files, `*.scala` files, and source JARs.",
             ),
             "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
             "title": attr.string(doc = "The name of the project. If none is provided, the target label will be used."),
         },
     ),
-    cfg = _scala_toolchain_transition,
+    cfg = _scala_toolchain_incoming_transition,
     doc = "Generates Scaladoc.",
     implementation = _scaladoc_implementation,
     toolchains = [

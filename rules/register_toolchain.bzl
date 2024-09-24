@@ -1,3 +1,4 @@
+load("@rules_scala_annex_scala_toolchain//:default.bzl", "default_scala_toolchain_name")
 load(
     "//rules:providers.bzl",
     "CodeCoverageConfiguration",
@@ -13,6 +14,9 @@ load(
     "phase_zinc_compile",
     "phase_zinc_depscheck",
 )
+
+original_scala_toolchain_setting = "@rules_scala_annex_scala_toolchain//:original-scala-toolchain"
+scala_toolchain_setting = "@rules_scala_annex_scala_toolchain//:scala-toolchain"
 
 def _bootstrap_configuration_impl(ctx):
     return [
@@ -189,7 +193,7 @@ def _make_register_toolchain(configuration_rule):
         native.config_setting(
             name = "{}-setting".format(name),
             flag_values = {
-                "@rules_scala_annex_scala_toolchain//:scala-toolchain": name,
+                scala_toolchain_setting: name,
             },
         )
 
@@ -206,21 +210,41 @@ def _make_register_toolchain(configuration_rule):
 register_bootstrap_toolchain = _make_register_toolchain(_bootstrap_configuration)
 register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
 
-def _scala_toolchain_transition_impl(_, attr):
-    if attr.scala_toolchain_name == "":
-        return {}
-
-    return {
-        "@rules_scala_annex_scala_toolchain//:scala-toolchain": attr.scala_toolchain_name,
+def _scala_toolchain_incoming_transition_impl(settings, attr):
+    # We set `original_scala_toolchain_setting` so we can reset the toolchain to its original value
+    # in `scala_toolchain_outgoing_transition`. That way, we can ensure every target is built under
+    # a single toolchain, thus preventing duplicate builds.
+    #
+    # This is inspired by what the rules_go folks are doing.
+    return {} if attr.scala_toolchain_name == "" else {
+        original_scala_toolchain_setting: settings[scala_toolchain_setting],
+        scala_toolchain_setting: attr.scala_toolchain_name,
     }
 
-scala_toolchain_transition = transition(
-    implementation = _scala_toolchain_transition_impl,
-    inputs = [],
-    outputs = ["@rules_scala_annex_scala_toolchain//:scala-toolchain"],
+scala_toolchain_incoming_transition = transition(
+    implementation = _scala_toolchain_incoming_transition_impl,
+    inputs = [scala_toolchain_setting],
+    outputs = [original_scala_toolchain_setting, scala_toolchain_setting],
 )
 
-scala_toolchain_transition_attributes = {
+def _scala_toolchain_outgoing_transition_impl(settings, _):
+    original_scala_toolchain = settings[original_scala_toolchain_setting]
+
+    return {} if original_scala_toolchain == "" else {
+        # Although `original_scala_toolchain_setting` will be overridden in the incoming transition,
+        # we set it to "" so that non-Scala targets aren't built under different values of this
+        # setting. That way, they aren't built multiple times.
+        original_scala_toolchain_setting: "",
+        scala_toolchain_setting: original_scala_toolchain,
+    }
+
+scala_toolchain_outgoing_transition = transition(
+    implementation = _scala_toolchain_outgoing_transition_impl,
+    inputs = [original_scala_toolchain_setting],
+    outputs = [original_scala_toolchain_setting, scala_toolchain_setting],
+)
+
+scala_toolchain_attributes = {
     "scala_toolchain_name": attr.string(
         doc = "The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)",
     ),

@@ -2,7 +2,12 @@ load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
-load("//rules/common:private/utils.bzl", _collect = "collect", _write_launcher = "write_launcher")
+load(
+    "//rules/common:private/utils.bzl",
+    _collect = "collect",
+    _short_path = "short_path",
+    _write_launcher = "write_launcher",
+)
 
 #
 # PHASE: test_launcher
@@ -39,7 +44,7 @@ def phase_test_launcher(ctx, g):
     if ctx.attr.isolation == "classloader":
         shared_deps = java_common.merge(_collect(JavaInfo, ctx.attr.shared_deps))
         args.add("--isolation", "classloader")
-        args.add_all("--shared_classpath", shared_deps.transitive_runtime_jars, map_each = _test_launcher_short_path)
+        args.add_all("--shared_classpath", shared_deps.transitive_runtime_jars, map_each = _short_path)
     elif ctx.attr.isolation == "process":
         subprocess_executable = ctx.actions.declare_file("{}/subprocess".format(ctx.label.name))
         subprocess_runner_jars = ctx.attr.subprocess_runner[0][JavaInfo].transitive_runtime_jars
@@ -55,7 +60,7 @@ def phase_test_launcher(ctx, g):
         files.append(subprocess_executable)
         args.add("--isolation", "process")
         args.add("--subprocess_exec", subprocess_executable.short_path)
-    args.add_all("--", test_jars, map_each = _test_launcher_short_path)
+    args.add_all("--", test_jars, map_each = _short_path)
     args.set_param_file_format("multiline")
     args_file = ctx.actions.declare_file("{}/test.params".format(ctx.label.name))
     ctx.actions.write(args_file, args)
@@ -88,6 +93,3 @@ def phase_test_launcher(ctx, g):
             transitive_files = depset([], transitive = all_jars),
         ),
     ))
-
-def _test_launcher_short_path(file):
-    return file.short_path

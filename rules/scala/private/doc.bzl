@@ -7,6 +7,7 @@ load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _separate_src_jars_srcs_and_other = "separate_src_jars_srcs_and_other",
 )
 
 scaladoc_private_attributes = {
@@ -33,13 +34,7 @@ def scaladoc_implementation(ctx):
             [dep[JavaInfo].transitive_runtime_jars for dep in ctx.attr.compiler_deps],
     )
 
-    srcs = [file for file in ctx.files.srcs if file.extension.lower() in ["java", "scala"]]
-    src_jars = [
-        file
-        for file in ctx.files.srcs
-        if file.path.lower().endswith(".srcjar") or file.path.lower().endswith("-sources.jar") or
-           file.path.lower().endswith("-src.jar")
-    ]
+    srcs, src_jars, _ = _separate_src_jars_srcs_and_other(ctx.files.srcs)
 
     scalacopts = ["-doc-title", ctx.attr.title or ctx.label] + ctx.attr.scalacopts
 
@@ -48,9 +43,9 @@ def scaladoc_implementation(ctx):
     args.add_all("--compiler_classpath", compiler_classpath)
     args.add_all("--classpath", classpath)
     args.add_all(scalacopts, format_each = "--option=%s")
-    args.add("--output_html", html.path)
+    args.add_all("--output_html", [html], expand_directories = False)
     args.add_all("--source_jars", src_jars)
-    args.add("--tmp", tmp.path)
+    args.add_all("--tmp", [tmp], expand_directories = False)
     args.add_all("--", srcs)
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
@@ -67,6 +62,7 @@ def scaladoc_implementation(ctx):
                 "supports-workers": "1",
                 "supports-multiplex-sandboxing": "1",
                 "supports-worker-cancellation": "1",
+                "supports-path-mapping": "1",
             },
         ),
         inputs = depset(

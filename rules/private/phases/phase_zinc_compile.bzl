@@ -59,7 +59,7 @@ def phase_zinc_compile(ctx, g):
     args.add("--output_used", used)
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
-    args.add("--tmp", tmp.path)
+    args.add_all("--tmp", [tmp], expand_directories = False)
 
     args.add("--log_level", toolchain.zinc_configuration.log_level)
     args.add_all("--", g.classpaths.srcs)
@@ -92,6 +92,7 @@ def phase_zinc_compile(ctx, g):
         "supports-workers": "1",
         "supports-multiplex-sandboxing": "1",
         "supports-worker-cancellation": "1",
+        "supports-path-mapping": "1",
     }
 
     # Disable several things if incremental compilation features are going to be used
@@ -102,6 +103,7 @@ def phase_zinc_compile(ctx, g):
         execution_requirements_tags["no-cache"] = "1"
         execution_requirements_tags["no-remote"] = "1"
         execution_requirements_tags["supports-multiplex-sandboxing"] = "0"
+        execution_requirements_tags["supports-path-mapping"] = "0"
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(

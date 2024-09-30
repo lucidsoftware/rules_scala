@@ -1,6 +1,7 @@
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _short_path = "short_path",
 )
 
 scala_format_attributes = {
@@ -33,14 +34,14 @@ def build_format(ctx):
     runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._fmt])
     manifest_content = []
     for src in ctx.files.srcs:
-        if src.path.endswith(".scala") and src.is_source:
+        if src.short_path.endswith(".scala") and src.is_source:
             file = ctx.actions.declare_file(src.short_path)
             files.append(file)
             args = ctx.actions.args()
             args.add("--config")
-            args.add(ctx.file.config.path)
-            args.add(src.path)
-            args.add(file.path)
+            args.add(ctx.file.config)
+            args.add(src)
+            args.add(file)
             args.set_param_file_format("multiline")
             args.use_param_file("@%s", use_always = True)
             ctx.actions.run(
@@ -56,6 +57,7 @@ def build_format(ctx):
                         "supports-workers": "1",
                         "supports-multiplex-sandboxing": "1",
                         "supports-worker-cancellation": "1",
+                        "supports-path-mapping": "1",
                     },
                 ),
                 mnemonic = "ScalaFmt",
@@ -68,31 +70,37 @@ def build_format(ctx):
     return manifest, files
 
 def format_runner(ctx, manifest, files):
+    args = ctx.actions.args()
+    args.add(ctx.file._runner)
+    args.add(ctx.workspace_name)
+    args.add(manifest.short_path)
+    args.add(ctx.outputs.scalafmt_runner)
+
     ctx.actions.run_shell(
         inputs = [ctx.file._runner, manifest] + files,
         outputs = [ctx.outputs.scalafmt_runner],
         command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
-        arguments = [
-            ctx.file._runner.path,
-            ctx.workspace_name,
-            manifest.short_path,
-            ctx.outputs.scalafmt_runner.path,
-        ],
-        execution_requirements = _resolve_execution_reqs(ctx, {}),
+        arguments = [args],
+        execution_requirements = _resolve_execution_reqs(ctx, {
+            "supports-path-mapping": "1",
+        }),
     )
 
 def format_tester(ctx, manifest, files):
+    args = ctx.actions.args()
+    args.add(ctx.file._testrunner)
+    args.add(ctx.workspace_name)
+    args.add(manifest.short_path)
+    args.add(ctx.outputs.scalafmt_testrunner)
+
     ctx.actions.run_shell(
         inputs = [ctx.file._testrunner, manifest] + files,
         outputs = [ctx.outputs.scalafmt_testrunner],
         command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
-        arguments = [
-            ctx.file._testrunner.path,
-            ctx.workspace_name,
-            manifest.short_path,
-            ctx.outputs.scalafmt_testrunner.path,
-        ],
-        execution_requirements = _resolve_execution_reqs(ctx, {}),
+        arguments = [args],
+        execution_requirements = _resolve_execution_reqs(ctx, {
+            "supports-path-mapping": "1",
+        }),
     )
 
 def scala_format_test_implementation(ctx):

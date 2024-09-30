@@ -28,7 +28,7 @@ def scala_proto_library_implementation(ctx):
     )
 
     args = ctx.actions.args()
-    args.add("--output_dir", gendir.path)
+    args.add_all("--output_dir", [gendir], expand_directories = False)
     args.add_all("--proto_paths", transitive_proto_path)
     if ctx.attr.grpc:
         args.add("--grpc")
@@ -55,19 +55,28 @@ def scala_proto_library_implementation(ctx):
                 "supports-workers": supports_workers,
                 "supports-multiplex-sandboxing": supports_workers,
                 "supports-worker-cancellation": supports_workers,
+                "supports-path-mapping": supports_workers,
             },
         ),
         arguments = [args],
     )
 
+    shell_args = ctx.actions.args()
+    shell_args.add(ctx.executable._zipper)
+    shell_args.add_all([gendir], expand_directories = False)
+    shell_args.add(gendir.short_path)
+    shell_args.add(srcjar)
+
     ctx.actions.run_shell(
         inputs = [gendir],
         outputs = [srcjar],
-        arguments = [ctx.executable._zipper.path, gendir.path, gendir.short_path, srcjar.path],
+        arguments = [shell_args],
         command = """$1 c $4 META-INF/= $(find -L $2 -type f | while read v; do echo ${v#"${2%$3}"}=$v; done)""",
         progress_message = "Bundling compiled Scala into srcjar for %{label}",
         tools = [ctx.executable._zipper],
-        execution_requirements = _resolve_execution_reqs(ctx, {}),
+        execution_requirements = _resolve_execution_reqs(ctx, {
+            "supports-path-mapping": "1",
+        }),
     )
 
     return [OutputGroupInfo(

@@ -16,6 +16,7 @@ def _impl(ctx):
             "supports-workers": "1",
             "supports-multiplex-sandboxing": "1",
             "supports-worker-cancellation": "1",
+            "supports-path-mapping": "1",
         },
         progress_message = "Running verbosity spec worker %{label}",
         executable = ctx.executable.verbosity_spec_worker,

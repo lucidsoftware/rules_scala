@@ -42,6 +42,19 @@ def _format_classpath_entry(runfiles_enabled, workspace_prefix, file):
 
     return "$(rlocation " + paths.normalize(workspace_prefix + file.short_path) + ")"
 
+def _format_javabin(java_executable, workspace_prefix, runfiles_enabled):
+    if not paths.is_absolute(java_executable):
+        java_executable = workspace_prefix + java_executable
+    java_executable = paths.normalize(java_executable)
+
+    if runfiles_enabled:
+        prefix = "" if paths.is_absolute(java_executable) else "${JAVA_RUNFILES}/"
+        javabin = "JAVABIN=${JAVABIN:-" + prefix + java_executable + "}"
+    else:
+        javabin = "JAVABIN=${JAVABIN:-$(rlocation " + java_executable + ")}"
+
+    return javabin
+
 def write_launcher(
         ctx,
         prefix,
@@ -71,15 +84,6 @@ def write_launcher(
     # elements in this list is unspecified."
     java_runtime_info = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo]
     java_executable = java_runtime_info.java_executable_runfiles_path
-    if not paths.is_absolute(java_executable):
-        java_executable = workspace_name + "/" + java_executable
-    java_executable = paths.normalize(java_executable)
-
-    if runfiles_enabled:
-        prefix = "" if paths.is_absolute(java_executable) else "${JAVA_RUNFILES}/"
-        javabin = "JAVABIN=${JAVABIN:-" + prefix + java_executable + "}"
-    else:
-        javabin = "JAVABIN=${JAVABIN:-$(rlocation " + java_executable + ")}"
 
     template_dict = ctx.actions.template_dict()
     template_dict.add_joined(
@@ -94,7 +98,7 @@ def write_launcher(
     base_substitutions = {
         "%runfiles_manifest_only%": "1" if runfiles_enabled else "",
         "%workspace_prefix%": workspace_prefix,
-        "%javabin%": "{}\n{}".format(javabin, extra),
+        "%javabin%": "{}\n{}".format(_format_javabin(java_executable, workspace_prefix, runfiles_enabled), extra),
         "%needs_runfiles%": "0" if paths.is_absolute(java_runtime_info.java_executable_exec_path) else "1",
         "%jvm_flags%": " ".join(jvm_flags),
         "%test_runtime_classpath_file%": "",
@@ -159,6 +163,10 @@ def resolve_execution_reqs(ctx, base_exec_reqs):
     exec_reqs.update(base_exec_reqs)
     return exec_reqs
 
+def _format_resources_item(item):
+    key, value = item
+    return "{}:{}".format(value.path, key)
+
 def action_singlejar(
         ctx,
         inputs,
@@ -184,7 +192,7 @@ def action_singlejar(
     if compression:
         args.add("--compression")
     args.add_all("--sources", inputs)
-    args.add_all("--resources", ["{}:{}".format(value.path, key) for key, value in resources.items()])
+    args.add_all("--resources", resources.items(), map_each = _format_resources_item)
     args.add("--output", output)
     if main_class != None:
         args.add("--main_class", main_class)
@@ -196,7 +204,13 @@ def action_singlejar(
     ctx.actions.run(
         arguments = [args],
         executable = ctx.executable._singlejar,
-        execution_requirements = resolve_execution_reqs(ctx, {"supports-workers": "0"}),
+        execution_requirements = resolve_execution_reqs(
+            ctx,
+            {
+                "supports-workers": "0",
+                "supports-path-mapping": "1",
+            },
+        ),
         mnemonic = _SINGLE_JAR_MNEMONIC,
         inputs = all_inputs,
         outputs = [output],
@@ -218,3 +232,7 @@ def separate_src_jars(srcs):
 def _is_src_jar(file):
     return (file.short_path.lower().endswith(".srcjar") or file.short_path.lower().endswith("-sources.jar") or
             file.short_path.lower().endswith("-src.jar"))
+
+def short_path(file):
+    """Convenience function for getting the short_path that was being duplicated in a few files"""
+    return file.short_path

@@ -54,6 +54,7 @@ def phase_zinc_depscheck(ctx, g):
                     "supports-workers": "1",
                     "supports-multiplex-sandboxing": "1",
                     "supports-worker-cancellation": "1",
+                    "supports-path-mapping": "1",
                 },
             ),
             arguments = [deps_args],

@@ -43,9 +43,9 @@ def scaladoc_implementation(ctx):
     args.add_all("--compiler_classpath", compiler_classpath)
     args.add_all("--classpath", classpath)
     args.add_all(scalacopts, format_each = "--option=%s")
-    args.add("--output_html", html.path)
+    args.add_all("--output_html", [html], expand_directories = False)
     args.add_all("--source_jars", src_jars)
-    args.add("--tmp", tmp.path)
+    args.add_all("--tmp", [tmp], expand_directories = False)
     args.add_all("--", srcs)
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
@@ -62,6 +62,7 @@ def scaladoc_implementation(ctx):
                 "supports-workers": "1",
                 "supports-multiplex-sandboxing": "1",
                 "supports-worker-cancellation": "1",
+                "supports-path-mapping": "1",
             },
         ),
         inputs = depset(

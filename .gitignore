@@ -21,3 +21,6 @@ target/
 /.vscode/
 /bazel.iml
 *.iml
+/.bazelbsp/
+/.bsp/
+/.metals/

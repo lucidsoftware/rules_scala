@@ -9,3 +9,6 @@ targets:
 
 additional_languages:
   scala
+
+enabled_rules:
+    rules_scala_annex

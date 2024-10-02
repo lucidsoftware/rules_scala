@@ -14,20 +14,26 @@ load(
 )
 
 def configure_bootstrap_scala_implementation(ctx):
-    return [
-        _ScalaConfiguration(
-            compiler_classpath = ctx.attr.compiler_classpath,
-            global_plugins = ctx.attr.global_plugins,
-            global_scalacopts = ctx.attr.global_scalacopts,
-            runtime_classpath = ctx.attr.runtime_classpath,
-            version = ctx.attr.version,
-        ),
-        _ScalaRulePhase(
-            phases = [
-                ("=", "compile", "compile", _phase_bootstrap_compile),
-            ],
-        ),
-    ]
+    scala_configuration = _ScalaConfiguration(
+        compiler_classpath = ctx.attr.compiler_classpath,
+        global_plugins = ctx.attr.global_plugins,
+        global_scalacopts = ctx.attr.global_scalacopts,
+        runtime_classpath = ctx.attr.runtime_classpath,
+        semanticdb_bundle = ctx.attr.semanticdb_bundle,
+        use_ijar = ctx.attr.use_ijar,
+        version = ctx.attr.version,
+    )
+    return struct(
+        scala_configuration = scala_configuration,
+        providers = [
+            scala_configuration,
+            _ScalaRulePhase(
+                phases = [
+                    ("=", "compile", "compile", _phase_bootstrap_compile),
+                ],
+            ),
+        ],
+    )
 
 def configure_zinc_scala_implementation(ctx):
     return [

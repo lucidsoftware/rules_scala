@@ -202,3 +202,19 @@ def action_singlejar(
         outputs = [output],
         progress_message = progress_message,
     )
+
+def separate_src_jars(srcs):
+    src_jars = []
+    other_srcs = []
+
+    for file in srcs:
+        if _is_src_jar(file):
+            src_jars.append(file)
+        else:
+            other_srcs.append(file)
+
+    return (other_srcs, src_jars)
+
+def _is_src_jar(file):
+    return (file.short_path.lower().endswith(".srcjar") or file.short_path.lower().endswith("-sources.jar") or
+            file.short_path.lower().endswith("-src.jar"))

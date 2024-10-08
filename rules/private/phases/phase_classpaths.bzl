@@ -6,6 +6,7 @@ load(
     "//rules/common:private/utils.bzl",
     _action_singlejar = "action_singlejar",
     _collect = "collect",
+    _separate_src_jars = "separate_src_jars",
 )
 
 def phase_classpaths(ctx, g):
@@ -57,13 +58,7 @@ def phase_classpaths(ctx, g):
         _collect(JavaInfo, g.init.scala_configuration.compiler_classpath),
     ).transitive_runtime_jars
 
-    srcs = [file for file in ctx.files.srcs if file.extension.lower() in ["java", "scala"]]
-    src_jars = [
-        file
-        for file in ctx.files.srcs
-        if file.path.lower().endswith(".srcjar") or file.path.lower().endswith("-sources.jar") or
-           file.path.lower().endswith("-src.jar")
-    ]
+    srcs, src_jars = _separate_src_jars(ctx.files.srcs)
 
     jar = ctx.actions.declare_file("{}/classes.jar".format(ctx.label.name))
 

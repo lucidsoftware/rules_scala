@@ -7,6 +7,7 @@ load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _separate_src_jars = "separate_src_jars",
 )
 
 scaladoc_private_attributes = {
@@ -33,13 +34,7 @@ def scaladoc_implementation(ctx):
             [dep[JavaInfo].transitive_runtime_jars for dep in ctx.attr.compiler_deps],
     )
 
-    srcs = [file for file in ctx.files.srcs if file.extension.lower() in ["java", "scala"]]
-    src_jars = [
-        file
-        for file in ctx.files.srcs
-        if file.path.lower().endswith(".srcjar") or file.path.lower().endswith("-sources.jar") or
-           file.path.lower().endswith("-src.jar")
-    ]
+    srcs, src_jars = _separate_src_jars(ctx.files.srcs)
 
     scalacopts = ["-doc-title", ctx.attr.title or ctx.label] + ctx.attr.scalacopts
 

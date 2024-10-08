@@ -41,9 +41,9 @@ load(":jvm.bzl", _labeled_jars = "labeled_jars")
 load(":providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
 load(
     ":register_toolchain.bzl",
+    _scala_toolchain_attributes = "scala_toolchain_attributes",
     _scala_toolchain_incoming_transition = "scala_toolchain_incoming_transition",
     _scala_toolchain_outgoing_transition = "scala_toolchain_outgoing_transition",
-    _scala_toolchain_attributes = "scala_toolchain_attributes",
 )
 
 _compile_private_attributes = {
@@ -358,7 +358,7 @@ def make_scala_test(*extras):
                 ),
                 "subprocess_runner": attr.label(
                     cfg = _scala_toolchain_outgoing_transition,
-                    default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"
+                    default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess",
                 ),
             },
             _extras_attributes(extras),

@@ -1,3 +1,4 @@
+load("@rules_scala_annex_scala_toolchain//:default.bzl", "default_scala_toolchain_name")
 load(
     "//rules:providers.bzl",
     "CodeCoverageConfiguration",
@@ -14,7 +15,6 @@ load(
     "phase_zinc_compile",
     "phase_zinc_depscheck",
 )
-load("@rules_scala_annex_scala_toolchain//:default.bzl", "default_scala_toolchain_name")
 
 def _bootstrap_configuration_impl(ctx):
     return [

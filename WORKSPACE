@@ -2,6 +2,18 @@ workspace(name = "rules_scala_annex")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# rules_license
+rules_license_tag = "1.0.0"
+
+http_archive(
+    name = "rules_license",
+    sha256 = "26d4021f6898e23b82ef953078389dd49ac2b5618ac564ade4ef87cced147b38",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+        "https://github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+    ],
+)
+
 # skylib
 
 bazel_skylib_tag = "1.7.1"
@@ -21,11 +33,26 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+# rules_java
+http_archive(
+    name = "rules_java",
+    sha256 = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83",
+    urls = [
+        "https://github.com/bazelbuild/rules_java/releases/download/7.12.2/rules_java-7.12.2.tar.gz",
+    ],
+)
+
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
+
+rules_java_dependencies()
+
+register_toolchains("//:repository_default_toolchain_21_definition")
+
 # com_github_bazelbuild_buildtools
 
-buildtools_tag = "7.1.2"
+buildtools_tag = "7.3.1"
 
-buildtools_sha256 = "4c63e823e6944c950401f92155416c631a65657dd32e1021451fc015faf22ecb"
+buildtools_sha256 = "118602587d5804c720c1617db30f56c93ec7a2bdda5e915125fccf7421e78412"
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",
@@ -47,48 +74,12 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.16/rules_cc-0.0.16.tar.gz"],
 )
 
-# io_bazel_rules_go
-
-rules_go_tag = "v0.43.0"
-
-rules_go_sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb"
-
-http_archive(
-    name = "io_bazel_rules_go",
-    integrity = "sha256-1qtrV+SMCVI+kwUPE2mPcIQoz9XmGSUuNp03evZZdwc=",
-    urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),
-        "https://github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),
-    ],
-)
-
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains(version = "1.17")
-
-# rules_java
-http_archive(
-    name = "rules_java",
-    sha256 = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83",
-    urls = [
-        "https://github.com/bazelbuild/rules_java/releases/download/7.12.2/rules_java-7.12.2.tar.gz",
-    ],
-)
-
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
-
-rules_java_dependencies()
-
-register_toolchains("//:repository_default_toolchain_21_definition")
-
 # rules_jvm_external
-rules_jvm_external_tag = "6.1"
+rules_jvm_external_tag = "6.5"
 
 http_archive(
     name = "rules_jvm_external",
-    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
+    sha256 = "c5b27928eeb8f0761f0805540587660f0ecc6946e9c04bf0d4c89e2f7d332b2b",
     strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
 )
@@ -185,6 +176,27 @@ load("@rules_proto//proto:setup.bzl", "rules_proto_setup")
 
 rules_proto_setup()
 
+# rules_go
+
+rules_go_tag = "v0.43.0"
+
+rules_go_sha256 = "d6ab6b57e48c09523e93050f13698f708428cfd5e619252e369d377af6597707"
+
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = rules_go_sha256,
+    urls = [
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),
+        "https://github.com/bazelbuild/rules_go/releases/download/{tag}/rules_go-{tag}.zip".format(tag = rules_go_tag),
+    ],
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "1.17")
+
 # Stardoc
 
 http_archive(
@@ -210,11 +222,11 @@ stardoc_pinned_maven_install()
 
 # rules_pkg
 
-rules_pkg_version = "1.0.0"
+rules_pkg_version = "1.0.1"
 
 http_archive(
     name = "rules_pkg",
-    sha256 = "cad05f864a32799f6f9022891de91ac78f30e0fa07dc68abac92a628121b5b11",
+    sha256 = "d20c951960ed77cb7b341c2a59488534e494d5ad1d30c4818c736d57772a9fef",
     urls = [
         "https://github.com/bazelbuild/rules_pkg/releases/download/{v}/rules_pkg-{v}.tar.gz".format(v = rules_pkg_version),
     ],
@@ -225,11 +237,11 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
 # rules_python - this is needed by rules_jvm_external for some reason
-rules_python_tag = "0.33.2"
+rules_python_tag = "0.36.0"
 
 http_archive(
     name = "rules_python",
-    sha256 = "e3f1cc7a04d9b09635afb3130731ed82b5f58eadc8233d4efb59944d92ffc06f",
+    sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
     strip_prefix = "rules_python-{}".format(rules_python_tag),
     url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
 )

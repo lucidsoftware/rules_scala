@@ -3,6 +3,17 @@ workspace(name = "rules_scala_annex_test")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 
+rules_license_tag = "1.0.0"
+
+http_archive(
+    name = "rules_license",
+    sha256 = "26d4021f6898e23b82ef953078389dd49ac2b5618ac564ade4ef87cced147b38",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+        "https://github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+    ],
+)
+
 # skylib
 
 bazel_skylib_tag = "1.7.1"
@@ -37,17 +48,12 @@ rules_java_dependencies()
 
 register_toolchains("//:repository_default_toolchain_21_definition")
 
-local_repository(
-    name = "rules_scala_annex",
-    path = "../",
-)
-
 # rules_jvm_external
-rules_jvm_external_tag = "6.1"
+rules_jvm_external_tag = "6.5"
 
 http_archive(
     name = "rules_jvm_external",
-    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
+    sha256 = "c5b27928eeb8f0761f0805540587660f0ecc6946e9c04bf0d4c89e2f7d332b2b",
     strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
 )
@@ -59,6 +65,11 @@ rules_jvm_external_deps()
 load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
 
 rules_jvm_external_setup()
+
+local_repository(
+    name = "rules_scala_annex",
+    path = "../",
+)
 
 load(
     "@rules_scala_annex//rules/scala:workspace.bzl",
@@ -218,11 +229,11 @@ http_file(
 )
 
 # rules_python - this is needed by rules_jvm_external for some reason
-rules_python_tag = "0.33.2"
+rules_python_tag = "0.36.0"
 
 http_archive(
     name = "rules_python",
-    sha256 = "e3f1cc7a04d9b09635afb3130731ed82b5f58eadc8233d4efb59944d92ffc06f",
+    sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
     strip_prefix = "rules_python-{}".format(rules_python_tag),
     url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
 )

@@ -68,9 +68,9 @@ def phase_zinc_compile(ctx, g):
 
     worker = toolchain.zinc_configuration.compile_worker
 
-    worker_inputs, _, input_manifests = ctx.resolve_command(tools = [worker])
+    worker_inputs, _ = ctx.resolve_tools(tools = [worker])
     inputs = depset(
-        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs,
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs.to_list(),
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
@@ -108,8 +108,7 @@ def phase_zinc_compile(ctx, g):
         mnemonic = "ScalaCompile",
         inputs = inputs,
         outputs = outputs,
-        executable = worker.files_to_run.executable,
-        input_manifests = input_manifests,
+        executable = worker.files_to_run,
         execution_requirements = _resolve_execution_reqs(
             ctx,
             execution_requirements_tags,

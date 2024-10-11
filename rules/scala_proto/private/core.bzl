@@ -18,7 +18,7 @@ def scala_proto_library_implementation(ctx):
 
     compiler = ctx.toolchains["@rules_scala_annex//rules/scala_proto:compiler_toolchain_type"]
 
-    compiler_inputs, _, input_manifests = ctx.resolve_command(tools = [compiler.compiler])
+    compiler_inputs, _ = ctx.resolve_tools(tools = [compiler.compiler])
 
     srcjar = ctx.outputs.srcjar
 
@@ -45,9 +45,8 @@ def scala_proto_library_implementation(ctx):
         mnemonic = "ScalaProtoCompile",
         inputs = depset(direct = [], transitive = [transitive_sources]),
         outputs = [gendir],
-        executable = compiler.compiler.files_to_run.executable,
+        executable = compiler.compiler.files_to_run,
         tools = compiler_inputs,
-        input_manifests = input_manifests,
         progress_message = "Compiling %{label} protobuf into Scala source",
         execution_requirements = _resolve_execution_reqs(
             ctx,

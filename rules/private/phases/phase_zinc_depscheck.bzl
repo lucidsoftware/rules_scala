@@ -21,7 +21,7 @@ def phase_zinc_depscheck(ctx, g):
     deps_checks = {}
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
 
-    worker_inputs, _, worker_input_manifests = ctx.resolve_command(tools = [deps_configuration.worker])
+    worker_inputs, _ = ctx.resolve_tools(tools = [deps_configuration.worker])
     for name in ("direct", "used"):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
         deps_args = ctx.actions.args()
@@ -43,10 +43,9 @@ def phase_zinc_depscheck(ctx, g):
         deps_args.use_param_file("@%s", use_always = True)
         ctx.actions.run(
             mnemonic = "ScalaCheckDeps",
-            inputs = [g.compile.used] + worker_inputs,
+            inputs = [g.compile.used] + worker_inputs.to_list(),
             outputs = [deps_check],
-            executable = deps_configuration.worker.files_to_run.executable,
-            input_manifests = worker_input_manifests,
+            executable = deps_configuration.worker.files_to_run,
             execution_requirements = _resolve_execution_reqs(
                 ctx,
                 {

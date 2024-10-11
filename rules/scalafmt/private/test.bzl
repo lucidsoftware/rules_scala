@@ -30,7 +30,7 @@ scala_non_default_format_attributes = {
 
 def build_format(ctx):
     files = []
-    runner_inputs, _, runner_manifests = ctx.resolve_command(tools = [ctx.attr._fmt])
+    runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._fmt])
     manifest_content = []
     for src in ctx.files.srcs:
         if src.path.endswith(".scala") and src.is_source:
@@ -47,7 +47,6 @@ def build_format(ctx):
                 arguments = ["--jvm_flag=-Dfile.encoding=UTF-8", args],
                 executable = ctx.executable._fmt,
                 outputs = [file],
-                input_manifests = runner_manifests,
                 inputs = [ctx.file.config, src],
                 tools = runner_inputs,
                 execution_requirements = _resolve_execution_reqs(

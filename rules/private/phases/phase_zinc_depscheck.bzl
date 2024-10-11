@@ -6,6 +6,7 @@ load(
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _short_path = "short_path",
 )
 
 #
@@ -81,4 +82,7 @@ def phase_zinc_depscheck(ctx, g):
 def _add_args_for_depscheck_labeled_group(labeled_jar_group, deps_args):
     deps_args.add("--group")
     deps_args.add(labeled_jar_group.label, format = "_%s")
-    deps_args.add_all(labeled_jar_group.jars)
+
+    # We do want to use map_each on the jar paths as we don't want the configuration specific
+    # fragments of those paths.
+    deps_args.add_all(labeled_jar_group.jars, map_each = _short_path)

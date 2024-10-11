@@ -143,19 +143,19 @@ _zinc_configuration_underlying = rule(
         "version": attr.string(mandatory = True),
         "_code_coverage_instrumentation_worker": attr.label(
             allow_files = True,
-            cfg = "host",
+            cfg = "exec",
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/jacoco/instrumenter",
             executable = True,
         ),
         "_compile_worker": attr.label(
             allow_files = True,
-            cfg = "host",
+            cfg = "exec",
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/compile",
             executable = True,
         ),
         "_deps_worker": attr.label(
             allow_files = True,
-            cfg = "host",
+            cfg = "exec",
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/deps",
             executable = True,
         ),

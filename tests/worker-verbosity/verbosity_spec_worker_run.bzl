@@ -31,7 +31,7 @@ verbosity_spec_worker_run = rule(
     attrs = {
         "verbosity_spec_worker": attr.label(
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             allow_files = True,
             default = Label(":verbosity-spec-worker"),
         ),

@@ -12,7 +12,7 @@ load(
 
 scaladoc_private_attributes = {
     "_runner": attr.label(
-        cfg = "host",
+        cfg = "exec",
         executable = True,
         default = "//src/main/scala/higherkindness/rules_scala/workers/zinc/doc",
     ),

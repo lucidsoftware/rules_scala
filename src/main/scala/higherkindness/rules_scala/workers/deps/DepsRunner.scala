@@ -62,16 +62,14 @@ object DepsRunner extends WorkerMain[Unit] {
 
   private[this] class Group private (
     val label: String,
-    val jars: Set[Path],
+    val jars: Set[String],
   )
 
   private[this] object Group {
     def apply(workDir: Path, prependedLabel: String, jars: Seq[String]): Group = {
       new Group(
         prependedLabel.tail,
-        jars.view.map { jar =>
-          SandboxUtil.getSandboxPath(workDir, Paths.get(jar))
-        }.toSet,
+        jars.toSet,
       )
     }
   }
@@ -117,8 +115,7 @@ object DepsRunner extends WorkerMain[Unit] {
     InterruptUtil.throwIfInterrupted()
 
     val groupLabelToJarPaths = workRequest.groups.map { group =>
-      // Use absolute path because the read mapper uses absolute path.
-      group.label -> group.jars.map(_.toAbsolutePath().normalize().toString())
+      group.label -> group.jars
     }.toMap
     def pathsForLabel(depLabel: String): List[String] = {
       // A label could have no @ prefix, a single @ prefix, or a double @@ prefix.
@@ -143,12 +140,22 @@ object DepsRunner extends WorkerMain[Unit] {
       .readAllLines(workRequest.usedDepsFile)
       .asScala
       .view
-      // Use the read mapper on the used classpath entries in order to keep
-      // comparisons consistent.
+      // Get the short path, so we can compare paths without the Bazel configuration sensitive
+      // parts of the path. We can handle the Zinc machine sensitive parts of the path with the
+      // AnnexMapper, but we don't have an equivalent for the Bazel configuration sensitive parts.
+      // So we just toss both out and compare the short path.
+      // Note that this is dependent upon the Bazel file output structure not changing.
       .map { usedDep =>
-        readMapper.mapClasspathEntry(Paths.get(usedDep)).toString
+        FileUtil
+          .bazelShortPath(
+            Paths.get(
+              usedDep.stripPrefix(AnnexMapper.rootPlaceholder.toString() + "/"),
+            ),
+          )
+          .toString()
       }
       .toSet
+
     val labelsToRemove = if (workRequest.checkUsed) {
       workRequest.directDepLabels
         .diff(workRequest.usedDepWhitelist)

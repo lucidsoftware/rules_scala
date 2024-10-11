@@ -24,9 +24,6 @@ scala_library(
 scala_library(
     name = "common",
     srcs = _common_srcs,
-    deps_used_whitelist = [
-        "@annex//:org_scala_lang_scala_library",
-    ],
     scala_toolchain_name = "zinc_2_13",
     visibility = ["//visibility:public"],
     deps = [

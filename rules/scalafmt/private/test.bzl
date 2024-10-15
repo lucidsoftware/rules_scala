@@ -84,6 +84,7 @@ def format_runner(ctx, manifest, files):
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        mnemonic = "CreateScalaFmtRunner",
     )
 
 def format_tester(ctx, manifest, files):
@@ -101,6 +102,7 @@ def format_tester(ctx, manifest, files):
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        mnemonic = "CreateScalaFmtTester",
     )
 
 def scala_format_test_implementation(ctx):

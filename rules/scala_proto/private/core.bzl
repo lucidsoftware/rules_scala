@@ -77,6 +77,7 @@ def scala_proto_library_implementation(ctx):
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        mnemonic = "SrcJar",
     )
 
     return [OutputGroupInfo(

@@ -1,3 +1,4 @@
+load("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 def scalafmt_artifacts():
@@ -27,4 +28,4 @@ def scalafmt_default_config(path = ".scalafmt.conf"):
     build.append("    srcs = [\"{}\"],".format(path))
     build.append("    visibility = [\"//visibility:public\"],")
     build.append(")")
-    native.new_local_repository(name = "scalafmt_default", build_file_content = "\n".join(build), path = "")
+    new_local_repository(name = "scalafmt_default", build_file_content = "\n".join(build), path = "")

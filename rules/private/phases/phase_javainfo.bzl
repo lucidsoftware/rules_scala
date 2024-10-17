@@ -12,6 +12,7 @@ load(
 load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
+    _separate_src_jars = "separate_src_jars",
 )
 
 #
@@ -49,10 +50,14 @@ def phase_javainfo(ctx, g):
             sibling = ctx.outputs.jar,
         )
 
+        srcs, src_jars = _separate_src_jars(ctx.files.srcs)
+
+        # TODO: source_jars
         source_jar = java_common.pack_sources(
             ctx.actions,
             output_source_jar = output_source_jar,
-            sources = ctx.files.srcs,
+            sources = srcs,
+            source_jars = src_jars,
             java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
         )
 

@@ -13,7 +13,7 @@ scala_proto_library = rule(
                 doc = "The proto_library targets you wish to generate Scala from",
             ),
             "grpc": attr.bool(),
-            "_zipper": attr.label(cfg = "host", default = "@bazel_tools//tools/zip:zipper", executable = True),
+            "_zipper": attr.label(cfg = "exec", default = "@bazel_tools//tools/zip:zipper", executable = True),
         },
     ),
     doc = """
@@ -42,7 +42,7 @@ scala_proto_toolchain = rule(
             doc = "The compiler to use to generate Scala form proto sources",
             allow_files = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
         ),
         "compiler_supports_workers": attr.bool(default = False),
     },

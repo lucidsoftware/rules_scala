@@ -4,6 +4,13 @@ common --color=yes
 # https://github.com/bazelbuild/bazel/issues/18696#issuecomment-2175561503
 common --remote_download_all
 
+common --experimental_output_paths=strip
+common --modify_execution_info=CppCompile=+supports-path-mapping
+
+# TODO: disable this before we merge path mapping. Need to fix the multiplex
+# sandbox + path mapping issue before we can do that.
+build --noworker_multiplex
+
 build --experimental_strict_action_env
 build --javacopt="-source 21 -target 21"
 build --java_language_version="21"
@@ -11,7 +18,8 @@ build --java_runtime_version="remotejdk_21"
 build --tool_java_language_version="21"
 build --tool_java_runtime_version="remotejdk_21"
 
-build --strategy=ScalaCompile=worker
+build --strategy=worker,sandboxed,local
+
 build --worker_max_instances=4
 build --worker_sandboxing
 build --experimental_worker_multiplex_sandboxing
@@ -20,16 +28,17 @@ build --verbose_failures
 
 test --test_output=all
 
+# TODO: re-enable
 build:rules --disk_cache=.bazel_cache
 build:tests --disk_cache=../.bazel_cache
 
-common:rules_v7.2 --config=noop
+common:rules_v7.3 --config=noop
 
 # route potentially unrouted configs to a terminating noop config
 # it's a noop because we use the default value
 common:rules --config=noop
 common:tests --config=noop
-common:v7.2 --config=rules_v7.2
+common:v7.3 --config=rules_v7.3
 
 # pick something trivial as a "noop"
 common:noop --logging=3

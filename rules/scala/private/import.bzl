@@ -4,6 +4,10 @@ load(
     "find_java_toolchain",
 )
 load("@rules_scala_annex//rules:providers.bzl", _IntellijInfo = "IntellijInfo")
+load(
+    "//rules/common:private/utils.bzl",
+    _separate_src_jars = "separate_src_jars",
+)
 
 scala_import_private_attributes = {
     "_java_toolchain": attr.label(
@@ -11,7 +15,7 @@ scala_import_private_attributes = {
     ),
     "_host_javabase": attr.label(
         default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
-        cfg = "host",
+        cfg = "exec",
     ),
 }
 
@@ -21,17 +25,7 @@ def scala_import_implementation(ctx):
     )
 
     if ctx.files.jars:
-        _jar = []
-        _src_jar = []
-        for jar in ctx.files.jars:
-            if (
-                jar.basename.lower().endswith("-sources.jar") or
-                jar.basename.lower().endswith("-src.jar") or
-                jar.basename.lower().endswith(".srcjar")
-            ):
-                _src_jar.append(jar)
-            else:
-                _jar.append(jar)
+        _jar, _src_jar = _separate_src_jars(ctx.files.jars)
         _src_jar += ctx.files.srcjar
 
         output_jar = _jar[0]

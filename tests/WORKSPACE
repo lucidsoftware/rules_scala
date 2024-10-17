@@ -3,6 +3,17 @@ workspace(name = "rules_scala_annex_test")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 
+rules_license_tag = "1.0.0"
+
+http_archive(
+    name = "rules_license",
+    sha256 = "26d4021f6898e23b82ef953078389dd49ac2b5618ac564ade4ef87cced147b38",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+        "https://github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
+    ],
+)
+
 # skylib
 
 bazel_skylib_tag = "1.7.1"
@@ -22,6 +33,39 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+# rules_java
+http_archive(
+    name = "rules_java",
+    sha256 = "dfbadbb37a79eb9e1cc1e156ecb8f817edf3899b28bc02410a6c1eb88b1a6862",
+    urls = [
+        "https://github.com/bazelbuild/rules_java/releases/download/7.12.1/rules_java-7.12.1.tar.gz",
+    ],
+)
+
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+
+rules_java_dependencies()
+
+register_toolchains("//:repository_default_toolchain_21_definition")
+
+# rules_jvm_external
+rules_jvm_external_tag = "6.4"
+
+http_archive(
+    name = "rules_jvm_external",
+    sha256 = "8c92f7c7a57273c692da459f70bd72464c87442e86b9e0b495950a7c554c254f",
+    strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
+    url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
+)
+
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
 # protobuf
 
 protobuf_tag = "3.19.6"
@@ -40,45 +84,10 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-# rules_java
-http_archive(
-    name = "rules_java",
-    sha256 = "8afd053dd2a7b85a4f033584f30a7f1666c5492c56c76e04eec4428bdb2a86cf",
-    urls = [
-        "https://github.com/bazelbuild/rules_java/releases/download/7.6.5/rules_java-7.6.5.tar.gz",
-    ],
-)
-
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
-
-rules_java_dependencies()
-
-rules_java_toolchains()
-
-register_toolchains("//:repository_default_toolchain_21_definition")
-
 local_repository(
     name = "rules_scala_annex",
     path = "../",
 )
-
-# rules_jvm_external
-rules_jvm_external_tag = "6.1"
-
-http_archive(
-    name = "rules_jvm_external",
-    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
-    strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
-)
-
-load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
-
-rules_jvm_external_deps()
-
-load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
-
-rules_jvm_external_setup()
 
 load(
     "@rules_scala_annex//rules/scala:workspace.bzl",
@@ -220,11 +229,11 @@ http_file(
 )
 
 # rules_python - this is needed by rules_jvm_external for some reason
-rules_python_tag = "0.33.2"
+rules_python_tag = "0.36.0"
 
 http_archive(
     name = "rules_python",
-    sha256 = "e3f1cc7a04d9b09635afb3130731ed82b5f58eadc8233d4efb59944d92ffc06f",
+    sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
     strip_prefix = "rules_python-{}".format(rules_python_tag),
     url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
 )

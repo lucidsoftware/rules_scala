@@ -59,7 +59,7 @@ def phase_zinc_compile(ctx, g):
     args.add("--output_used", used)
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
-    args.add("--tmp", tmp.path)
+    args.add_all("--tmp", [tmp], expand_directories = False)
 
     args.add("--log_level", toolchain.zinc_configuration.log_level)
     args.add_all("--", g.classpaths.srcs)
@@ -68,9 +68,9 @@ def phase_zinc_compile(ctx, g):
 
     worker = toolchain.zinc_configuration.compile_worker
 
-    worker_inputs, _, input_manifests = ctx.resolve_command(tools = [worker])
+    worker_inputs, _ = ctx.resolve_tools(tools = [worker])
     inputs = depset(
-        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs,
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs.to_list(),
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
@@ -92,6 +92,7 @@ def phase_zinc_compile(ctx, g):
         "supports-workers": "1",
         "supports-multiplex-sandboxing": "1",
         "supports-worker-cancellation": "1",
+        "supports-path-mapping": "1",
     }
 
     # Disable several things if incremental compilation features are going to be used
@@ -102,14 +103,14 @@ def phase_zinc_compile(ctx, g):
         execution_requirements_tags["no-cache"] = "1"
         execution_requirements_tags["no-remote"] = "1"
         execution_requirements_tags["supports-multiplex-sandboxing"] = "0"
+        execution_requirements_tags["supports-path-mapping"] = "0"
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(
         mnemonic = "ScalaCompile",
         inputs = inputs,
         outputs = outputs,
-        executable = worker.files_to_run.executable,
-        input_manifests = input_manifests,
+        executable = worker.files_to_run,
         execution_requirements = _resolve_execution_reqs(
             ctx,
             execution_requirements_tags,

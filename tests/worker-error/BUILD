@@ -7,7 +7,7 @@ scala_library(
         "RunnerThatThrowsException.scala",
         "RunnerThatThrowsFatalError.scala",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sandbox",
@@ -18,7 +18,7 @@ scala_library(
 scala_test(
     name = "error-spec",
     srcs = ["ErrorSpec.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         ":fatal-error-spec-workers",
@@ -35,7 +35,7 @@ scala_test(
 scala_test(
     name = "fatal-error-spec",
     srcs = ["FatalErrorSpec.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         ":fatal-error-spec-workers",

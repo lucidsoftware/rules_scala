@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 scala_library(
     name = "0_used",
     srcs = ["0_used.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
@@ -13,7 +13,7 @@ scala_library(
 scala_library(
     name = "0_unused",
     srcs = ["0_unused.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
@@ -26,7 +26,7 @@ scala_library(
     deps_used_whitelist = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
@@ -36,7 +36,7 @@ scala_library(
 scala_library(
     name = "indirect_unused",
     srcs = ["indirect_unused.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
@@ -48,7 +48,7 @@ scala_library(
 scala_library(
     name = "indirect_unused_missing",
     srcs = ["indirect_unused.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
@@ -62,7 +62,7 @@ scala_library(
     deps_unused_whitelist = [
         "@annex_test//:org_specs2_specs2_matcher_2_13",
     ],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",

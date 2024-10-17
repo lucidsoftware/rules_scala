@@ -15,14 +15,9 @@ def phase_coverage_jacoco(ctx, g):
     if not ctx.configuration.coverage_enabled:
         return
 
-    if _CodeCoverageConfiguration not in ctx.attr.scala:
-        #print("WARNING: code coverage is not supported by scala configuration: %s " % ctx.attr.scala)
-        return
-
-    code_coverage_configuration = ctx.attr.scala[_CodeCoverageConfiguration]
-
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     worker_inputs, _, worker_input_manifests = ctx.resolve_command(
-        tools = [code_coverage_configuration.instrumentation_worker],
+        tools = [toolchain.code_coverage_configuration.instrumentation_worker],
     )
 
     args = ctx.actions.args()
@@ -42,7 +37,7 @@ def phase_coverage_jacoco(ctx, g):
         mnemonic = "JacocoInstrumenter",
         inputs = [in_out_pair[0] for in_out_pair in in_out_pairs] + worker_inputs,
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
-        executable = code_coverage_configuration.instrumentation_worker.files_to_run.executable,
+        executable = toolchain.code_coverage_configuration.instrumentation_worker.files_to_run.executable,
         input_manifests = worker_input_manifests,
         execution_requirements = _resolve_execution_reqs(
             ctx,

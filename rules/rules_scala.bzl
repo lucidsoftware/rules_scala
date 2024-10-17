@@ -56,12 +56,7 @@ emulate_rules_scala_repository = repository_rule(
     implementation = _emulate_rules_scala_repository_impl,
 )
 
-def emulate_rules_scala(scala, scalatest, extra_deps = []):
-    native.bind(
-        name = "scala_annex/compat/rules_scala/scala",
-        actual = scala,
-    )
-
+def emulate_rules_scala(scalatest, extra_deps = []):
     native.bind(
         name = "scala_annex/compat/rules_scala/extra_deps",
         actual = "@io_bazel_rules_scala//scala:extra_deps",

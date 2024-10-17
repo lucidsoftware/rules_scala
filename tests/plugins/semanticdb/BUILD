@@ -1,7 +1,8 @@
-load("@rules_scala_annex//rules:scala.bzl", "configure_zinc_scala", "scala_library")
+load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
+load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
 
-configure_zinc_scala(
+register_zinc_toolchain(
     name = "scala_2_13_with_semanticdb",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
@@ -15,7 +16,7 @@ configure_zinc_scala(
     version = scala_2_13_version,
 )
 
-configure_zinc_scala(
+register_zinc_toolchain(
     name = "scala_3_with_semanticdb",
     compiler_bridge = "@annex//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = [
@@ -35,13 +36,13 @@ configure_zinc_scala(
 scala_library(
     name = "semanticdb-2_13",
     srcs = glob(["*.scala"]),
-    scala = ":scala_2_13_with_semanticdb",
+    scala_toolchain_name = "scala_2_13_with_semanticdb",
     tags = ["manual"],
 )
 
 scala_library(
     name = "semanticdb-3",
     srcs = glob(["*.scala"]),
-    scala = ":scala_3_with_semanticdb",
+    scala_toolchain_name = "scala_3_with_semanticdb",
     tags = ["manual"],
 )

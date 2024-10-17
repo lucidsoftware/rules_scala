@@ -9,7 +9,6 @@ def _scala_binary_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
-        ("compile", _phase_noop),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
         ("ijinfo", _phase_ijinfo),

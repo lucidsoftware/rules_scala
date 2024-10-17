@@ -16,7 +16,11 @@ load(
 #
 
 def phase_test_launcher(ctx, g):
-    files = ctx.attr._target_jdk[java_common.JavaRuntimeInfo].files.to_list() + [g.compile.zinc_info.analysis_store]
+    # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
+    # "When attaching a transition to an outgoing edge (regardless of whether the transition is a
+    # 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it isn't already. The order of
+    # elements in this list is unspecified."
+    files = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo].files.to_list() + [g.compile.zinc_info.analysis_store]
 
     coverage_replacements = {}
     coverage_runner_jars = depset(direct = [])
@@ -31,7 +35,7 @@ def phase_test_launcher(ctx, g):
         coverage_replacements[jar] if jar in coverage_replacements else jar
         for jar in g.javainfo.java_info.transitive_runtime_jars.to_list()
     ])
-    runner_jars = depset(transitive = [ctx.attr.runner[JavaInfo].transitive_runtime_jars, coverage_runner_jars])
+    runner_jars = depset(transitive = [ctx.attr.runner[0][JavaInfo].transitive_runtime_jars, coverage_runner_jars])
     all_jars = [test_jars, runner_jars]
 
     args = ctx.actions.args()
@@ -43,7 +47,7 @@ def phase_test_launcher(ctx, g):
         args.add_all("--shared_classpath", shared_deps.transitive_runtime_jars, map_each = _test_launcher_short_path)
     elif ctx.attr.isolation == "process":
         subprocess_executable = ctx.actions.declare_file("{}/subprocess".format(ctx.label.name))
-        subprocess_runner_jars = ctx.attr.subprocess_runner[JavaInfo].transitive_runtime_jars
+        subprocess_runner_jars = ctx.attr.subprocess_runner[0][JavaInfo].transitive_runtime_jars
         all_jars.append(subprocess_runner_jars)
         files += _write_launcher(
             ctx,

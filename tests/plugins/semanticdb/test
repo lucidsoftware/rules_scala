@@ -1,9 +1,11 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+bazel_bin="$(bazel info bazel-bin)"
+
 check_for_semanticdb_files() {
 	for filename in "A.scala.semanticdb" "B.scala.semanticdb"; do
-		path="../../bazel-bin/plugins/semanticdb/_semanticdb/semanticdb-$1/META-INF/semanticdb/plugins/semanticdb/$filename"
+		path="../../bazel-bin/plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb/$filename"
 
 		if [ ! -f "$path" ]; then
 			echo "Error: $path doesn't exist"
@@ -12,7 +14,22 @@ check_for_semanticdb_files() {
 	done
 }
 
+check_semanticdb_info() {
+	bazel build ":semanticdb-$1-semanticdb-info"
+
+	output_path="$bazel_bin/plugins/semanticdb/semanticdb-$1-semanticdb-info.txt"
+	semanticdb_file_directory="bazel-out/k8-fastbuild/bin/plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb"
+
+	[ "$(jq ".targetRoot" "$output_path")" = "\"plugins/semanticdb/semanticdb-$1/semanticdb\"" ]
+	[ "$(jq -c ".semanticDbFiles" "$output_path")" = "[\"$semanticdb_file_directory/A.scala.semanticdb\",\"$semanticdb_file_directory/B.scala.semanticdb\"]" ]
+}
+
 bazel build :semanticdb-2_13
 check_for_semanticdb_files 2_13
+check_semanticdb_info 2_13
+
 bazel build :semanticdb-3
 check_for_semanticdb_files '3'
+check_semanticdb_info '3'
+
+bazel build :semanticdb-empty

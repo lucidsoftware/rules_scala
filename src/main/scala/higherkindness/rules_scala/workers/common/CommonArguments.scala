@@ -49,14 +49,18 @@ object Analysis {
 }
 
 object CommonArguments {
+  private val scala2SemanticDbTargetRootRegex = """-P:semanticdb:targetroot:(.*)""".r
+  private val scala3SemanticDbTargetRootRegex = """-semanticdb-target:(.*)""".r
+
   private def adjustCompilerOptions(workDir: Path, options: List[String]) = {
-    def adjustStringPath(path: String) = SandboxUtil.getSandboxPath(workDir, Paths.get(path)).toString
+    def adjustStringPath(path: String) =
+      SandboxUtil.getSandboxPath(workDir, Paths.get(path)).toString
 
     options.flatMap {
-      case s"-P:semanticdb:targetroot:$path" =>
+      case scala2SemanticDbTargetRootRegex(path) =>
         List(s"-P:semanticdb:sourceroot:${workDir.toString}", s"-P:semanticdb:targetroot:${adjustStringPath(path)}")
 
-      case s"-semanticdb-target:$path" =>
+      case scala3SemanticDbTargetRootRegex(path) =>
         List(s"-semanticdb-target:${adjustStringPath(path)}", s"-sourceroot:${workDir.toString}")
 
       case option => List(option)

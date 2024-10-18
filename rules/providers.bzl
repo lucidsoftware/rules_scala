@@ -207,3 +207,11 @@ LabeledJars = provider(
         "values": "The preorder depset of label and jars.",
     },
 )
+
+SemanticDbInfo = provider(
+    doc = "Provided by the Scala rules when `semanticdb_bundle` is set to `False`.",
+    fields = {
+        "target_root": "The directory in which SemanticDB files were outputted.",
+        "semanticdb_files": "The SemanticDB files.",
+    },
+)

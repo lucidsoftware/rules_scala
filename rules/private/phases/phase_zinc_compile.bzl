@@ -37,10 +37,9 @@ def phase_zinc_compile(ctx, g):
     ]
 
     zincs = [dep[_ZincInfo] for dep in ctx.attr.deps if _ZincInfo in dep]
-    common_scalacopts = scala_configuration.global_scalacopts + ctx.attr.scalacopts + g.semanticdb.scalacopts
+    common_scalacopts = scala_configuration.global_scalacopts + ctx.attr.scalacopts
 
     args = ctx.actions.args()
-
     args.add_all(depset(transitive = [zinc.deps for zinc in zincs]), map_each = _compile_analysis)
     args.add("--compiler_bridge", zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
@@ -55,8 +54,10 @@ def phase_zinc_compile(ctx, g):
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
     args.add("--tmp", tmp.path)
-
     args.add("--log_level", zinc_configuration.log_level)
+
+    g.semanticdb.arguments_modifier(args)
+
     args.add_all("--", g.classpaths.srcs)
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)

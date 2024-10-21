@@ -42,13 +42,13 @@ def phase_semanticdb(ctx, g):
             arguments.add("--compiler_option=-P:semanticdb:failures:error")
             arguments.add_all(
                 [outputs[0]],
-                format_each = "--compiler_option=-P:semanticdb:targetroot:%s",
+                format_each = "--compiler_option_referencing_path=-P:semanticdb:targetroot:%s",
                 map_each = _semanticdb_directory_from_file,
             )
         else:
             arguments.add_all(
                 [outputs[0]],
-                format_each = "--compiler_option=-semanticdb-target:%s",
+                format_each = "--compiler_option_referencing_path=-semanticdb-target:%s",
                 map_each = _semanticdb_directory_from_file,
             )
 

@@ -17,6 +17,18 @@ class CommonArguments private (
   val compilerBridge: Path,
   val compilerClasspath: List[Path],
   val compilerOptions: List[String],
+
+  /**
+   * With [[https://bazel.build/remote/multiplex#multiplex_sandboxing multiplex sandboxing]], Bazel generates a separate
+   * sandbox directory for each worker invocation, which means the paths to build artifacts won't be known until the
+   * execution phase. However, compiler options are usually generated during the analysis phase.
+   *
+   * Some compiler options (currently, only those regarding SemanticDB) reference paths to build artifacts and need to
+   * be adjusted to be relative to the sandbox directory. It's more performant for those options to be passed in a
+   * separate list so we don't have to scan through every compiler option and potentially modify it. In our experience,
+   * this resulted in a ~10% worker speedup.
+   */
+  val compilerOptionsReferencingPaths: List[String],
   val classpath: List[Path],
   val debug: Boolean,
   val javaCompilerOptions: List[String],
@@ -93,6 +105,11 @@ object CommonArguments {
     parser
       .addArgument("--compiler_option")
       .help("Compiler option")
+      .action(ArgumentsImpl.append)
+      .metavar("option")
+    parser
+      .addArgument("--compiler_option_referencing_path")
+      .help("Compiler option referencing the paths to build artifact(s)")
       .action(ArgumentsImpl.append)
       .metavar("option")
     parser
@@ -195,9 +212,14 @@ object CommonArguments {
       analyses = analyses,
       compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
       compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
-      compilerOptions = adjustCompilerOptions(
+      compilerOptions = Option(namespace.getList[String]("compiler_option"))
+        .map(_.asScala.toList)
+        .getOrElse(List.empty),
+      compilerOptionsReferencingPaths = adjustCompilerOptions(
         workDir,
-        Option(namespace.getList[String]("compiler_option")).map(_.asScala.toList).getOrElse(List.empty),
+        Option(namespace.getList[String]("compiler_option_referencing_path"))
+          .map(_.asScala.toList)
+          .getOrElse(List.empty),
       ),
       classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
       debug = namespace.getBoolean("debug"),

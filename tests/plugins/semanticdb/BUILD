@@ -1,6 +1,6 @@
-load(":rule.bzl", "read_semanticdb_info")
 load("@rules_scala_annex//rules:scala.bzl", "configure_zinc_scala", "scala_library")
 load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
+load(":rule.bzl", "read_semanticdb_info")
 
 configure_zinc_scala(
     name = "scala_2_13_with_semanticdb",

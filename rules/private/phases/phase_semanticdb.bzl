@@ -34,7 +34,6 @@ def phase_semanticdb(ctx, g):
 
             outputs.append(ctx.actions.declare_file(path))
 
-
     def add_scalacopts(arguments):
         if len(outputs) == 0:
             return

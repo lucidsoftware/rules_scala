@@ -21,6 +21,5 @@ read_semanticdb_info = rule(
             providers = [SemanticDbInfo],
         ),
     },
-
     implementation = _read_semanticdb_info_impl,
 )

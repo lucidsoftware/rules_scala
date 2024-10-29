@@ -7,8 +7,6 @@
 set -eox pipefail
 cd "$(dirname "$0")/.."
 
-. ./scripts/prepare-path.sh --force
-
 case "$1" in
 
     "build")

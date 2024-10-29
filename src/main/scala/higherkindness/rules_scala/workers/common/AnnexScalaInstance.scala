@@ -7,7 +7,7 @@ import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.immutable.Map
+import scala.collection.immutable.TreeMap
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
@@ -48,7 +48,7 @@ object AnnexScalaInstance {
    * from a prior compilation in combination with a new ScalaInstance for the current compilation. Or there's some issue
    * with Scala's classpath caching.
    *
-   * If all three caches are enabled (this cache + Zinc claspath + Scala compiler), then the non-determinism seems go
+   * If all three caches are enabled (this cache + Zinc claspath + Scala compiler), then the non-determinism seems to go
    * away.
    *
    * If this cache is not used, but the Zinc classpath + Scala compiler caches are used, then non-determinsm shows up in
@@ -67,11 +67,20 @@ object AnnexScalaInstance {
    * any different from leaving Zinc's cache enabled.
    */
   private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
-    // We need to remove the sandbox prefix from the paths in order to compare them.
-    val mapBuilder = Map.newBuilder[Path, Path]
+    // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
+    // We use a tree map because we want the keys sorted for comparison purposes
+    val mapBuilder = TreeMap.newBuilder[Path, Path]
+    val absoluteWorkDir = workDir.toAbsolutePath().normalize()
     allJars.foreach { jar =>
-      val comparableJarPath = jar.toPath().toAbsolutePath().normalize()
-      mapBuilder.addOne(jar.toPath -> workDir.toAbsolutePath().normalize().relativize(comparableJarPath))
+      val absoluteJarPath = jar.toPath().toAbsolutePath().normalize()
+      // Remove the sandbox prefix as well as the arch/config specific parts of the path.
+      mapBuilder.addOne(
+        jar.toPath ->
+          FileUtil.bazelShortPath(
+            absoluteWorkDir.relativize(absoluteJarPath),
+            replaceExternal = false,
+          ),
+      )
     }
     val workRequestJarToWorkerJar = mapBuilder.result()
 
@@ -84,7 +93,7 @@ object AnnexScalaInstance {
     // but that would require hashing the all the classpath jars on every compilation request. I
     // imagine that would cause a performance hit.
     //
-    // I also imagine it is extremeley rare to be mutating the contents of compiler classpath jars
+    // I also imagine it is extremely rare to be mutating the contents of compiler classpath jars
     // while keeping the names the same, e.g., generating new scala library jar for scala 2.13.14.
     // As a result I'm leaving this string based for now.
     val key = workRequestJarToWorkerJar.values.mkString(":")

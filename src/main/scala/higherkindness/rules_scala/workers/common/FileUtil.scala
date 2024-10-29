@@ -4,7 +4,7 @@ package workers.common
 import scala.annotation.tailrec
 import java.io.{File, IOException}
 import java.nio.channels.FileChannel
-import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
+import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, Paths, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
 
@@ -57,6 +57,29 @@ object FileUtil {
 
   def getNameWithoutRulesJvmExternalStampPrefix(path: Path): String = {
     path.getFileName().toString().stripPrefix("header_").stripPrefix("processed_")
+  }
+
+  /**
+   * Given a Bazel path to the bazel output directory, return a path excluding the bazel configuration specific parts of
+   * the path. This is analogous to Bazel's File.short_path function. Fair warning: this function is super good enough,
+   * but is likely not perfect.
+   */
+  def bazelShortPath(path: Path, replaceExternal: Boolean = true): Path = {
+    val nameCount = path.getNameCount()
+    val pathString = path.toAbsolutePath().normalize().toString()
+
+    val shortPath = if (path.startsWith("bazel-out") && nameCount >= 4) {
+      path.subpath(3, nameCount)
+    } else {
+      path
+    }
+
+    // Handle difference between Bazel's external directory being referred to as .. in the short_path
+    if (replaceExternal && shortPath.startsWith("external")) {
+      Paths.get(shortPath.toString().replaceFirst("external", ".."))
+    } else {
+      shortPath
+    }
   }
 
   def copy(source: Path, target: Path) = Files.walkFileTree(source, new CopyFileVisitor(source, target))

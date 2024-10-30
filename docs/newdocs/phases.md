@@ -15,6 +15,7 @@ def _scala_binary_implementation(ctx):
         ("ijinfo", _phase_ijinfo),
         ("binary_deployjar", _phase_binary_deployjar),
         ("binary_launcher", _phase_binary_launcher),
+        ("outputgroupinfo", _phase_outputgroupinfo),
         ("coda", _phase_coda),
     ]).coda
 ```

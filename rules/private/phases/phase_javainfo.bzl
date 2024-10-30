@@ -13,7 +13,6 @@ load(
 # PHASE: javainfo
 #
 # Builds up the JavaInfo provider. And the ScalaInfo, while we're at it.
-# And DefaultInfo.
 #
 
 def phase_javainfo(ctx, g):
@@ -61,18 +60,10 @@ def phase_javainfo(ctx, g):
         scala_configuration = g.init.scala_configuration,
     )
 
-    output_group_info = OutputGroupInfo(
-        **g.out.output_groups
-    )
-
-    g.out.providers.extend([
-        output_group_info,
-        java_info,
-        scala_info,
-    ])
+    g.out.providers.append(java_info)
+    g.out.providers.append(scala_info)
 
     return struct(
         java_info = java_info,
-        output_group_info = output_group_info,
         scala_info = scala_info,
     )

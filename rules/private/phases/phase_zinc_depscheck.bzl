@@ -20,11 +20,10 @@ def phase_zinc_depscheck(ctx, g):
         return
 
     deps_configuration = ctx.attr.scala[_DepsConfiguration]
-
-    deps_checks = {}
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
-
     worker_inputs, _, worker_input_manifests = ctx.resolve_command(tools = [deps_configuration.worker])
+    outputs = []
+
     for name in ("direct", "used"):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
         deps_args = ctx.actions.args()
@@ -61,21 +60,16 @@ def phase_zinc_depscheck(ctx, g):
             ),
             arguments = [deps_args],
         )
-        deps_checks[name] = deps_check
 
-    outputs = []
-    if deps_configuration.direct == "error":
-        outputs.append(deps_checks["direct"])
-    if deps_configuration.used == "error":
-        outputs.append(deps_checks["used"])
+        if getattr(deps_configuration, name) == "error":
+            outputs.append(deps_check)
 
-    g.out.output_groups["depscheck"] = depset(outputs)
+    if "_validation" in g.out.output_groups:
+        validation_transitive = [g.out.output_groups["_validation"]]
+    else:
+        validation_transitive = None
 
-    return struct(
-        checks = deps_checks,
-        outputs = outputs,
-        toolchain = deps_configuration,
-    )
+    g.out.output_groups["_validation"] = depset(outputs, transitive = validation_transitive)
 
 # If you use avoid using map_each, then labels are converted to their apparent repo name rather than
 # their canonical repo name. The apparent repo name is the human readable one that we want for use

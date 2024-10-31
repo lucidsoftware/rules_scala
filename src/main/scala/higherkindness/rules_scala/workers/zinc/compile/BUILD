@@ -7,9 +7,6 @@ scala_binary(
     main_class = "higherkindness.rules_scala.workers.zinc.compile.ZincRunner",
     scala = "//src/main/scala:bootstrap",
     visibility = ["//visibility:public"],
-    runtime_deps = [
-        "@annex//:com_lihaoyi_sourcecode_2_13",
-    ],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/error",
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",

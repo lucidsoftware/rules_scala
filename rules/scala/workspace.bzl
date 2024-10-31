@@ -18,7 +18,6 @@ scalapb_version = "0.11.17"
 def scala_artifacts():
     return [
         "ch.epfl.scala:bloop-frontend_2.12:1.0.0",
-        "com.lihaoyi:sourcecode_2.13:0.2.7,",
         "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
         "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
         "net.sourceforge.argparse4j:argparse4j:0.8.1",

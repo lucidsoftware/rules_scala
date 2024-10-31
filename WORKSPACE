@@ -21,6 +21,17 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+skydoc_tag = "0.3.0"
+
+skydoc_sha256 = "8762a212cff5f81505a1632630edcfe9adce381479a50a03c968bd2fc217972d"
+
+http_archive(
+    name = "io_bazel_skydoc",
+    sha256 = skydoc_sha256,
+    strip_prefix = "skydoc-{}".format(skydoc_tag),
+    url = "https://github.com/bazelbuild/skydoc/archive/{}.zip".format(skydoc_tag),
+)
+
 # com_github_bazelbuild_buildtools
 
 buildtools_tag = "7.1.2"

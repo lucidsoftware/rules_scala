@@ -10,21 +10,22 @@ filegroup(
     visibility = ["//visibility:public"]
 )"""
 
-scala_2_13_version = "2.13.14"
-scala_3_version = "3.4.2"
-zinc_version = "1.10.1"
+scala_2_13_version = "2.13.15"
+scala_3_version = "3.5.2"
+zinc_version = "1.10.4"
+scalapb_version = "0.11.17"
 
 def scala_artifacts():
     return [
         "ch.epfl.scala:bloop-frontend_2.12:1.0.0",
         "com.lihaoyi:sourcecode_2.13:0.2.7,",
-        "com.thesamet.scalapb:lenses_2.13:0.11.17",
-        "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.17",
+        "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
+        "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
         "net.sourceforge.argparse4j:argparse4j:0.8.1",
         "org.jacoco:org.jacoco.core:0.7.5.201505241946",
         "org.scala-sbt:test-interface:1.0",
         "org.scala-sbt:compiler-interface:{}".format(zinc_version),
-        "org.scala-sbt:io_2.13:1.10.0",
+        "org.scala-sbt:io_2.13:1.10.1",
         "org.scala-sbt:util-interface:{}".format(zinc_version),
         "org.scala-sbt:util-logging_2.13:{}".format(zinc_version),
         "org.scala-sbt:zinc_2.13:{}".format(zinc_version),
@@ -33,7 +34,6 @@ def scala_artifacts():
         "org.scala-sbt:zinc-compile-core_2.13:{}".format(zinc_version),
         "org.scala-sbt:zinc-core_2.13:{}".format(zinc_version),
         "org.scala-sbt:zinc-persist_2.13:{}".format(zinc_version),
-        "org.scala-sbt:compiler-interface:{}".format(zinc_version),
         "org.scala-lang:scala-compiler:{}".format(scala_2_13_version),
         "org.scala-lang:scala-library:{}".format(scala_2_13_version),
         "org.scala-lang:scala-reflect:{}".format(scala_2_13_version),

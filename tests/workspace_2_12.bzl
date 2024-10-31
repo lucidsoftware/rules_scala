@@ -1,12 +1,13 @@
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_scala_annex_test//:workspace.bzl", "scalacheck_version", "scalatest_version", "specs2_version")
 
 def test_2_12_artifacts():
     return [
-        "org.specs2:specs2-common_2.12:4.12.3",
-        "org.specs2:specs2-core_2.12:4.12.3",
-        "org.specs2:specs2-matcher_2.12:4.12.3",
-        "org.scalatest:scalatest_2.12:3.2.9",
-        "org.scalacheck:scalacheck_2.12:1.15.4",
+        "org.specs2:specs2-common_2.12:{}".format(specs2_version),
+        "org.specs2:specs2-core_2.12:{}".format(specs2_version),
+        "org.specs2:specs2-matcher_2.12:{}".format(specs2_version),
+        "org.scalatest:scalatest_2.12:{}".format(scalatest_version),
+        "org.scalacheck:scalacheck_2.12:{}".format(scalacheck_version),
     ]
 
 def test_2_12_dependencies():

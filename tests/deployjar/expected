@@ -175,9 +175,9 @@
 -rw----     2.0 fat     1133 bl 53% defN 20100101.000002 scala/sys/process/ProcessBuilderImpl$FileInput.class
 -rw----     2.0 fat     1134 bl 34% defN 20100101.000002 scala/collection/Hashing.class
 -rw----     2.0 fat    11357 bl 65% defN 20100101.000000 LICENSE
--rw----     2.0 fat    11358 bl 54% defN 20100101.000002 scala/util/Failure.class
 -rw----     2.0 fat    11359 bl 72% defN 20100101.000002 scala/util/Properties$.class
 -rw----     2.0 fat    11375 bl 68% defN 20100101.000002 scala/collection/immutable/RedBlackTree$Tree.class
+-rw----     2.0 fat    11376 bl 54% defN 20100101.000002 scala/util/Failure.class
 -rw----     2.0 fat     1138 bl 55% defN 20100101.000002 scala/collection/convert/StreamExtensions$AccumulatorFactoryInfo$$anon$9.class
 -rw----     2.0 fat     1139 bl 54% defN 20100101.000002 scala/Product14$.class
 -rw----     2.0 fat    11407 bl 74% defN 20100101.000002 scala/math/Equiv$.class
@@ -224,8 +224,8 @@
 -rw----     2.0 fat     1187 bl 55% defN 20100101.000002 scala/collection/JavaConverters$AsJavaCollection.class
 -rw----     2.0 fat    11886 bl 63% defN 20100101.000002 scala/collection/mutable/IndexedBuffer.class
 -rw----     2.0 fat     1189 bl 43% defN 20100101.000002 scala/runtime/ScalaRunTime$$anon$1.class
--rw----     2.0 fat    11907 bl 53% defN 20100101.000002 scala/util/Success.class
 -rw----     2.0 fat     1190 bl 47% defN 20100101.000002 scala/collection/View$Single.class
+-rw----     2.0 fat    11932 bl 53% defN 20100101.000002 scala/util/Success.class
 -rw----     2.0 fat     1194 bl 44% defN 20100101.000002 scala/math/Equiv$Boolean$.class
 -rw----     2.0 fat     1194 bl 55% defN 20100101.000002 scala/collection/mutable/package$.class
 -rw----     2.0 fat     1195 bl 55% defN 20100101.000002 scala/collection/JavaConverters$AsJavaEnumeration.class
@@ -314,9 +314,9 @@
 -rw----     2.0 fat    12871 bl 50% defN 20100101.000002 scala/collection/SeqView.class
 -rw----     2.0 fat    12891 bl 67% defN 20100101.000002 scala/concurrent/duration/DurationConversions.class
 -rw----     2.0 fat     1289 bl 47% defN 20100101.000002 scala/math/Equiv$Float$StrictEquiv$.class
--rw----     2.0 fat     1292 bl 43% defN 20100101.000002 scala/util/Try$.class
 -rw----     2.0 fat     1292 bl 47% defN 20100101.000002 scala/collection/Iterator$$anon$18.class
 -rw----     2.0 fat     1292 bl 55% defN 20100101.000002 scala/runtime/VolatileObjectRef.class
+-rw----     2.0 fat     1296 bl 43% defN 20100101.000002 scala/util/Try$.class
 -rw----     2.0 fat     1296 bl 47% defN 20100101.000002 scala/math/Equiv$Double$StrictEquiv$.class
 -rw----     2.0 fat     1296 bl 51% defN 20100101.000002 scala/collection/MapOps$$anon$1.class
 -rw----     2.0 fat     1297 bl 55% defN 20100101.000002 scala/collection/mutable/AnyRefMap$$anon$1.class
@@ -463,7 +463,7 @@
 -rw----     2.0 fat     1446 bl 48% defN 20100101.000002 scala/collection/ArrayOps$ReverseIterator$mcD$sp.class
 -rw----     2.0 fat     1448 bl 48% defN 20100101.000002 scala/collection/ArrayOps$ReverseIterator$mcZ$sp.class
 -rw----     2.0 fat     1452 bl 48% defN 20100101.000002 scala/collection/ArrayOps$ReverseIterator$mcC$sp.class
--rw----     2.0 fat     1453 bl 51% defN 20100101.000002 scala/collection/immutable/LazyList$LazyIterator.class
+-rw----     2.0 fat     1453 bl 52% defN 20100101.000002 scala/collection/immutable/LazyList$LazyIterator.class
 -rw----     2.0 fat     1455 bl 53% defN 20100101.000002 scala/Predef$any2stringadd.class
 -rw----     2.0 fat     1455 bl 54% defN 20100101.000002 scala/collection/BuildFrom$$anon$1.class
 -rw----     2.0 fat     1456 bl 48% defN 20100101.000002 scala/collection/IterableOnceOps$Spanner$1.class
@@ -544,7 +544,7 @@
 -rw----     2.0 fat    15276 bl 62% defN 20100101.000002 scala/Tuple11.class
 -rw----     2.0 fat    15287 bl 55% defN 20100101.000002 scala/collection/LinearSeqOps.class
 -rw----     2.0 fat     1528 bl 30% defN 20100101.000002 scala/LowPriorityImplicits2.class
--rw----     2.0 fat     1528 bl 47% defN 20100101.000002 scala/util/Using$Manager$.class
+-rw----     2.0 fat     1532 bl 46% defN 20100101.000002 scala/util/Using$Manager$.class
 -rw----     2.0 fat     1533 bl 49% defN 20100101.000002 scala/sys/process/ProcessImpl$Spawn$.class
 -rw----     2.0 fat     1533 bl 56% defN 20100101.000002 scala/collection/convert/StreamExtensions$AnyArrayHasSeqParStream.class
 -rw----     2.0 fat    15345 bl 80% defN 20100101.000002 scala/jdk/FunctionConverters.class
@@ -1185,12 +1185,12 @@
 -rw----     2.0 fat     2113 bl 39% defN 20100101.000002 scala/util/control/Breaks.class
 -rw----     2.0 fat     2114 bl 38% defN 20100101.000002 scala/Proxy.class
 -rw----     2.0 fat     2116 bl 57% defN 20100101.000002 scala/collection/mutable/HashMap$DeserializationFactory.class
--rw----     2.0 fat    21176 bl 68% defN 20100101.000002 scala/util/Using$.class
 -rw----     2.0 fat     2117 bl 58% defN 20100101.000002 scala/jdk/FunctionWrappers$RichDoubleToIntFunctionAsFunction1$.class
 -rw----     2.0 fat     2117 bl 58% defN 20100101.000002 scala/jdk/FunctionWrappers$RichDoubleUnaryOperatorAsFunction1$.class
 -rw----     2.0 fat     2117 bl 58% defN 20100101.000002 scala/jdk/FunctionWrappers$RichIntToDoubleFunctionAsFunction1$.class
 -rw----     2.0 fat     2117 bl 58% defN 20100101.000002 scala/jdk/FunctionWrappers$RichLongBinaryOperatorAsFunction2$.class
 -rw----     2.0 fat     2117 bl 59% defN 20100101.000002 scala/jdk/FunctionWrappers$RichObjIntConsumerAsFunction2.class
+-rw----     2.0 fat    21181 bl 68% defN 20100101.000002 scala/util/Using$.class
 -rw----     2.0 fat     2119 bl 62% defN 20100101.000002 scala/Tuple2$mcJJ$sp.class
 -rw----     2.0 fat     2120 bl 53% defN 20100101.000002 scala/math/Equiv$Tuple2Equiv.class
 -rw----     2.0 fat     2123 bl 62% defN 20100101.000002 scala/Tuple2$mcDD$sp.class
@@ -1514,7 +1514,6 @@
 -rw----     2.0 fat     2530 bl 64% defN 20100101.000002 scala/collection/convert/StreamExtensions$FloatArrayHasSeqParStream.class
 -rw----     2.0 fat     2531 bl 37% defN 20100101.000002 scala/MatchError.class
 -rw----     2.0 fat     2532 bl 56% defN 20100101.000002 scala/sys/process/package.class
--rw----     2.0 fat     2537 bl 52% defN 20100101.000002 scala/collection/immutable/TreeSeqMap$Ordering$Iterator.class
 -rw----     2.0 fat     2546 bl 54% defN 20100101.000002 scala/collection/LazyZip2$$anon$5$$anon$6.class
 -rw----     2.0 fat     2547 bl 56% defN 20100101.000002 scala/runtime/AbstractFunction17.class
 -rw----     2.0 fat     2551 bl 58% defN 20100101.000002 scala/collection/LazyZip4$$anon$19$$anon$20.class
@@ -1562,7 +1561,7 @@
 -rw----     2.0 fat    26448 bl 62% defN 20100101.000002 scala/collection/mutable/OpenHashMap.class
 -rw----     2.0 fat     2645 bl 48% defN 20100101.000002 scala/collection/immutable/MapKeyValueTupleHashIterator.class
 -rw----     2.0 fat     2651 bl 67% defN 20100101.000002 scala/collection/immutable/IntMap$ToBuildFrom$.class
--rw----     2.0 fat    26566 bl 53% defN 20100101.000002 scala/collection/concurrent/TrieMap.class
+-rw----     2.0 fat    26570 bl 53% defN 20100101.000002 scala/collection/concurrent/TrieMap.class
 -rw----     2.0 fat     2661 bl 36% defN 20100101.000002 scala/reflect/NameTransformer.class
 -rw----     2.0 fat     2662 bl 54% defN 20100101.000002 scala/collection/immutable/NumericRange$NumericRangeIterator.class
 -rw----     2.0 fat     2664 bl 68% defN 20100101.000002 scala/collection/immutable/LongMap$ToBuildFrom$.class
@@ -1614,6 +1613,7 @@
 -rw----     2.0 fat     2755 bl 60% defN 20100101.000002 scala/collection/immutable/ListMap$$anon$1.class
 -rw----     2.0 fat     2761 bl 40% defN 20100101.000002 scala/runtime/ArrayCharSequence.class
 -rw----     2.0 fat     2761 bl 61% defN 20100101.000002 scala/runtime/Tuple2Zipped$Ops.class
+-rw----     2.0 fat     2762 bl 53% defN 20100101.000002 scala/collection/immutable/TreeSeqMap$Ordering$Iterator.class
 -rw----     2.0 fat     2780 bl 61% defN 20100101.000002 scala/Tuple1$.class
 -rw----     2.0 fat    27819 bl 70% defN 20100101.000002 scala/concurrent/impl/Promise$DefaultPromise.class
 -rw----     2.0 fat     2783 bl 58% defN 20100101.000002 scala/runtime/AbstractFunction20.class
@@ -1994,12 +1994,12 @@
 -rw----     2.0 fat     3887 bl 62% defN 20100101.000002 scala/jdk/FunctionWrappers$AsJavaToIntBiFunction.class
 -rw----     2.0 fat    38893 bl 61% defN 20100101.000002 scala/collection/Iterator.class
 -rw----     2.0 fat     3891 bl 62% defN 20100101.000002 scala/jdk/FunctionWrappers$AsJavaObjIntConsumer.class
--rw----     2.0 fat    38955 bl 59% defN 20100101.000002 scala/collection/mutable/LongMap.class
 -rw----     2.0 fat     3896 bl 57% defN 20100101.000002 scala/collection/mutable/ArraySeq$ofFloat.class
 -rw----     2.0 fat     3896 bl 62% defN 20100101.000002 scala/jdk/FunctionWrappers$AsJavaObjLongConsumer.class
 -rw----     2.0 fat     3896 bl 62% defN 20100101.000002 scala/jdk/FunctionWrappers$AsJavaToLongBiFunction.class
 -rw----     2.0 fat     3896 bl 63% defN 20100101.000002 scala/collection/immutable/LongVectorStepper.class
 -rw----     2.0 fat     3900 bl 57% defN 20100101.000002 scala/collection/mutable/ArraySeq$ofDouble.class
+-rw----     2.0 fat    39024 bl 59% defN 20100101.000002 scala/collection/mutable/LongMap.class
 -rw----     2.0 fat     3906 bl 60% defN 20100101.000002 scala/math/Equiv$Tuple6Equiv.class
 -rw----     2.0 fat      390 bl 36% defN 20100101.000002 scala/util/Using$Releasable.class
 -rw----     2.0 fat     3910 bl 47% defN 20100101.000002 scala/Product10.class
@@ -2191,7 +2191,7 @@
 -rw----     2.0 fat     4905 bl 59% defN 20100101.000002 scala/collection/immutable/VectorStepperBase.class
 -rw----     2.0 fat     4906 bl 70% defN 20100101.000002 scala/collection/Stepper$UnboxingIntStepper.class
 -rw----     2.0 fat     4910 bl 70% defN 20100101.000002 scala/math/Ordering$String$.class
--rw----     2.0 fat    49164 bl 67% defN 20100101.000002 scala/collection/immutable/RedBlackTree$.class
+-rw----     2.0 fat    49158 bl 67% defN 20100101.000002 scala/collection/immutable/RedBlackTree$.class
 -rw----     2.0 fat     4917 bl 70% defN 20100101.000002 scala/collection/Stepper$UnboxingLongStepper.class
 -rw----     2.0 fat     4922 bl 70% defN 20100101.000002 scala/math/Ordering$BigInt$.class
 -rw----     2.0 fat    49249 bl 77% defN 20100101.000002 scala/collection/immutable/SeqMap$SeqMap1.class
@@ -2260,9 +2260,9 @@
 -rw----     2.0 fat     5136 bl 62% defN 20100101.000002 scala/collection/convert/impl/ObjectArrayStepper.class
 -rw----     2.0 fat    51389 bl 79% defN 20100101.000002 scala/collection/immutable/SeqMap$EmptySeqMap$.class
 -rw----     2.0 fat     5138 bl 56% defN 20100101.000002 scala/collection/mutable/Shrinkable.class
--rw----     2.0 fat     5140 bl 67% defN 20100101.000002 scala/math/Numeric$CharIsIntegral.class
 -rw----     2.0 fat     5142 bl 61% defN 20100101.000002 scala/collection/immutable/ListMap$.class
 -rw----     2.0 fat     5142 bl 62% defN 20100101.000002 scala/math/Equiv$Tuple9Equiv.class
+-rw----     2.0 fat     5144 bl 67% defN 20100101.000002 scala/math/Numeric$CharIsIntegral.class
 -rw----     2.0 fat      514 bl 25% defN 20100101.000002 scala/runtime/Null$.class
 -rw----     2.0 fat     5154 bl 68% defN 20100101.000002 scala/collection/mutable/PriorityQueue$.class
 -rw----     2.0 fat     5156 bl 55% defN 20100101.000002 scala/Function8.class
@@ -2278,8 +2278,8 @@
 -rw----     2.0 fat      527 bl 42% defN 20100101.000002 scala/jdk/Accumulator$mcD$sp.class
 -rw----     2.0 fat      527 bl 42% defN 20100101.000002 scala/jdk/Accumulator$mcI$sp.class
 -rw----     2.0 fat      527 bl 42% defN 20100101.000002 scala/jdk/Accumulator$mcJ$sp.class
--rw----     2.0 fat     5281 bl 68% defN 20100101.000002 scala/math/Numeric$BigDecimalIsConflicted.class
--rw----     2.0 fat     5288 bl 68% defN 20100101.000002 scala/math/Numeric$BigIntIsIntegral.class
+-rw----     2.0 fat     5285 bl 68% defN 20100101.000002 scala/math/Numeric$BigDecimalIsConflicted.class
+-rw----     2.0 fat     5292 bl 68% defN 20100101.000002 scala/math/Numeric$BigIntIsIntegral.class
 -rw----     2.0 fat      529 bl 37% defN 20100101.000002 scala/concurrent/duration/package$span$.class
 -rw----     2.0 fat     5318 bl 63% defN 20100101.000002 scala/collection/immutable/ListSet$Node.class
 -rw----     2.0 fat      531 bl 39% defN 20100101.000002 scala/sys/process/Parser$ParseException.class
@@ -2587,7 +2587,7 @@
 -rw----     2.0 fat     6814 bl 51% defN 20100101.000002 scala/collection/immutable/MapNode.class
 -rw----     2.0 fat     6816 bl 65% defN 20100101.000002 scala/collection/immutable/TreeSet$.class
 -rw----     2.0 fat      682 bl 45% defN 20100101.000002 scala/Specializable$Group.class
--rw----     2.0 fat     6832 bl 51% defN 20100101.000002 scala/util/Try.class
+-rw----     2.0 fat     6836 bl 51% defN 20100101.000002 scala/util/Try.class
 -rw----     2.0 fat     6837 bl 49% defN 20100101.000002 scala/Double.class
 -rw----     2.0 fat     6853 bl 74% defN 20100101.000002 scala/collection/StepperShape$.class
 -rw----     2.0 fat     6862 bl 76% defN 20100101.000002 scala/collection/mutable/CheckedIndexedSeqView$Id.class
@@ -2690,7 +2690,7 @@
 -rw----     2.0 fat     7826 bl 68% defN 20100101.000002 scala/math/Ordering$Tuple6Ordering.class
 -rw----     2.0 fat     7826 bl 70% defN 20100101.000002 scala/jdk/FunctionWrappers$FromJavaIntPredicate.class
 -rw----     2.0 fat     7829 bl 68% defN 20100101.000002 scala/collection/mutable/CollisionProofHashMap$.class
--rw----     2.0 fat    78317 bl 63% defN 20100101.000002 scala/collection/immutable/LazyList.class
+-rw----     2.0 fat    78337 bl 63% defN 20100101.000002 scala/collection/immutable/LazyList.class
 -rw----     2.0 fat     7836 bl 70% defN 20100101.000002 scala/jdk/FunctionWrappers$FromJavaLongPredicate.class
 -rw----     2.0 fat     7856 bl 70% defN 20100101.000002 scala/jdk/FunctionWrappers$FromJavaDoublePredicate.class
 -rw----     2.0 fat     7857 bl 70% defN 20100101.000002 scala/jdk/FunctionWrappers$FromJavaIntConsumer.class
@@ -2808,7 +2808,6 @@
 -rw----     2.0 fat     8691 bl 66% defN 20100101.000002 scala/collection/mutable/IndexedSeq.class
 -rw----     2.0 fat     8724 bl 57% defN 20100101.000002 scala/jdk/DoubleAccumulatorStepper.class
 -rw----     2.0 fat      872 bl 57% defN 20100101.000002 scala/sys/process/ProcessBuilder$FileBuilder.class
--rw----     2.0 fat     8734 bl 64% defN 20100101.000002 scala/collection/mutable/LongMap$.class
 -rw----     2.0 fat     8744 bl 51% defN 20100101.000002 scala/collection/mutable/ArrayDequeOps.class
 -rw----     2.0 fat      874 bl 45% defN 20100101.000002 scala/util/DynamicVariable$$anon$1.class
 -rw----     2.0 fat     8760 bl 54% defN 20100101.000002 scala/runtime/ScalaRunTime.class
@@ -2841,6 +2840,7 @@
 -rw----     2.0 fat     9027 bl 66% defN 20100101.000002 scala/collection/immutable/LinearSeq.class
 -rw----     2.0 fat      903 bl 48% defN 20100101.000002 scala/math/Ordering$BooleanOrdering.class
 -rw----     2.0 fat     9041 bl 73% defN 20100101.000002 scala/math/package$.class
+-rw----     2.0 fat     9048 bl 63% defN 20100101.000002 scala/collection/mutable/LongMap$.class
 -rw----     2.0 fat      904 bl 46% defN 20100101.000002 scala/util/control/Exception$By.class
 -rw----     2.0 fat      904 bl 49% defN 20100101.000002 scala/sys/process/BasicIO$Uncloseable$$anon$1.class
 -rw----     2.0 fat      907 bl 43% defN 20100101.000002 scala/math/Numeric$.class
@@ -2853,8 +2853,8 @@
 -rw----     2.0 fat      916 bl 46% defN 20100101.000002 scala/concurrent/Future$$anon$2.class
 -rw----     2.0 fat     9183 bl 73% defN 20100101.000002 scala/PartialFunction$$anon$1.class
 -rw----     2.0 fat    91865 bl 63% defN 20100101.000002 scala/collection/StringOps.class
--rw----     2.0 fat     9199 bl 62% defN 20100101.000002 scala/collection/convert/JavaCollectionWrappers$JConcurrentMapWrapper.class
 -rw----     2.0 fat      919 bl 47% defN 20100101.000002 scala/math/Equiv$Float$IeeeEquiv.class
+-rw----     2.0 fat     9204 bl 62% defN 20100101.000002 scala/collection/convert/JavaCollectionWrappers$JConcurrentMapWrapper.class
 -rw----     2.0 fat     9214 bl 68% defN 20100101.000002 scala/concurrent/BatchingExecutor$AsyncBatch.class
 -rw----     2.0 fat      921 bl 46% defN 20100101.000002 scala/concurrent/Future$$anon$3.class
 -rw----     2.0 fat     9246 bl 69% defN 20100101.000002 scala/reflect/ClassManifestFactory$.class
@@ -2897,7 +2897,7 @@
 -rw----     2.0 fat      970 bl 45% defN 20100101.000002 scala/collection/Stepper$$anon$1.class
 -rw----     2.0 fat      970 bl 46% defN 20100101.000002 scala/math/PartialOrdering$.class
 -rw----     2.0 fat      970 bl 53% defN 20100101.000002 scala/collection/StepperShape$$anon$1$$anon$2.class
--rw----     2.0 fat     9713 bl 70% defN 20100101.000002 scala/collection/immutable/LazyList$LazyBuilder.class
+-rw----     2.0 fat     9713 bl 69% defN 20100101.000002 scala/collection/immutable/LazyList$LazyBuilder.class
 -rw----     2.0 fat      971 bl 50% defN 20100101.000002 scala/math/Ordering$Double$TotalOrdering.class
 -rw----     2.0 fat     9720 bl 59% defN 20100101.000002 scala/collection/immutable/NumericRange$.class
 -rw----     2.0 fat      972 bl 49% defN 20100101.000002 scala/Product9$.class

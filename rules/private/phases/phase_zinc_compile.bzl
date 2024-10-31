@@ -1,5 +1,4 @@
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
-
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",

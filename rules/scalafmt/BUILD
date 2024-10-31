@@ -40,6 +40,8 @@ scala_format_test(
     srcs = glob(["**/*.scala"]),
 )
 
+exports_files(["workspace.bzl"])
+
 filegroup(
     name = "bzl",
     srcs = glob(["**/*.bzl"]),

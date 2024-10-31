@@ -1,50 +1,38 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@io_bazel_skydoc//stardoc:stardoc.bzl", "stardoc")
+load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
+load(":stardoc.bzl", "stardoc_targets")
 
 [
     stardoc(
-        name = paths.replace_extension(file, "_doc").replace("/", "_"),
-        out = paths.replace_extension(file, ".md").replace("/", "_"),
-        input = file,
-        deps = [
-            ":bzl_internal",
-            "@rules_scala_annex//rules:bzl",
-        ],
+        name = stardoc_target.name,
+        out = stardoc_target.out,
+        input = stardoc_target.input,
+        deps = [":scala-rules"],
     )
-    for file in glob(["**/*.bzl"])
+    for stardoc_target in stardoc_targets
 ]
 
 pkg_tar(
     name = "docs",
-    srcs = [paths.replace_extension(file, ".md").replace("/", "_") for file in glob(["**/*.bzl"])],
+    srcs = [stardoc_target.out for stardoc_target in stardoc_targets],
     mode = "0644",
 )
 
 bzl_library(
-    name = "bzl",
-    srcs = glob(["**/*.bzl"]),
-    visibility = ["//visibility:public"],
-    deps = [":private_bzl"],
-)
-
-# Bizzaro @rules_scala_annex// vs // differences
-bzl_library(
-    name = "bzl_internal",
-    srcs = glob(["**/*.bzl"]),
-    visibility = ["//visibility:public"],
-    deps = [":private_bzl"],
-)
-
-bzl_library(
-    name = "jdk_toolchain_utils",
-    srcs = ["@bazel_tools//tools/jdk:toolchain_utils.bzl"],
-)
-
-bzl_library(
-    name = "private_bzl",
+    name = "bazel_tools_build_defs_repo",
     srcs = [
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:jvm.bzl",
+        "@bazel_tools//tools/build_defs/repo:local.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    ],
+)
+
+bzl_library(
+    name = "scala-rules",
+    srcs = glob(["**/*.bzl"]) + [
         "//rules/common:bzl",
         "//rules/external/third_party/bazel/tools/build_defs/repo:bzl",
         "//rules/jvm:bzl",
@@ -53,9 +41,13 @@ bzl_library(
         "//rules/scala_proto:bzl",
         "//rules/scalafmt:bzl",
     ],
+    visibility = ["//visibility:public"],
     deps = [
-        ":jdk_toolchain_utils",
+        ":bazel_tools_build_defs_repo",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:shell",
+        "@rules_java//toolchains:toolchain_utils",
+        "@rules_jvm_external//:implementation",
     ],
 )

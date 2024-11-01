@@ -1,6 +1,18 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
+This extension contains copies of the `scala_binary`, `scala_library`, and `scala_test` rules from
+`rules/scala.bzl` that provide formatting capabilities via Scalafmt. They're identical to the
+afformentioned rules, but have two additional attributes:
+- `config`
+- `format`
 
+Additionally, for every target created from one of the rules in this extension
+(e.g. `//foo/bar:bizz`), you'll find two additional targets:
+- `//foo/bar:bizz.format`
+- `//foo/bar:bizz.format-test`
+
+The former runs Scalafmt on the sources of the target, while the latter tests that those sources are
+formatted.
 
 <a id="scala_binary"></a>
 
@@ -37,7 +49,7 @@ To run the program: `bazel run <target>`
 | <a id="scala_binary-config"></a>config |  The Scalafmt configuration file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@scalafmt_default//:config"`  |
 | <a id="scala_binary-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_binary-format"></a>format |  -   | Boolean | optional |  `True`  |
+| <a id="scala_binary-format"></a>format |  Whether to format the target. If this is False, the formatter and format tester will do nothing.   | Boolean | optional |  `True`  |
 | <a id="scala_binary-javacopts"></a>javacopts |  The Javac options.   | List of strings | optional |  `[]`  |
 | <a id="scala_binary-jvm_flags"></a>jvm_flags |  The JVM runtime flags.   | List of strings | optional |  `[]`  |
 | <a id="scala_binary-main_class"></a>main_class |  The main class. If not provided, it will be inferred by its type signature.   | String | optional |  `""`  |
@@ -45,7 +57,7 @@ To run the program: `bazel run <target>`
 | <a id="scala_binary-resource_jars"></a>resource_jars |  The JARs to merge into the output JAR.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_binary-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_binary-scala"></a>scala |  The `ScalaConfiguration`. Among other things, this specifies which scala version to use. Defaults to the default_scala target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
+| <a id="scala_binary-scala"></a>scala |  The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
 | <a id="scala_binary-scalacopts"></a>scalacopts |  The Scalac options.   | List of strings | optional |  `[]`  |
 
 
@@ -77,7 +89,7 @@ Compiles a Scala JVM library.
 | <a id="scala_library-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-exports"></a>exports |  The JVM libraries to add as dependencies to any libraries dependent on this one.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_library-format"></a>format |  -   | Boolean | optional |  `True`  |
+| <a id="scala_library-format"></a>format |  Whether to format the target. If this is False, the formatter and format tester will do nothing.   | Boolean | optional |  `True`  |
 | <a id="scala_library-javacopts"></a>javacopts |  The Javac options.   | List of strings | optional |  `[]`  |
 | <a id="scala_library-macro"></a>macro |  Whether this library provides macros.   | Boolean | optional |  `False`  |
 | <a id="scala_library-neverlink"></a>neverlink |  Whether this library should be excluded at runtime.   | Boolean | optional |  `False`  |
@@ -85,7 +97,7 @@ Compiles a Scala JVM library.
 | <a id="scala_library-resource_jars"></a>resource_jars |  The JARs to merge into the output JAR.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_library-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_library-scala"></a>scala |  The `ScalaConfiguration`. Among other things, this specifies which scala version to use. Defaults to the default_scala target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
+| <a id="scala_library-scala"></a>scala |  The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
 | <a id="scala_library-scalacopts"></a>scalacopts |  The Scalac options.   | List of strings | optional |  `[]`  |
 
 
@@ -124,8 +136,8 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 | <a id="scala_test-config"></a>config |  The Scalafmt configuration file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@scalafmt_default//:config"`  |
 | <a id="scala_test-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_test-format"></a>format |  -   | Boolean | optional |  `True`  |
-| <a id="scala_test-frameworks"></a>frameworks |  -   | List of strings | optional |  `["org.scalatest.tools.Framework", "org.scalacheck.ScalaCheckFramework", "org.specs2.runner.Specs2Framework", "minitest.runner.Framework", "utest.runner.Framework", "com.novocode.junit.JUnitFramework"]`  |
+| <a id="scala_test-format"></a>format |  Whether to format the target. If this is False, the formatter and format tester will do nothing.   | Boolean | optional |  `True`  |
+| <a id="scala_test-frameworks"></a>frameworks |  The list of test frameworks to check for. These should conform to the sbt test interface (https://github.com/sbt/test-interface).   | List of strings | optional |  `["org.scalatest.tools.Framework", "org.scalacheck.ScalaCheckFramework", "org.specs2.runner.Specs2Framework", "minitest.runner.Framework", "utest.runner.Framework", "com.novocode.junit.JUnitFramework"]`  |
 | <a id="scala_test-isolation"></a>isolation |  The isolation level to apply   | String | optional |  `"none"`  |
 | <a id="scala_test-javacopts"></a>javacopts |  The Javac options.   | List of strings | optional |  `[]`  |
 | <a id="scala_test-jvm_flags"></a>jvm_flags |  The JVM runtime flags.   | List of strings | optional |  `[]`  |
@@ -134,8 +146,8 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 | <a id="scala_test-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_test-runner"></a>runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//src/main/scala/higherkindness/rules_scala/workers/zinc/test"`  |
 | <a id="scala_test-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_test-scala"></a>scala |  The `ScalaConfiguration`. Among other things, this specifies which scala version to use. Defaults to the default_scala target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
-| <a id="scala_test-scalacopts"></a>scalacopts |  -   | List of strings | optional |  `[]`  |
+| <a id="scala_test-scala"></a>scala |  The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//external:default_scala"`  |
+| <a id="scala_test-scalacopts"></a>scalacopts |  Options to pass to scalac.   | List of strings | optional |  `[]`  |
 | <a id="scala_test-shared_deps"></a>shared_deps |  If isolation is "classloader", the list of deps to keep loaded between tests   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-subprocess_runner"></a>subprocess_runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"`  |
 

@@ -18,6 +18,9 @@ build --experimental_worker_multiplex_sandboxing
 build --experimental_worker_cancellation
 build --verbose_failures
 
+build --experimental_worker_sandbox_hardening
+build --experimental_use_hermetic_linux_sandbox
+
 test --test_output=all
 
 build:rules --disk_cache=.bazel_cache

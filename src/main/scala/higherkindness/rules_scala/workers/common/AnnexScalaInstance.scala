@@ -11,8 +11,8 @@ import scala.collection.immutable.TreeMap
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
-  private val instanceCache: ConcurrentHashMap[String, AnnexScalaInstance] =
-    new ConcurrentHashMap[String, AnnexScalaInstance]()
+  private val instanceCache: ConcurrentHashMap[Set[Path], AnnexScalaInstance] =
+    new ConcurrentHashMap[Set[Path], AnnexScalaInstance]()
 
   /**
    * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
@@ -68,19 +68,21 @@ object AnnexScalaInstance {
    */
   private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
     // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
-    // We use a tree map because we want the keys sorted for comparison purposes
-    val mapBuilder = TreeMap.newBuilder[Path, Path]
+    // We use a tree map because we want the entries sorted for comparison purposes
+    val mapBuilder = Map.newBuilder[Path, Path]
+    val keyBuilder = Set.newBuilder[Path]
     val absoluteWorkDir = workDir.toAbsolutePath().normalize()
     allJars.foreach { jar =>
       val absoluteJarPath = jar.toPath().toAbsolutePath().normalize()
-      // Remove the sandbox prefix as well as the arch/config specific parts of the path.
-      mapBuilder.addOne(
-        jar.toPath ->
-          FileUtil.bazelShortPath(
-            absoluteWorkDir.relativize(absoluteJarPath),
-            replaceExternal = false,
-          ),
+
+      // Remove the arch/config specific parts of the path.
+      val comparablePath = FileUtil.bazelShortPath(
+        // Remove the sandbox prefix from the path
+        absoluteWorkDir.relativize(absoluteJarPath),
+        replaceExternal = false,
       )
+      mapBuilder.addOne(jar.toPath -> comparablePath)
+      keyBuilder.addOne(comparablePath)
     }
     val workRequestJarToWorkerJar = mapBuilder.result()
 
@@ -96,9 +98,10 @@ object AnnexScalaInstance {
     // I also imagine it is extremely rare to be mutating the contents of compiler classpath jars
     // while keeping the names the same, e.g., generating new scala library jar for scala 2.13.14.
     // As a result I'm leaving this string based for now.
-    val key = workRequestJarToWorkerJar.values.mkString(":")
+    val key = keyBuilder.result()
 
     Option(instanceCache.get(key)).getOrElse {
+      out.println(s"ScalaInstance cache miss. Instance cache size: ${instanceCache.size}.\nCache key: ${workRequestJarToWorkerJar.values.mkString(":")}")
       // Copy all the jars to the worker's directory because in a sandboxed world the
       // jars can go away after the work request, so we can't rely on them sticking around.
       // This should only happen once per compiler version, so it shouldn't happen often.

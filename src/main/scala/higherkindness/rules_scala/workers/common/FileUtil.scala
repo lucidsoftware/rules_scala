@@ -66,7 +66,6 @@ object FileUtil {
    */
   def bazelShortPath(path: Path, replaceExternal: Boolean = true): Path = {
     val nameCount = path.getNameCount()
-    val pathString = path.toAbsolutePath().normalize().toString()
 
     val shortPath = if (path.startsWith("bazel-out") && nameCount >= 4) {
       path.subpath(3, nameCount)
@@ -75,8 +74,8 @@ object FileUtil {
     }
 
     // Handle difference between Bazel's external directory being referred to as .. in the short_path
-    if (replaceExternal && shortPath.startsWith("external")) {
-      Paths.get(shortPath.toString().replaceFirst("external", ".."))
+    if (replaceExternal && shortPath.subpath(0, 1) == Paths.get("external")) {
+      Paths.get("..").resolve(shortPath.subpath(1, shortPath.getNameCount() - 1))
     } else {
       shortPath
     }

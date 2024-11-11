@@ -1,4 +1,5 @@
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scalapb_version")
 
 def scala_proto_register_toolchains():
     native.register_toolchains("@rules_scala_annex//rules/scala_proto:scalapb_scala_proto_toolchain")
@@ -6,7 +7,7 @@ def scala_proto_register_toolchains():
 def scala_proto_artifacts():
     return [
         "com.github.os72:protoc-jar:3.11.4",
-        "com.thesamet.scalapb:compilerplugin_2.13:0.11.17",
+        "com.thesamet.scalapb:compilerplugin_2.13:{}".format(scalapb_version),
         "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
     ]
 

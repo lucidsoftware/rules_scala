@@ -1,19 +1,23 @@
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scalapb_version", "zinc_version")
+
+specs2_version = "4.20.9"
+scalatest_version = "3.2.19"
+scalacheck_version = "1.18.1"
 
 def test_artifacts():
     return [
-        "com.google.protobuf:protobuf-java:3.11.4",
-        "com.thesamet.scalapb:lenses_2.13:0.9.0",
-        "com.thesamet.scalapb:scalapb-runtime_2.13:0.11.4",
-        "org.scala-lang.modules:scala-xml_2.13:2.0.0",
-        "org.scala-sbt:compiler-interface:1.10.0",
-        "org.scalacheck:scalacheck_2.13:1.18.0",
-        "org.scalactic:scalactic_2.13:3.2.19",
+        "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
+        "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
+        "org.scala-lang.modules:scala-xml_2.13:2.3.0",
+        "org.scala-sbt:compiler-interface:{}".format(zinc_version),
+        "org.scalacheck:scalacheck_2.13:{}".format(scalacheck_version),
         "org.scalameta:semanticdb-scalac_2.13.14:4.9.9",
-        "org.scalatest:scalatest_2.13:3.2.19",
-        "org.specs2:specs2-common_2.13:4.20.7",
-        "org.specs2:specs2-core_2.13:4.20.7",
-        "org.specs2:specs2-matcher_2.13:4.20.7",
+        "org.scalactic:scalactic_2.13:{}".format(scalatest_version),
+        "org.scalatest:scalatest_2.13:{}".format(scalatest_version),
+        "org.specs2:specs2-common_2.13:{}".format(specs2_version),
+        "org.specs2:specs2-core_2.13:{}".format(specs2_version),
+        "org.specs2:specs2-matcher_2.13:{}".format(specs2_version),
         "org.typelevel:kind-projector_2.13.14:0.13.3",
     ]
 

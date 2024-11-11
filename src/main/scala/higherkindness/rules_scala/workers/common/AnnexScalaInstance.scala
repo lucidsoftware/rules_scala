@@ -2,7 +2,7 @@ package higherkindness.rules_scala
 package workers.common
 
 import xsbti.compile.ScalaInstance
-import java.io.File
+import java.io.{File, PrintStream}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util.Properties
@@ -18,9 +18,9 @@ object AnnexScalaInstance {
    * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
    * worker. Otherwise just create the AnnexScalaInstance and be done with it because the process won't be long lived.
    */
-  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean): AnnexScalaInstance = {
+  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean, out: PrintStream): AnnexScalaInstance = {
     if (isWorker) {
-      getAnnexScalaInstance(allJars, workDir)
+      getAnnexScalaInstance(allJars, workDir, out)
     } else {
       new AnnexScalaInstance(allJars)
     }
@@ -66,7 +66,7 @@ object AnnexScalaInstance {
    * Using this cache and the Scala compiler cache, but disabling Zinc's classloader cache works, but doesn't seem to be
    * any different from leaving Zinc's cache enabled.
    */
-  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
+  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path, out: PrintStream): AnnexScalaInstance = {
     // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
     // We use a tree map because we want the entries sorted for comparison purposes
     val mapBuilder = Map.newBuilder[Path, Path]
@@ -119,6 +119,7 @@ object AnnexScalaInstance {
 
       val instance = new AnnexScalaInstance(Array.from(workRequestJarToWorkerJar.values.map(_.toFile())))
       val instanceInsertedByOtherThreadOrNull = instanceCache.putIfAbsent(key, instance)
+      out.println(s"Added to ScalaInstance cache. Instance cache size: ${instanceCache.size}.\nCache key: ${workRequestJarToWorkerJar.values.mkString(":")}")
 
       // putIfAbsent is atomic, but there exists time between the get and the putIfAbsent.
       // This handles the scenario in which the AnnexScalaInstance is created and inserted

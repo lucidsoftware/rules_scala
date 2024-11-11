@@ -1,8 +1,4 @@
-load(
-    "@bazel_tools//tools/jdk:toolchain_utils.bzl",
-    "find_java_runtime_toolchain",
-    "find_java_toolchain",
-)
+load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load("@rules_scala_annex//rules:providers.bzl", _IntellijInfo = "IntellijInfo")
 
 scala_import_private_attributes = {

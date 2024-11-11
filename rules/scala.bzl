@@ -138,10 +138,8 @@ _compile_attributes = {
     ),
     "scala": attr.label(
         default = "//external:default_scala",
-        doc = "The `ScalaConfiguration`. Among other things, this specifies which scala version to use.\n Defaults to the default_scala target specified in the WORKSPACE file.",
-        providers = [
-            _ScalaConfiguration,
-        ],
+        doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
+        providers = [_ScalaConfiguration],
     ),
     "scalacopts": attr.string_list(
         doc = "The Scalac options.",
@@ -329,7 +327,7 @@ def make_scala_test(*extras):
                         "process",
                     ],
                 ),
-                "scalacopts": attr.string_list(),
+                "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
                 "shared_deps": attr.label_list(
                     doc = "If isolation is \"classloader\", the list of deps to keep loaded between tests",
                     providers = [JavaInfo],
@@ -343,6 +341,7 @@ def make_scala_test(*extras):
                         "utest.runner.Framework",
                         "com.novocode.junit.JUnitFramework",
                     ],
+                    doc = "The list of test frameworks to check for. These should conform to the sbt test interface (https://github.com/sbt/test-interface).",
                 ),
                 "runner": attr.label(default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test"),
                 "subprocess_runner": attr.label(default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"),
@@ -396,21 +395,19 @@ scala_repl = rule(
                 doc = "The additional runtime files needed by this REPL.",
                 allow_files = True,
             ),
-            "deps": attr.label_list(providers = [JavaInfo]),
+            "deps": attr.label_list(
+                doc = "Dependencies that should be made available to the REPL.",
+                providers = [JavaInfo],
+            ),
             "jvm_flags": attr.string_list(
                 doc = "The JVM runtime flags.",
             ),
             "scala": attr.label(
                 default = "//external:default_scala",
-                doc = "The `ScalaConfiguration`.",
-                providers = [
-                    _ScalaConfiguration,
-                    _ZincConfiguration,
-                ],
+                doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
+                providers = [_ScalaConfiguration, _ZincConfiguration],
             ),
-            "scalacopts": attr.string_list(
-                doc = "The Scalac options.",
-            ),
+            "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
         },
     ),
     doc = """
@@ -430,19 +427,36 @@ scala_import = rule(
     attrs = _dicts.add(
         _scala_import_private_attributes,
         {
-            "deps": attr.label_list(providers = [JavaInfo]),
-            "exports": attr.label_list(providers = [JavaInfo]),
-            "jars": attr.label_list(allow_files = True),
-            "neverlink": attr.bool(default = False),
-            "runtime_deps": attr.label_list(providers = [JavaInfo]),
-            "srcjar": attr.label(allow_single_file = True),
+            "deps": attr.label_list(
+                doc = "Libraries used by this one.",
+                providers = [JavaInfo],
+            ),
+            "exports": attr.label_list(
+                doc = "Libraries made available by this one. See https://bazel.build/versions/6.0.0/reference/be/java#java_library.exports.",
+                providers = [JavaInfo],
+            ),
+            "jars": attr.label_list(
+                allow_files = True,
+                doc = "JAR files to include in this library.",
+            ),
+            "neverlink": attr.bool(
+                default = False,
+                doc = "Set this to True to exclude this library from the runtime classpath (i.e. if it should only be used at compile-time).",
+            ),
+            "runtime_deps": attr.label_list(
+                doc = "Libraries used by this one, but which aren't referenced explicitly and need only be available at runtime.",
+                providers = [JavaInfo],
+            ),
+            "srcjar": attr.label(
+                allow_single_file = True,
+                doc = "The source JAR for this library.",
+            ),
         },
     ),
     doc = """
 Creates a Scala JVM library.
 
-Use this only for libraries with macros. Otherwise, use `java_import`.
-""",
+Use this only for libraries with macros. Otherwise, use `java_import`.""",
     toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     implementation = _scala_import_implementation,
 )
@@ -451,29 +465,37 @@ scaladoc = rule(
     attrs = _dicts.add(
         _scaladoc_private_attributes,
         {
-            "compiler_deps": attr.label_list(providers = [JavaInfo]),
-            "deps": attr.label_list(providers = [JavaInfo]),
-            "srcs": attr.label_list(allow_files = [
-                ".java",
-                ".scala",
-                ".srcjar",
-                "-sources.jar",
-                "-src.jar",
-            ]),
+            "compiler_deps": attr.label_list(
+                doc = "JVM targets that should be included on the compile classpath.",
+                providers = [JavaInfo],
+            ),
+            "deps": attr.label_list(
+                doc = "Dependencies that should be made available to the Scaladoc tool. These may include libraries referenced in Scaladoc or public signatures.",
+                providers = [JavaInfo],
+            ),
+            "srcs": attr.label_list(
+                allow_files = [
+                    ".java",
+                    ".scala",
+                    ".srcjar",
+                    "-sources.jar",
+                    "-src.jar",
+                ],
+                doc = "Sources from which to generate Scaladoc. These may include `*.java` files, `*.scala` files, and source JARs.",
+            ),
             "scala": attr.label(
-                default = "@scala",
+                default = "//external:default_scala",
+                doc = "The Scala compiler to use (a `configure_bootstrap_scala` or `configure_zinc_scala` target). Defaults to the `default_scala` target specified in the WORKSPACE file.",
                 providers = [
                     _ScalaConfiguration,
                     _ZincConfiguration,
                 ],
             ),
-            "scalacopts": attr.string_list(),
-            "title": attr.string(),
+            "scalacopts": attr.string_list(doc = "Options to pass to scalac."),
+            "title": attr.string(doc = "The name of the project. If none is provided, the target label will be used."),
         },
     ),
-    doc = """
-Generates Scaladocs.
-""",
+    doc = "Generates Scaladoc.",
     toolchains = ["@bazel_tools//tools/jdk:toolchain_type"],
     implementation = _scaladoc_implementation,
 )
@@ -485,17 +507,19 @@ Generates Scaladocs.
 configure_bootstrap_scala = rule(
     attrs = {
         "compiler_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the compiler classpath. Usually, this is the compiler itself and the standard library.",
             mandatory = True,
             providers = [JavaInfo],
         ),
         "global_plugins": attr.label_list(
-            doc = "Scalac plugins that will always be enabled.",
+            doc = "scalac plugins that will always be enabled.",
             providers = [JavaInfo],
         ),
         "global_scalacopts": attr.string_list(
-            doc = "Scalac options that will always be enabled.",
+            doc = "scalac options that will always be enabled.",
         ),
         "runtime_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the runtime classpath. Usually, this is the standard library.",
             mandatory = True,
             providers = [JavaInfo],
         ),
@@ -504,11 +528,15 @@ configure_bootstrap_scala = rule(
             doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
         ),
         "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler.",
+            doc = "Whether to use ijar for this compiler. See https://github.com/bazelbuild/bazel/blob/master/third_party/ijar/README.txt for more information.",
             default = True,
         ),
-        "version": attr.string(mandatory = True),
+        "version": attr.string(
+            doc = "The Scala version this compiler corresponds to.",
+            mandatory = True,
+        ),
     },
+    doc = "Configures a Scala compiler that's used for compiling the Scala targets used by `configure_zinc_scala`. You probably want `configure_zinc_scala` instead (even if you're not using incremental compilation), as this rule doesn't support features like dependency checking and compilation workers.",
     implementation = _configure_bootstrap_scala_implementation,
 )
 
@@ -522,35 +550,31 @@ _configure_zinc_scala = rule(
             mandatory = True,
             providers = [JavaInfo],
         ),
-        "deps_direct": attr.string(default = "error"),
-        "deps_used": attr.string(default = "error"),
-        "global_plugins": attr.label_list(
-            doc = "Scalac plugins that will always be enabled.",
-            providers = [JavaInfo],
+        "deps_direct": attr.string(
+            default = "error",
+            doc = """Whether to perform direct dependency checking.
+error: Require that directly used libraries must be declared as dependencies.
+off: Don't perform direct dependency checking.""",
         ),
-        "global_scalacopts": attr.string_list(
-            doc = "Scalac options that will always be enabled.",
+        "deps_used": attr.string(
+            default = "error",
+            doc = """Whether to perform unused dependency checking.
+error: Require that all declared dependencies are used.
+off: Don't perform unused dependency checking.""",
         ),
-        "incremental": attr.bool(
-            doc = "Whether Zinc's incremental compilation will be available for this Zinc compiler. If True, this requires additional configuration to use incremental compilation.",
-            default = False,
-        ),
+        "global_plugins": attr.label_list(providers = [JavaInfo]),
+        "global_scalacopts": attr.string_list(),
+        "incremental": attr.bool(default = False),
         "log_level": attr.string(
-            doc = "Compiler log level",
             default = "warn",
+            values = ["error", "warn", "info", "debug", "none"],
         ),
         "runtime_classpath": attr.label_list(
             mandatory = True,
             providers = [JavaInfo],
         ),
-        "semanticdb_bundle": attr.bool(
-            default = True,
-            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
-        ),
-        "use_ijar": attr.bool(
-            doc = "Whether to use ijars for this compiler.",
-            default = True,
-        ),
+        "semanticdb_bundle": attr.bool(default = True),
+        "use_ijar": attr.bool(default = True),
         "version": attr.string(mandatory = True),
         "_code_coverage_instrumentation_worker": attr.label(
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/jacoco/instrumenter",
@@ -574,8 +598,51 @@ _configure_zinc_scala = rule(
     implementation = _configure_zinc_scala_implementation,
 )
 
-def configure_zinc_scala(**kwargs):
+def configure_zinc_scala(
+        compiler_bridge,
+        compiler_classpath,
+        version,
+        global_plugins = [],
+        global_scalacopts = [],
+        incremental = False,
+        log_level = "warn",
+        runtime_classpath = [],
+        semanticdb_bundle = True,
+        use_ijar = True,
+        **kwargs):
+    """Configures a Scala compiler.
+
+    You can use this for a Scala target by setting the `scala` attribute to your `configure_zinc_scala` target.
+
+    Args:
+      compiler_bridge: The compiler bridge (org.scala-sbt.compiler-bridge).
+      compiler_classpath: JVM targets that will always be on the compiler classpath.
+        Usually, this is the compiler itself and the standard library.
+
+      global_plugins: scalac plugins that will always be enabled.
+      global_scalacopts: scalac options that will always be enabled.
+      incremental: Whether Zinc's incremental compilation will be available for this Zinc compiler.
+        If True, this requires additional configuration to use incremental compilation.
+
+      log_level: The compiler log level.
+        One of "error", "warn", "info", "debug", or "none".
+
+      runtime_classpath: JVM targets that will always be on the runtime classpath.
+        Usually, this is the standard library.
+
+      semanticdb_bundle: Whether to bundle SemanticDB files in the resulting JAR.
+        Note that in Scala 2, this requires the SemanticDB compiler plugin.
+
+      use_ijar: Whether to use ijar for this compiler.
+        See https://github.com/bazelbuild/bazel/blob/master/third_party/ijar/README.txt for more
+        information.
+
+      version: The Scala version this compiler corresponds to.
+    """
+
     _configure_zinc_scala(
+        compiler_bridge = compiler_bridge,
+        compiler_classpath = compiler_classpath,
         deps_direct = select({
             "@rules_scala_annex//src/main/scala:deps_direct_off": "off",
             "//conditions:default": "error",
@@ -584,5 +651,13 @@ def configure_zinc_scala(**kwargs):
             "@rules_scala_annex//src/main/scala:deps_used_off": "off",
             "//conditions:default": "error",
         }),
+        global_plugins = global_plugins,
+        global_scalacopts = global_scalacopts,
+        incremental = incremental,
+        log_level = log_level,
+        runtime_classpath = runtime_classpath,
+        semanticdb_bundle = semanticdb_bundle,
+        use_ijar = use_ijar,
+        version = version,
         **kwargs
     )

@@ -45,6 +45,8 @@ toolchain(
     visibility = ["//visibility:public"],
 )
 
+exports_files(["workspace.bzl"])
+
 filegroup(
     name = "bzl",
     srcs = glob(["**/*.bzl"]),

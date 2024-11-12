@@ -1,0 +1,24 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+scalacheckdeps_outputs="$(
+    bazel aquery 'mnemonic("^ScalaCheckDeps$", //dependencies/validation_action)' |
+        grep -oP '(?<=^  Outputs: \[).*(?=\]$)' |
+        sed 's/, /\n/g' |
+        sort -u
+)"
+
+action_inputs="$(
+    bazel aquery '//dependencies/validation_action' |
+        grep -oP '(?<=^  Inputs: \[).*(?=\]$)' |
+        sed 's/, /\n/g' |
+        sort -u
+)"
+
+common_files="$(comm -12 <(echo "$scalacheckdeps_outputs") <(echo "$action_inputs"))"
+
+if [ -n "$common_files" ]; then
+    echo "Found some ScalaCheckDeps outputs that are the inputs to other actons:"
+    echo "$common_files"
+    exit 1
+fi

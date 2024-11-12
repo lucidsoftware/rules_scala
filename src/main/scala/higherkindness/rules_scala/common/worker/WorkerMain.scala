@@ -86,10 +86,20 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
 
           val requestId = request.getRequestId()
 
+          // "Passing the --worker_verbose flag to Bazel sets the verbosity field to 10, but smaller
+          // or larger values can be used manually for different amounts of output."
+          // For more info: https://bazel.build/remote/creating#work-requests
+          val verbosity = request.getVerbosity()
+          def logVerbose(message: String) = {
+            if (verbosity >= 10) {
+              System.err.println(message)
+            }
+          }
+
           // If this is a cancel request, we need to cancel a previously sent WorkRequest
           // Arguments and inputs fields on cancel requests "must be empty and should be ignored"
           if (request.getCancel()) {
-            System.err.println(s"Cancellation WorkRequest received for request id: $requestId")
+            logVerbose(s"Cancellation WorkRequest received for request id: $requestId")
 
             // From the Bazel doc: "The server may send cancel requests for requests that the worker
             // has already responded to, in which case the cancel request must be ignored."
@@ -101,8 +111,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           } else {
             val args = request.getArgumentsList.toArray(Array.empty[String])
             val sandboxDir = Path.of(request.getSandboxDir())
-            val verbosity = request.getVerbosity()
-            System.err.println(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
+            logVerbose(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
 
             // We go through this hullabaloo with output streams being defined out here, so we can
             // close them after the async work in the Future is all done.
@@ -130,24 +139,23 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                 case Success(code) =>
                   out.flush()
                   writeResponse(requestId, Some(outStream), Some(code))
-                  System.err.println(s"WorkResponse $requestId sent with code $code")
+                  logVerbose(s"WorkResponse $requestId sent with code $code")
 
                 case Failure(e: ExecutionException) =>
                   e.getCause() match {
                     // Task successfully cancelled
                     case cancelError: InterruptedException =>
                       writeResponse(requestId, None, None, wasCancelled = true)
-                      System.err.println(
+                      logVerbose(
                         s"Cancellation WorkResponse sent for request id: $requestId in response to an" +
                           " InterruptedException",
                       )
-
                     // Work task threw a non-fatal error
                     case e =>
                       e.printStackTrace(out)
                       out.flush()
                       writeResponse(requestId, Some(outStream), Some(-1))
-                      System.err.println(
+                      logVerbose(
                         "Encountered an uncaught exception that was wrapped in an ExecutionException while" +
                           s" proccessing the Future for WorkRequest $requestId. This usually means a non-fatal" +
                           " error was thrown in the Future.",
@@ -158,7 +166,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                 // Task successfully cancelled
                 case Failure(e: CancellationException) =>
                   writeResponse(requestId, None, None, wasCancelled = true)
-                  System.err.println(
+                  logVerbose(
                     s"Cancellation WorkResponse sent for request id: $requestId in response to a" +
                       " CancellationException",
                   )
@@ -168,7 +176,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   e.printStackTrace(out)
                   out.flush()
                   writeResponse(requestId, Some(outStream), Some(-1))
-                  System.err.println(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
+                  logVerbose(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
                   e.printStackTrace(System.err)
               }(scala.concurrent.ExecutionContext.global)
               .andThen { case _ =>

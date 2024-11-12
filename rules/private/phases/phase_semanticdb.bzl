@@ -1,5 +1,21 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@rules_scala_annex//rules:providers.bzl", _ScalaConfiguration = "ScalaConfiguration")
+load(
+    "@rules_scala_annex//rules:providers.bzl",
+    _ScalaConfiguration = "ScalaConfiguration",
+    _SemanticDbInfo = "SemanticDbInfo",
+)
+
+def _semanticdb_directory_from_file(file):
+    """
+    This is janky, but we're limited in what we can do in this function. From the
+    [documentation](https://bazel.build/rules/lib/builtins/Args#add_all) on `Args#add_all`:
+
+    To avoid unintended retention of large analysis-phase data structures into the execution phase,
+    the `map_each` function must be declared by a top-level `def` statement; it may not be a
+    nested function closure by default.
+    """
+
+    return "{}/{}".format(file.root.path, file.short_path[:file.short_path.find("META-INF") - 1])
 
 #
 # PHASE: semanticdb
@@ -11,32 +27,49 @@ def phase_semanticdb(ctx, g):
     scala_configuration = ctx.attr.scala[_ScalaConfiguration]
 
     if scala_configuration.semanticdb_bundle:
-        return struct(outputs = [], scalacopts = [])
+        return struct(outputs = [], arguments_modifier = lambda _: None)
 
+    directory_name = "{}/semanticdb".format(ctx.label.name)
     outputs = []
-    semanticdb_directory = paths.join("_semanticdb/", ctx.label.name)
-    semanticdb_target_root = paths.join(paths.dirname(ctx.outputs.jar.path), semanticdb_directory)
 
     for source in ctx.files.srcs:
         if source.extension == "scala":
-            output_filename = paths.join(
-                semanticdb_directory,
+            path = paths.join(
+                directory_name,
                 "META-INF",
                 "semanticdb",
                 "{}.semanticdb".format(source.path),
             )
 
-            outputs.append(ctx.actions.declare_file(output_filename))
+            outputs.append(ctx.actions.declare_file(path))
 
-    if scala_configuration.version.startswith("2"):
-        scalacopts = [
-            "-P:semanticdb:failures:error",
-            "-P:semanticdb:targetroot:{}".format(semanticdb_target_root),
-        ]
-    else:
-        scalacopts = [
-            "-semanticdb-target:{}".format(semanticdb_target_root),
-            "-Ysemanticdb",
-        ]
+    def add_scalacopts(arguments):
+        if len(outputs) == 0:
+            return
 
-    return struct(outputs = outputs, scalacopts = scalacopts)
+        if scala_configuration.version.startswith("2"):
+            arguments.add("--compiler_option=-P:semanticdb:failures:error")
+            arguments.add("--compiler_option_referencing_path=-P:semanticdb:sourceroot:${workDir}")
+            arguments.add_all(
+                [outputs[0]],
+                format_each = "--compiler_option_referencing_path=-P:semanticdb:targetroot:${path} %s",
+                map_each = _semanticdb_directory_from_file,
+            )
+        else:
+            arguments.add_all(
+                [outputs[0]],
+                format_each = "--compiler_option_referencing_path=-semanticdb-target:${path} %s",
+                map_each = _semanticdb_directory_from_file,
+            )
+
+            arguments.add("--compiler_option_referencing_path=-sourceroot:${workDir}")
+            arguments.add("--compiler_option=-Ysemanticdb")
+
+    g.out.providers.append(
+        _SemanticDbInfo(
+            target_root = "{}/{}".format(ctx.label.package, directory_name),
+            semanticdb_files = outputs,
+        ),
+    )
+
+    return struct(outputs = outputs, arguments_modifier = add_scalacopts)

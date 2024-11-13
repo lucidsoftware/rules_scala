@@ -1,20 +1,22 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+package_output_directory='../../bazel-bin/compile/srcjar'
+
 zip -FSr example.srcjar Example.scala META-INF/MANIFEST.MF
 bazel build :lib-srcjar
 diff <( sort expected)  <(
-   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-srcjar.jar" | sort
+   zipinfo -m -T --h-t "$package_output_directory/lib-srcjar.jar" | sort
 )
 
 zip -FSr example-sources.jar Example.scala META-INF/MANIFEST.MF
 bazel build :lib-sources-jar
 diff <( sort expected)  <(
-   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-sources-jar.jar" | sort
+   zipinfo -m -T --h-t "$package_output_directory/lib-sources-jar.jar" | sort
 )
 
 zip -FSr example-src.jar Example.scala META-INF/MANIFEST.MF
 bazel build :lib-src-jar
 diff <( sort expected)  <(
-   zipinfo -m -T --h-t "$(bazel info bazel-bin)/compile/srcjar/lib-src-jar.jar" | sort
+   zipinfo -m -T --h-t "$package_output_directory/lib-src-jar.jar" | sort
 )

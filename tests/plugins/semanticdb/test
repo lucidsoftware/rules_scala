@@ -18,10 +18,11 @@ check_semanticdb_info() {
 	bazel build ":semanticdb-$1-semanticdb-info"
 
 	output_path="$bazel_bin/plugins/semanticdb/semanticdb-$1-semanticdb-info.txt"
-	semanticdb_file_directory="bazel-out/k8-fastbuild/bin/plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb"
+	reported_semanticdb_files="$(jq -r '.semanticDbFiles[]' "$output_path" | sed -E 's_^bazel-out/[^\n/]+/bin/__g')"
+	semanticdb_file_directory="plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb"
 
-	[ "$(jq ".targetRoot" "$output_path")" = "\"plugins/semanticdb/semanticdb-$1/semanticdb\"" ]
-	[ "$(jq -c ".semanticDbFiles" "$output_path")" = "[\"$semanticdb_file_directory/A.scala.semanticdb\",\"$semanticdb_file_directory/B.scala.semanticdb\"]" ]
+	[ "$(jq '.targetRoot' "$output_path")" = "\"plugins/semanticdb/semanticdb-$1/semanticdb\"" ]
+	[ "$reported_semanticdb_files" = "$semanticdb_file_directory/A.scala.semanticdb"$'\n'"$semanticdb_file_directory/B.scala.semanticdb" ]
 }
 
 bazel build :semanticdb-2_13

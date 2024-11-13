@@ -9,6 +9,7 @@ load(":phases/phase_ijinfo.bzl", _phase_ijinfo = "phase_ijinfo")
 load(":phases/phase_javainfo.bzl", _phase_javainfo = "phase_javainfo")
 load(":phases/phase_library_defaultinfo.bzl", _phase_library_defaultinfo = "phase_library_defaultinfo")
 load(":phases/phase_noop.bzl", _phase_noop = "phase_noop")
+load(":phases/phase_outputgroupinfo.bzl", _phase_outputgroupinfo = "phase_outputgroupinfo")
 load(":phases/phase_resources.bzl", _phase_resources = "phase_resources")
 load(":phases/phase_scalafmt_nondefault_outputs.bzl", _phase_scalafmt_nondefault_outputs = "phase_scalafmt_nondefault_outputs")
 load(":phases/phase_semanticdb.bzl", _phase_semanticdb = "phase_semanticdb")
@@ -40,6 +41,8 @@ phase_javainfo = _phase_javainfo
 phase_library_defaultinfo = _phase_library_defaultinfo
 
 phase_noop = _phase_noop
+
+phase_outputgroupinfo = _phase_outputgroupinfo
 
 phase_resources = _phase_resources
 

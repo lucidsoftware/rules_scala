@@ -30,7 +30,7 @@ def phase_binary_launcher(ctx, g):
 
     g.out.providers.append(DefaultInfo(
         executable = ctx.outputs.bin,
-        files = depset([ctx.outputs.bin, ctx.outputs.jar]),
+        files = depset([ctx.outputs.bin, ctx.outputs.jar] + g.semanticdb.outputs),
         runfiles = ctx.runfiles(
             files = inputs + files,
             transitive_files = depset(

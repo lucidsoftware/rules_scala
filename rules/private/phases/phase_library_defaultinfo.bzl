@@ -6,5 +6,5 @@
 
 def phase_library_defaultinfo(ctx, g):
     g.out.providers.append(DefaultInfo(
-        files = depset([ctx.outputs.jar]),
+        files = depset([ctx.outputs.jar] + g.semanticdb.outputs),
     ))

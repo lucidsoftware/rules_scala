@@ -29,7 +29,9 @@ load(
     _phase_javainfo = "phase_javainfo",
     _phase_library_defaultinfo = "phase_library_defaultinfo",
     _phase_noop = "phase_noop",
+    _phase_outputgroupinfo = "phase_outputgroupinfo",
     _phase_resources = "phase_resources",
+    _phase_semanticdb = "phase_semanticdb",
     _phase_singlejar = "phase_singlejar",
     _phase_test_launcher = "phase_test_launcher",
     _run_phases = "run_phases",
@@ -211,11 +213,13 @@ def _scala_library_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("semanticdb", _phase_semanticdb),
         ("compile", _phase_noop),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
         ("ijinfo", _phase_ijinfo),
         ("library_defaultinfo", _phase_library_defaultinfo),
+        ("outputgroupinfo", _phase_outputgroupinfo),
         ("coda", _phase_coda),
     ]).coda
 
@@ -224,12 +228,14 @@ def _scala_binary_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("semanticdb", _phase_semanticdb),
         ("compile", _phase_noop),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
         ("ijinfo", _phase_ijinfo),
         ("binary_deployjar", _phase_binary_deployjar),
         ("binary_launcher", _phase_binary_launcher),
+        ("outputgroupinfo", _phase_outputgroupinfo),
         ("coda", _phase_coda),
     ]).coda
 
@@ -238,11 +244,13 @@ def _scala_test_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("semanticdb", _phase_semanticdb),
         ("compile", _phase_noop),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
         ("ijinfo", _phase_ijinfo),
         ("test_launcher", _phase_test_launcher),
+        ("outputgroupinfo", _phase_outputgroupinfo),
         ("coda", _phase_coda),
     ]).coda
 

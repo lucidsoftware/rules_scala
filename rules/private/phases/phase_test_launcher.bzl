@@ -2,12 +2,7 @@ load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
-load(
-    "//rules/common:private/utils.bzl",
-    _action_singlejar = "action_singlejar",
-    _collect = "collect",
-    _write_launcher = "write_launcher",
-)
+load("//rules/common:private/utils.bzl", _collect = "collect", _write_launcher = "write_launcher")
 
 #
 # PHASE: test_launcher

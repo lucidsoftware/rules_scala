@@ -162,7 +162,6 @@ def action_singlejar(
         ctx,
         inputs,
         output,
-        phantom_inputs = depset(),
         main_class = None,
         progress_message = None,
         resources = {},
@@ -174,8 +173,6 @@ def action_singlejar(
 
     if type(inputs) == "list":
         inputs = depset(inputs)
-    if type(phantom_inputs) == "list":
-        phantom_inputs = depset(phantom_inputs)
 
     args = ctx.actions.args()
     args.add("--exclude_build_data")
@@ -190,7 +187,7 @@ def action_singlejar(
         args.set_param_file_format("multiline")
         args.use_param_file("@%s", use_always = True)
 
-    all_inputs = depset(resources.values(), transitive = [inputs, phantom_inputs])
+    all_inputs = depset(resources.values(), transitive = [inputs])
 
     ctx.actions.run(
         arguments = [args],

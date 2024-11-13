@@ -22,24 +22,6 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-# protobuf
-
-protobuf_tag = "3.19.6"
-
-protobuf_sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389"
-
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = protobuf_sha256,
-    strip_prefix = "protobuf-{}".format(protobuf_tag),
-    type = "zip",
-    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.zip".format(protobuf_tag),
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 # rules_java
 http_archive(
     name = "rules_java",
@@ -52,7 +34,6 @@ http_archive(
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
 
 rules_java_dependencies()
-
 
 register_toolchains("//:repository_default_toolchain_21_definition")
 
@@ -116,6 +97,24 @@ scala_proto_register_toolchains()
 load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven_install")
 
 annex_proto_pinned_maven_install()
+
+# protobuf
+
+protobuf_tag = "28.3"
+
+protobuf_sha256 = "5b2ff0f72e85dc1350b7bb1b4ea94d7e92e297f7a58b630e46fa6b430b5b253b"
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = protobuf_sha256,
+    strip_prefix = "protobuf-{}".format(protobuf_tag),
+    type = "zip",
+    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.zip".format(protobuf_tag),
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
 
 load("@rules_scala_annex//rules:external.bzl", "scala_import_external")
 load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")

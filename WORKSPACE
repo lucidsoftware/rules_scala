@@ -21,29 +21,6 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-# Stardoc
-
-http_archive(
-    name = "io_bazel_stardoc",
-    sha256 = "fabb280f6c92a3b55eed89a918ca91e39fb733373c81e87a18ae9e33e75023ec",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.7.1/stardoc-0.7.1.tar.gz",
-        "https://github.com/bazelbuild/stardoc/releases/download/0.7.1/stardoc-0.7.1.tar.gz",
-    ],
-)
-
-load("@io_bazel_stardoc//:setup.bzl", "stardoc_repositories")
-
-stardoc_repositories()
-
-load("@io_bazel_stardoc//:deps.bzl", "stardoc_external_deps")
-
-stardoc_external_deps()
-
-load("@stardoc_maven//:defs.bzl", stardoc_pinned_maven_install = "pinned_maven_install")
-
-stardoc_pinned_maven_install()
-
 # com_github_bazelbuild_buildtools
 
 buildtools_tag = "7.1.2"
@@ -60,6 +37,15 @@ http_archive(
 load("@com_github_bazelbuild_buildtools//buildifier:deps.bzl", "buildifier_dependencies")
 
 buildifier_dependencies()
+
+# rules_cc
+
+http_archive(
+    name = "rules_cc",
+    sha256 = "bbf1ae2f83305b7053b11e4467d317a7ba3517a12cef608543c1b1c5bf48a4df",
+    strip_prefix = "rules_cc-0.0.16",
+    urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.16/rules_cc-0.0.16.tar.gz"],
+)
 
 # io_bazel_rules_go
 
@@ -82,34 +68,16 @@ go_rules_dependencies()
 
 go_register_toolchains(version = "1.17")
 
-# protobuf
-
-protobuf_tag = "3.19.6"
-
-protobuf_sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389"
-
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = protobuf_sha256,
-    strip_prefix = "protobuf-{}".format(protobuf_tag),
-    type = "zip",
-    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.zip".format(protobuf_tag),
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 # rules_java
 http_archive(
     name = "rules_java",
-    sha256 = "41131de4417de70b9597e6ebd515168ed0ba843a325dc54a81b92d7af9a7b3ea",
+    sha256 = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83",
     urls = [
-        "https://github.com/bazelbuild/rules_java/releases/download/7.9.0/rules_java-7.9.0.tar.gz",
+        "https://github.com/bazelbuild/rules_java/releases/download/7.12.2/rules_java-7.12.2.tar.gz",
     ],
 )
 
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
 
 rules_java_dependencies()
 
@@ -181,6 +149,64 @@ scala_proto_register_toolchains()
 load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven_install")
 
 annex_proto_pinned_maven_install()
+
+# protobuf
+
+protobuf_tag = "28.3"
+
+protobuf_sha256 = "5b2ff0f72e85dc1350b7bb1b4ea94d7e92e297f7a58b630e46fa6b430b5b253b"
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = protobuf_sha256,
+    strip_prefix = "protobuf-{}".format(protobuf_tag),
+    type = "zip",
+    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.zip".format(protobuf_tag),
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
+# rules_proto
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "0e5c64a2599a6e26c6a03d6162242d231ecc0de219534c38cb4402171def21e8",
+    strip_prefix = "rules_proto-7.0.2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/7.0.2/rules_proto-7.0.2.tar.gz",
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+
+rules_proto_dependencies()
+
+load("@rules_proto//proto:setup.bzl", "rules_proto_setup")
+
+rules_proto_setup()
+
+# Stardoc
+
+http_archive(
+    name = "io_bazel_stardoc",
+    sha256 = "fabb280f6c92a3b55eed89a918ca91e39fb733373c81e87a18ae9e33e75023ec",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.7.1/stardoc-0.7.1.tar.gz",
+        "https://github.com/bazelbuild/stardoc/releases/download/0.7.1/stardoc-0.7.1.tar.gz",
+    ],
+)
+
+load("@io_bazel_stardoc//:setup.bzl", "stardoc_repositories")
+
+stardoc_repositories()
+
+load("@io_bazel_stardoc//:deps.bzl", "stardoc_external_deps")
+
+stardoc_external_deps()
+
+load("@stardoc_maven//:defs.bzl", stardoc_pinned_maven_install = "pinned_maven_install")
+
+stardoc_pinned_maven_install()
 
 # rules_pkg
 

@@ -1,6 +1,6 @@
 # higherkindness/rules_scala
 
-[![Build Status](https://github.com/higherkindness/rules_scala/workflows/CI/badge.svg)](https://github.com/higherkindness/rules_scala/actions)
+[![Build Status](https://github.com/lucidsoftware/rules_scala/workflows/CI/badge.svg)](https://github.com/lucidsoftware/rules_scala/actions)
 
 `higherkindness/rules_scala` evolved, in part, from the need for Bazel adoption support for large, monorepo Scala projects.
 Bazel is wonderful because it makes use of parallelism and caching to vastly improve build times. However, to see these benefits, a project must first be broken down into

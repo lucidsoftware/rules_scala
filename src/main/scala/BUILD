@@ -1,26 +1,6 @@
-load(
-    "@rules_scala_annex//rules:scala.bzl",
-    "configure_bootstrap_scala",
-    "configure_zinc_scala",
-    "scala_library",
-)
-load(
-    "@rules_scala_annex//rules/scala:workspace.bzl",
-    "scala_2_13_version",
-    "scala_3_version",
-)
-
-alias(
-    name = "bootstrap",
-    actual = ":bootstrap_2_13",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "zinc",
-    actual = ":zinc_2_13",
-    visibility = ["//visibility:public"],
-)
+load("//rules:register_toolchain.bzl", "register_bootstrap_toolchain", "register_zinc_toolchain")
+load("//rules:scala.bzl", "scala_library")
+load("//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
 
 # Scala 2.13
 compiler_classpath_2_13 = [
@@ -46,7 +26,7 @@ shared_scala2_global_scalacopts = [
 
 scala2_global_scalacopts = shared_global_scalacopts + shared_scala2_global_scalacopts
 
-configure_bootstrap_scala(
+register_bootstrap_toolchain(
     name = "bootstrap_2_13",
     compiler_classpath = compiler_classpath_2_13,
     global_scalacopts = scala2_global_scalacopts,
@@ -55,7 +35,7 @@ configure_bootstrap_scala(
     visibility = ["//visibility:public"],
 )
 
-configure_zinc_scala(
+register_zinc_toolchain(
     name = "zinc_2_13",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
@@ -72,7 +52,7 @@ configure_zinc_scala(
 scala_library(
     name = "scala-sdk",
     deps_used_whitelist = compiler_classpath_2_13,
-    scala = ":zinc_3",
+    scala_toolchain_name = "zinc_3",
     deps = compiler_classpath_2_13,
 )
 
@@ -90,11 +70,11 @@ runtime_classpath_3 = [
 scala_library(
     name = "scala-sdk-3",
     deps_used_whitelist = compiler_classpath_3,
-    scala = ":zinc_3",
+    scala_toolchain_name = "zinc_3",
     deps = compiler_classpath_3,
 )
 
-configure_bootstrap_scala(
+register_bootstrap_toolchain(
     name = "bootstrap_3",
     compiler_classpath = compiler_classpath_3,
     global_scalacopts = shared_global_scalacopts,
@@ -104,7 +84,7 @@ configure_bootstrap_scala(
     visibility = ["//visibility:public"],
 )
 
-configure_zinc_scala(
+register_zinc_toolchain(
     name = "zinc_3",
     compiler_bridge = "@annex//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = compiler_classpath_3,

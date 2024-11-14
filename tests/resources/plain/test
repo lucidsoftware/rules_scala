@@ -1,12 +1,14 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+package_output_directory='../../bazel-bin/resources/plain'
+
 bazel build :plain
 diff <(sort expected_plain) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/plain/plain.jar" | sort
+    zipinfo -m -T --h-t "$package_output_directory/plain.jar" | sort
 )
 
 bazel build :merged
 diff <(sort expected_merged) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/plain/merged.jar" | sort
+    zipinfo -m -T --h-t "$package_output_directory/merged.jar" | sort
 )

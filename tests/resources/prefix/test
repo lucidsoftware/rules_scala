@@ -3,7 +3,7 @@
 
 bazel build :prefix
 diff <(sort expected) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/prefix/prefix.jar" | sort
+    zipinfo -m -T --h-t "../../bazel-bin/resources/prefix/prefix.jar" | sort
 )
 
 ! bazel build :outside

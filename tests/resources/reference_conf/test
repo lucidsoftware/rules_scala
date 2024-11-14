@@ -1,12 +1,14 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../../common.sh
 
+package_output_directory='../../bazel-bin/resources/reference_conf'
+
 bazel build :plain_java
 diff <(sort expected_plain) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/reference_conf/libplain_java.jar" | sort
+    zipinfo -m -T --h-t "$package_output_directory/libplain_java.jar" | sort
 )
 
 bazel build :plain
 diff <(sort expected_plain) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/reference_conf/plain.jar" | sort
+    zipinfo -m -T --h-t "$package_output_directory/plain.jar" | sort
 )

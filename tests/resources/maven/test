@@ -3,5 +3,5 @@
 
 bazel build :maven
 diff <(sort expected) <(
-    zipinfo -m -T --h-t "$(bazel info bazel-bin)/resources/maven/maven.jar" | sort
+    zipinfo -m -T --h-t "../../bazel-bin/resources/maven/maven.jar" | sort
 )

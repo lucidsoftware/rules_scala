@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library", "scala_test")
 scala_library(
     name = "worker",
     srcs = glob(["*.scala"]),
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     visibility = ["//visibility:public"],
     deps = [

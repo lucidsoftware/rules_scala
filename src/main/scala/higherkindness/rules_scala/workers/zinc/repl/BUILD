@@ -4,7 +4,7 @@ load("//rules:scalafmt.bzl", "scala_format_test")
 scala_binary(
     name = "repl",
     srcs = glob(["**/*.scala"]),
-    scala = "//src/main/scala:zinc",
+    scala_toolchain_name = "zinc_2_13",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/args",

@@ -4,12 +4,12 @@ scala_library(
     name = "library",
     srcs = ["Library.scala"],
     neverlink = True,
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
 )
 
 scala_binary(
     name = "binary",
     srcs = ["Binary.scala"],
-    scala = "//scala:2_13",
+    scala_toolchain_name = "test_zinc_2_13",
     deps = [":library"],
 )

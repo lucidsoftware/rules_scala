@@ -54,7 +54,7 @@ scala_repositories(<a href="#scala_repositories-java_launcher_version">java_laun
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="scala_repositories-java_launcher_version"></a>java_launcher_version |  <p align="center"> - </p>   |  `"7.4.0"` |
+| <a id="scala_repositories-java_launcher_version"></a>java_launcher_version |  <p align="center"> - </p>   |  `"7.4.1"` |
 | <a id="scala_repositories-java_launcher_template_sha"></a>java_launcher_template_sha |  <p align="center"> - </p>   |  `"ee4aa47ae5e639632c67be5cc0ccbc4e941a67a1b884a1ce0c4329357a4b62b2"` |
 
 

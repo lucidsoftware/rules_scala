@@ -75,7 +75,7 @@ object FileUtil {
 
     // Handle difference between Bazel's external directory being referred to as .. in the short_path
     if (replaceExternal && shortPath.subpath(0, 1) == Paths.get("external")) {
-      Paths.get("..").resolve(shortPath.subpath(1, shortPath.getNameCount() - 1))
+      Paths.get("..").resolve(shortPath.subpath(1, shortPath.getNameCount()))
     } else {
       shortPath
     }

@@ -205,6 +205,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         workRequest.compilerClasspath.view.map(_.toFile).toArray,
         workDir,
         isWorker,
+        out,
       )
 
     val compileOptions =

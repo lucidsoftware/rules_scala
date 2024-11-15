@@ -109,6 +109,7 @@ object ReplRunner {
       replRequest.compilerClasspath.map(_.toFile).toArray,
       workDir,
       isWorker = false,
+      null,
     )
 
     val scalaCompiler = ZincUtil.scalaCompiler(scalaInstance, replRequest.compilerBridge.toFile)

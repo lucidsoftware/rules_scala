@@ -2,7 +2,7 @@ package higherkindness.rules_scala
 package workers.common
 
 import xsbti.compile.ScalaInstance
-import java.io.File
+import java.io.{File, PrintStream}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util.Properties
@@ -18,9 +18,9 @@ object AnnexScalaInstance {
    * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
    * worker. Otherwise just create the AnnexScalaInstance and be done with it because the process won't be long lived.
    */
-  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean): AnnexScalaInstance = {
+  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean, out: PrintStream): AnnexScalaInstance = {
     if (isWorker) {
-      getAnnexScalaInstance(allJars, workDir)
+      getAnnexScalaInstance(allJars, workDir, out)
     } else {
       new AnnexScalaInstance(allJars)
     }
@@ -66,7 +66,7 @@ object AnnexScalaInstance {
    * Using this cache and the Scala compiler cache, but disabling Zinc's classloader cache works, but doesn't seem to be
    * any different from leaving Zinc's cache enabled.
    */
-  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
+  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path, out: PrintStream): AnnexScalaInstance = {
     // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
     // We use a set because we don't care about ordering for comparison purposes
     val mapBuilder = Map.newBuilder[Path, Path]
@@ -101,6 +101,7 @@ object AnnexScalaInstance {
     val key = keyBuilder.result()
 
     Option(instanceCache.get(key)).getOrElse {
+      out.println(s"Cache miss. Key: ${key}. Size: ${instanceCache.size}")
       // Copy all the jars to the worker's directory because in a sandboxed world the
       // jars can go away after the work request, so we can't rely on them sticking around.
       // This should only happen once per compiler version, so it shouldn't happen often.
@@ -126,6 +127,7 @@ object AnnexScalaInstance {
       // using a putIfAbsent, but that's likely more expensive because of all the classloaders
       // that get constructed when creating an AnnexScalaInstance.
       if (instanceInsertedByOtherThreadOrNull == null) {
+        out.println(s"Added to cache. Key: ${key}. Size: ${instanceCache.size}")
         instance
       } else {
         instanceInsertedByOtherThreadOrNull

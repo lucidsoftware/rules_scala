@@ -1,8 +1,7 @@
 common --announce_rc
 common --color=yes
-# Fix "Failed to fetch blobs because they do not exist remotely" errors
-# https://github.com/bazelbuild/bazel/issues/18696#issuecomment-2175561503
-common --remote_download_all
+# TODO: remove this when we move to Bazel 8. This is the default in Bazel 8.
+common --experimental_remote_cache_eviction_retries=5
 
 # TODO: enable path mapping when we move to Bazel 8. There is a bug in 7. See:
 # https://github.com/bazelbuild/bazel/issues/23990

@@ -76,8 +76,9 @@ object CommonArguments {
       )
     }
 
+    // Use an absolute path here for the work dir to avoid problems when the working directory is " "
     withPathReplaced
-      .replace("${workDir}": @nowarn("cat=lint-missing-interpolator"), workDir.toString)
+      .replace("${workDir}": @nowarn("cat=lint-missing-interpolator"), workDir.toAbsolutePath().normalize().toString())
   }
 
   /**

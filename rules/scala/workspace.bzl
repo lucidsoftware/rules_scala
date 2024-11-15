@@ -11,7 +11,7 @@ filegroup(
 )"""
 
 scala_2_13_version = "2.13.15"
-scala_3_version = "3.5.2"
+scala_3_version = "3.3.4"
 zinc_version = "1.10.4"
 scalapb_version = "0.11.17"
 

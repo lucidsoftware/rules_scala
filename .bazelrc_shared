@@ -22,7 +22,13 @@ build --strategy=worker,sandboxed,local
 
 build --worker_max_instances=4
 build --worker_sandboxing
-build --experimental_worker_multiplex_sandboxing
+# Disable multiplex sandboxing because there is a bug that causes files which
+# should be in the sandbox to not be. Not sure if this is a Bazel bug or a rule
+# set bug. Something we need to deal with either way.
+# Once we enable path mapping, we should also be able to get rid of the outgoing
+# transition that we're currently relying on to prevent an explosion in the number
+# of builds.
+#build --experimental_worker_multiplex_sandboxing
 build --experimental_worker_cancellation
 build --verbose_failures
 

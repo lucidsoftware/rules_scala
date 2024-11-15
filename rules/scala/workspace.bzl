@@ -135,9 +135,9 @@ def scala_register_toolchains(default_scala_toolchain_name, toolchains = []):
     )
 
     native.register_toolchains(
-        "//src/main/scala:bootstrap_2_13",
-        "//src/main/scala:bootstrap_3",
-        "//src/main/scala:zinc_2_13",
-        "//src/main/scala:zinc_3",
+        "//src/main/scala:annex_bootstrap_2_13",
+        "//src/main/scala:annex_bootstrap_3",
+        "//src/main/scala:annex_zinc_2_13",
+        "//src/main/scala:annex_zinc_3",
         *toolchains
     )

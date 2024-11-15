@@ -27,7 +27,7 @@ shared_scala2_global_scalacopts = [
 scala2_global_scalacopts = shared_global_scalacopts + shared_scala2_global_scalacopts
 
 register_bootstrap_toolchain(
-    name = "bootstrap_2_13",
+    name = "annex_bootstrap_2_13",
     compiler_classpath = compiler_classpath_2_13,
     global_scalacopts = scala2_global_scalacopts,
     runtime_classpath = runtime_classpath_2_13,
@@ -36,7 +36,7 @@ register_bootstrap_toolchain(
 )
 
 register_zinc_toolchain(
-    name = "zinc_2_13",
+    name = "annex_zinc_2_13",
     compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     global_scalacopts = scala2_global_scalacopts,
@@ -52,7 +52,7 @@ register_zinc_toolchain(
 scala_library(
     name = "scala-sdk",
     deps_used_whitelist = compiler_classpath_2_13,
-    scala_toolchain_name = "zinc_3",
+    scala_toolchain_name = "annex_zinc_3",
     deps = compiler_classpath_2_13,
 )
 
@@ -70,12 +70,12 @@ runtime_classpath_3 = [
 scala_library(
     name = "scala-sdk-3",
     deps_used_whitelist = compiler_classpath_3,
-    scala_toolchain_name = "zinc_3",
+    scala_toolchain_name = "annex_zinc_3",
     deps = compiler_classpath_3,
 )
 
 register_bootstrap_toolchain(
-    name = "bootstrap_3",
+    name = "annex_bootstrap_3",
     compiler_classpath = compiler_classpath_3,
     global_scalacopts = shared_global_scalacopts,
     runtime_classpath = runtime_classpath_3,
@@ -85,7 +85,7 @@ register_bootstrap_toolchain(
 )
 
 register_zinc_toolchain(
-    name = "zinc_3",
+    name = "annex_zinc_3",
     compiler_bridge = "@annex//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = compiler_classpath_3,
     global_scalacopts = shared_global_scalacopts,

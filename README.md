@@ -74,7 +74,7 @@ load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains
 scala_repositories()
 load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
 annex_pinned_maven_install()
-scala_register_toolchains(default_scala_toolchain_name = "zinc_3")
+scala_register_toolchains(default_scala_toolchain_name = "annex_zinc_3")
 
 load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config", "scalafmt_repositories")
 scalafmt_repositories()
@@ -116,7 +116,7 @@ protobuf_deps()
 # Specify the scala compiler we wish to use; in this case, we'll use the default one specified in rules_scala_annex
 bind(
     name = "default_scala",
-    actual = "@rules_scala_annex//src/main/scala:zinc_2_13",
+    actual = "@rules_scala_annex//src/main/scala:annex_zinc_2_13",
 )
 ```
 

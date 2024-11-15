@@ -35,7 +35,7 @@ compiler_classpath_2_13 = [
 runtime_classpath_2_13 = ["@scala_library_2_13//jar"]
 
 register_bootstrap_toolchain(
-    name = "bootstrap_2_13",
+    name = "annex_bootstrap_2_13",
     compiler_classpath = compiler_classpath_2_13,
     runtime_classpath = runtime_classpath_2_13,
     version = "2.13.14",
@@ -46,7 +46,7 @@ register_bootstrap_toolchain(
 scala_library(
     name = "compiler_bridge_2_13",
     srcs = ["@compiler_bridge_2_13//:src"],
-    scala_toolchain_name = "bootstrap_2_13",
+    scala_toolchain_name = "annex_bootstrap_2_13",
     visibility = ["//visibility:public"],
     deps = compiler_classpath_2_13 + [
         "@scala_annex_org_scala_sbt_compiler_interface//jar",
@@ -56,7 +56,7 @@ scala_library(
 
 # This augments the configuration to configure the zinc compiler
 register_zinc_toolchain(
-    name = "zinc_2_13",
+    name = "annex_zinc_2_13",
     compiler_bridge = ":compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     runtime_classpath = runtime_classpath_2_13,
@@ -72,8 +72,8 @@ load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains
 ...
 
 scala_register_toolchains(
-    toolchains = ["//:bootstrap_2_13", "//:zinc_2_13"],
-    default_scala_toolchain_name = "zinc_2_13",
+    toolchains = ["//:annex_bootstrap_2_13", "//:annex_zinc_2_13"],
+    default_scala_toolchain_name = "annex_zinc_2_13",
 )
 
 ...
@@ -90,13 +90,13 @@ For example:
 scala_library(
   name = "example_compiled_with_scalac",
   srcs = glob(["**/*.scala"])
-  scala_toolchain_name = "bootstrap_2_13",
+  scala_toolchain_name = "annex_bootstrap_2_13",
 )
 
 scala_library(
   name = "example_compiled_with_zinc",
   srcs = glob(["**/*.scala"])
-  scala_toolchain_name = "zinc_2_13",
+  scala_toolchain_name = "annex_zinc_2_13",
 )
 
 # This would use the default toolchain, which we configured via `scala_register_toolchains` above

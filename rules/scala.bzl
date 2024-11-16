@@ -408,7 +408,7 @@ _scala_repl_private_attributes = _dicts.add(
     _runtime_private_attributes,
     {
         "_runner": attr.label(
-            cfg = "exec",
+            cfg = "target",
             executable = True,
             default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/repl",
         ),

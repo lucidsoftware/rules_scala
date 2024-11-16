@@ -53,10 +53,6 @@ _compile_private_attributes = {
         cfg = _scala_toolchain_outgoing_transition,
         default = Label("@bazel_tools//tools/jdk:current_java_toolchain"),
     ),
-    "_host_javabase": attr.label(
-        default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
-        cfg = "exec",
-    ),
     "_singlejar": attr.label(
         cfg = "exec",
         default = "@bazel_tools//tools/jdk:singlejar",

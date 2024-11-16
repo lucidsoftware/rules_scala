@@ -32,7 +32,9 @@ build --worker_sandboxing
 build --experimental_worker_cancellation
 build --verbose_failures
 
-build --experimental_worker_sandbox_hardening
+# This is disabled as it was causing some issues with some javac targets when used
+# with path mapping. If that is resolved, then we can turn it back on.
+#build --experimental_worker_sandbox_hardening
 build --experimental_use_hermetic_linux_sandbox
 
 test --test_output=all

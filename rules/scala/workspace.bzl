@@ -49,7 +49,7 @@ def scala_artifacts():
     ]
 
 def scala_repositories(
-        java_launcher_version = "7.4.0",
+        java_launcher_version = "7.4.1",
         java_launcher_template_sha = "ee4aa47ae5e639632c67be5cc0ccbc4e941a67a1b884a1ce0c4329357a4b62b2"):
     maven_install(
         name = "annex",
@@ -135,9 +135,9 @@ def scala_register_toolchains(default_scala_toolchain_name, toolchains = []):
     )
 
     native.register_toolchains(
-        "//src/main/scala:bootstrap_2_13",
-        "//src/main/scala:bootstrap_3",
-        "//src/main/scala:zinc_2_13",
-        "//src/main/scala:zinc_3",
+        "//src/main/scala:annex_bootstrap_2_13",
+        "//src/main/scala:annex_bootstrap_3",
+        "//src/main/scala:annex_zinc_2_13",
+        "//src/main/scala:annex_zinc_3",
         *toolchains
     )

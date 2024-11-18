@@ -6,6 +6,7 @@ load(
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _short_path = "short_path",
 )
 
 #
@@ -18,7 +19,7 @@ load(
 def phase_zinc_depscheck(ctx, g):
     deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
-    worker_inputs, _, worker_input_manifests = ctx.resolve_command(tools = [deps_configuration.worker])
+    worker_inputs, _ = ctx.resolve_tools(tools = [deps_configuration.worker])
     outputs = []
 
     for name in ("direct", "used"):
@@ -42,10 +43,9 @@ def phase_zinc_depscheck(ctx, g):
         deps_args.use_param_file("@%s", use_always = True)
         ctx.actions.run(
             mnemonic = "ScalaCheckDeps",
-            inputs = [g.compile.used] + worker_inputs,
+            inputs = [g.compile.used] + worker_inputs.to_list(),
             outputs = [deps_check],
-            executable = deps_configuration.worker.files_to_run.executable,
-            input_manifests = worker_input_manifests,
+            executable = deps_configuration.worker.files_to_run,
             execution_requirements = _resolve_execution_reqs(
                 ctx,
                 {
@@ -53,6 +53,7 @@ def phase_zinc_depscheck(ctx, g):
                     "supports-workers": "1",
                     "supports-multiplex-sandboxing": "1",
                     "supports-worker-cancellation": "1",
+                    "supports-path-mapping": "1",
                 },
             ),
             arguments = [deps_args],
@@ -76,4 +77,7 @@ def phase_zinc_depscheck(ctx, g):
 def _add_args_for_depscheck_labeled_group(labeled_jar_group, deps_args):
     deps_args.add("--group")
     deps_args.add(labeled_jar_group.label, format = "_%s")
-    deps_args.add_all(labeled_jar_group.jars)
+
+    # We do want to use map_each on the jar paths as we don't want the configuration specific
+    # fragments of those paths.
+    deps_args.add_all(labeled_jar_group.jars, map_each = _short_path)

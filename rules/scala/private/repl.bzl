@@ -4,7 +4,12 @@ load(
     _ScalaConfiguration = "ScalaConfiguration",
     _ZincConfiguration = "ZincConfiguration",
 )
-load("//rules/common:private/utils.bzl", "write_launcher", _collect = "collect")
+load(
+    "//rules/common:private/utils.bzl",
+    "write_launcher",
+    _collect = "collect",
+    _short_path = "short_path",
+)
 
 def scala_repl_implementation(ctx):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
@@ -59,6 +64,3 @@ def scala_repl_implementation(ctx):
             ),
         ),
     ]
-
-def _short_path(file):
-    return file.short_path

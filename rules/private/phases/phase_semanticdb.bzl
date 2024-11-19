@@ -15,7 +15,7 @@ def _semanticdb_directory_from_file(file):
     nested function closure by default.
     """
 
-    return "{}/{}".format(file.root.path, file.short_path[:file.short_path.find("META-INF") - 1])
+    return file.path[:file.path.find("META-INF") - 1]
 
 #
 # PHASE: semanticdb

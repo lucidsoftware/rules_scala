@@ -1,6 +1,6 @@
 ## Phases
 
-Most rules in `higherkindness/rules_scala` are architected using phases. Phases break down the Bazel Analysis stage into logical chunks.
+Most rules in `lucidsoftware/rules_scala` are architected using phases. Phases break down the Bazel Analysis stage into logical chunks.
 For example, the implementation of `scala_binary` is:
 
 ```python

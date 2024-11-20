@@ -139,6 +139,6 @@ scala_library(
 
 ## Further Documentation
 
-See [contributing guidlines](CONTRIBUTING.md) for help on contributing to this project.
+See [contributing guidelines](CONTRIBUTING.md) for help on contributing to this project.
 
 For all rules and attributes, see the [Stardoc](docs/stardoc).

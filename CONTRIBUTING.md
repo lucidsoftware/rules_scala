@@ -1,10 +1,10 @@
 # Contributing guidelines
 
-Contributions should follow the [principals](../README.md#principals) of rules_scala_annex.
+Contributions should follow the [principles](README.md#principles) of `lucidsoftware/rules_scala`.
 
 ## Documentation
 
-To generate the [Stardoc](https://github.com/bazelbuild/skydoc),
+To generate the [Stardoc](https://github.com/bazelbuild/stardoc),
 
 ```
 $ ./scripts/gen-docs.sh
@@ -12,7 +12,7 @@ $ ./scripts/gen-docs.sh
 
 ## Formatting
 
-[Buildifier](https://github.com/bazelbuild/buildtools/blob/master/buildifier) is used to format Skylark files,
+[Buildifier](https://github.com/bazelbuild/buildtools/blob/main/buildifier) is used to format Skylark files,
 and [Scalafmt](https://scalameta.org/scalafmt/) is used to format Scala files. To run them,
 
 ```
@@ -21,7 +21,7 @@ $ ./scripts/format.sh
 
 ## Maven deps
 
-[rules_jvm_external](https://github.com/bazelbuild/rules_jvm_external) is used to generate maven deps. If you need to change
+[rules_jvm_external](https://github.com/bazel-contrib/rules_jvm_external) is used to generate maven deps. If you need to change
 dependencies, modify `maven_install` in the following different `workspace.bzl` files
 
 ```

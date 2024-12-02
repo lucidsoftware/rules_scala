@@ -10,7 +10,10 @@ bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_pkg", version = "1.0.1")
 bazel_dep(name = "stardoc", version = "0.7.1")
 
-register_toolchains("//:repository_default_toolchain_21_definition")
+register_toolchains(
+    "//:repository_default_toolchain_21_definition",
+    "//rules/scala_proto:scalapb_scala_proto_toolchain",
+)
 
 # Please ensure these stay up-to-date with the versions in `/rules/scala/versions.bzl`,
 # `/tests/MODULE.bazel`, and `/MODULE.bazel`. Unfortunately, `MODULE.bazel` files can't call `load`,

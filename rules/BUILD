@@ -1,6 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
+load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 load(":stardoc.bzl", "stardoc_targets")
 
 [

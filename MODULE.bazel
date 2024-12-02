@@ -1,1 +1,10 @@
 module(name = "rules_scala_annex")
+
+# TODO: Use buildifier instead of buildifier_prebuilt once
+# https://github.com/bazelbuild/bazel-central-registry/issues/380 is resolved
+bazel_dep(name = "buildifier_prebuilt", version = "7.3.1")
+bazel_dep(name = "rules_java", version = "7.12.2")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "stardoc", version = "0.7.1")
+
+register_toolchains("//:repository_default_toolchain_21_definition")

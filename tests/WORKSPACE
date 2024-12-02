@@ -33,21 +33,6 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-# rules_java
-http_archive(
-    name = "rules_java",
-    sha256 = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83",
-    urls = [
-        "https://github.com/bazelbuild/rules_java/releases/download/7.12.2/rules_java-7.12.2.tar.gz",
-    ],
-)
-
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
-
-rules_java_dependencies()
-
-register_toolchains("//:repository_default_toolchain_21_definition")
-
 # rules_jvm_external
 rules_jvm_external_tag = "6.5"
 
@@ -120,24 +105,6 @@ scala_proto_register_toolchains()
 load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven_install")
 
 annex_proto_pinned_maven_install()
-
-# protobuf
-
-protobuf_tag = "28.3"
-
-protobuf_sha256 = "5b2ff0f72e85dc1350b7bb1b4ea94d7e92e297f7a58b630e46fa6b430b5b253b"
-
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = protobuf_sha256,
-    strip_prefix = "protobuf-{}".format(protobuf_tag),
-    type = "zip",
-    url = "https://github.com/protocolbuffers/protobuf/archive/v{}.zip".format(protobuf_tag),
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
 
 load("@rules_scala_annex//rules:external.bzl", "scala_import_external")
 load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")

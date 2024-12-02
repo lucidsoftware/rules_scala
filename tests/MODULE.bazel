@@ -1,7 +1,10 @@
-module(name = "rules_scala_annex_test")
+module(name = "rules_scala_annex_tests")
 
+bazel_dep(name = "rules_java", version = "7.12.2")
 bazel_dep(name = "rules_scala_annex")
 local_path_override(
     module_name = "rules_scala_annex",
     path = "..",
 )
+
+register_toolchains("//:repository_default_toolchain_21_definition")

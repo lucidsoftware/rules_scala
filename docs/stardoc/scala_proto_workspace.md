@@ -7,7 +7,7 @@
 ## scala_proto_artifacts
 
 <pre>
-load("@//rules/scala_proto:workspace.bzl", "scala_proto_artifacts")
+load("@rules_scala_annex//rules/scala_proto:workspace.bzl", "scala_proto_artifacts")
 
 scala_proto_artifacts()
 </pre>
@@ -21,7 +21,7 @@ scala_proto_artifacts()
 ## scala_proto_register_toolchains
 
 <pre>
-load("@//rules/scala_proto:workspace.bzl", "scala_proto_register_toolchains")
+load("@rules_scala_annex//rules/scala_proto:workspace.bzl", "scala_proto_register_toolchains")
 
 scala_proto_register_toolchains()
 </pre>
@@ -35,7 +35,7 @@ scala_proto_register_toolchains()
 ## scala_proto_repositories
 
 <pre>
-load("@//rules/scala_proto:workspace.bzl", "scala_proto_repositories")
+load("@rules_scala_annex//rules/scala_proto:workspace.bzl", "scala_proto_repositories")
 
 scala_proto_repositories()
 </pre>

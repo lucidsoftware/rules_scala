@@ -66,11 +66,6 @@ load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
 
 rules_jvm_external_setup()
 
-local_repository(
-    name = "rules_scala_annex",
-    path = "../",
-)
-
 load(
     "@rules_scala_annex//rules/scala:workspace.bzl",
     "scala_register_toolchains",

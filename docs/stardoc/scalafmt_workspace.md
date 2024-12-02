@@ -7,7 +7,7 @@
 ## scalafmt_artifacts
 
 <pre>
-load("@//rules/scalafmt:workspace.bzl", "scalafmt_artifacts")
+load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_artifacts")
 
 scalafmt_artifacts()
 </pre>
@@ -21,7 +21,7 @@ scalafmt_artifacts()
 ## scalafmt_default_config
 
 <pre>
-load("@//rules/scalafmt:workspace.bzl", "scalafmt_default_config")
+load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config")
 
 scalafmt_default_config(<a href="#scalafmt_default_config-path">path</a>)
 </pre>
@@ -41,7 +41,7 @@ scalafmt_default_config(<a href="#scalafmt_default_config-path">path</a>)
 ## scalafmt_repositories
 
 <pre>
-load("@//rules/scalafmt:workspace.bzl", "scalafmt_repositories")
+load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_repositories")
 
 scalafmt_repositories()
 </pre>

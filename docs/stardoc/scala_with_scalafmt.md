@@ -19,7 +19,7 @@ formatted.
 ## scala_binary
 
 <pre>
-load("@//rules:scala_with_scalafmt.bzl", "scala_binary")
+load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_binary")
 
 scala_binary(<a href="#scala_binary-name">name</a>, <a href="#scala_binary-deps">deps</a>, <a href="#scala_binary-srcs">srcs</a>, <a href="#scala_binary-data">data</a>, <a href="#scala_binary-resources">resources</a>, <a href="#scala_binary-config">config</a>, <a href="#scala_binary-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_binary-deps_used_whitelist">deps_used_whitelist</a>,
              <a href="#scala_binary-format">format</a>, <a href="#scala_binary-javacopts">javacopts</a>, <a href="#scala_binary-jvm_flags">jvm_flags</a>, <a href="#scala_binary-main_class">main_class</a>, <a href="#scala_binary-plugins">plugins</a>, <a href="#scala_binary-resource_jars">resource_jars</a>, <a href="#scala_binary-resource_strip_prefix">resource_strip_prefix</a>,
@@ -66,7 +66,7 @@ To run the program: `bazel run <target>`
 ## scala_library
 
 <pre>
-load("@//rules:scala_with_scalafmt.bzl", "scala_library")
+load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_library")
 
 scala_library(<a href="#scala_library-name">name</a>, <a href="#scala_library-deps">deps</a>, <a href="#scala_library-srcs">srcs</a>, <a href="#scala_library-data">data</a>, <a href="#scala_library-resources">resources</a>, <a href="#scala_library-config">config</a>, <a href="#scala_library-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_library-deps_used_whitelist">deps_used_whitelist</a>,
               <a href="#scala_library-exports">exports</a>, <a href="#scala_library-format">format</a>, <a href="#scala_library-javacopts">javacopts</a>, <a href="#scala_library-macro">macro</a>, <a href="#scala_library-neverlink">neverlink</a>, <a href="#scala_library-plugins">plugins</a>, <a href="#scala_library-resource_jars">resource_jars</a>,
@@ -106,7 +106,7 @@ Compiles a Scala JVM library.
 ## scala_test
 
 <pre>
-load("@//rules:scala_with_scalafmt.bzl", "scala_test")
+load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_test")
 
 scala_test(<a href="#scala_test-name">name</a>, <a href="#scala_test-deps">deps</a>, <a href="#scala_test-srcs">srcs</a>, <a href="#scala_test-data">data</a>, <a href="#scala_test-resources">resources</a>, <a href="#scala_test-config">config</a>, <a href="#scala_test-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_test-deps_used_whitelist">deps_used_whitelist</a>,
            <a href="#scala_test-format">format</a>, <a href="#scala_test-frameworks">frameworks</a>, <a href="#scala_test-isolation">isolation</a>, <a href="#scala_test-javacopts">javacopts</a>, <a href="#scala_test-jvm_flags">jvm_flags</a>, <a href="#scala_test-plugins">plugins</a>, <a href="#scala_test-resource_jars">resource_jars</a>,
@@ -144,11 +144,11 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 | <a id="scala_test-plugins"></a>plugins |  The Scalac plugins.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-resource_jars"></a>resource_jars |  The JARs to merge into the output JAR.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
-| <a id="scala_test-runner"></a>runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//src/main/scala/higherkindness/rules_scala/workers/zinc/test"`  |
+| <a id="scala_test-runner"></a>runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test"`  |
 | <a id="scala_test-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-scala_toolchain_name"></a>scala_toolchain_name |  The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)   | String | optional |  `""`  |
 | <a id="scala_test-scalacopts"></a>scalacopts |  Options to pass to scalac.   | List of strings | optional |  `[]`  |
 | <a id="scala_test-shared_deps"></a>shared_deps |  If isolation is "classloader", the list of deps to keep loaded between tests   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_test-subprocess_runner"></a>subprocess_runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"`  |
+| <a id="scala_test-subprocess_runner"></a>subprocess_runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"`  |
 
 

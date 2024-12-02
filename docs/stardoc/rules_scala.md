@@ -7,7 +7,7 @@
 ## emulate_rules_scala
 
 <pre>
-load("@//rules:rules_scala.bzl", "emulate_rules_scala")
+load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")
 
 emulate_rules_scala(<a href="#emulate_rules_scala-scalatest">scalatest</a>, <a href="#emulate_rules_scala-extra_deps">extra_deps</a>)
 </pre>
@@ -28,7 +28,7 @@ emulate_rules_scala(<a href="#emulate_rules_scala-scalatest">scalatest</a>, <a h
 ## emulate_rules_scala_repository
 
 <pre>
-load("@//rules:rules_scala.bzl", "emulate_rules_scala_repository")
+load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala_repository")
 
 emulate_rules_scala_repository(<a href="#emulate_rules_scala_repository-name">name</a>, <a href="#emulate_rules_scala_repository-extra_deps">extra_deps</a>, <a href="#emulate_rules_scala_repository-repo_mapping">repo_mapping</a>)
 </pre>

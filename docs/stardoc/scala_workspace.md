@@ -7,7 +7,7 @@
 ## scala_artifacts
 
 <pre>
-load("@//rules/scala:workspace.bzl", "scala_artifacts")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_artifacts")
 
 scala_artifacts()
 </pre>
@@ -21,7 +21,7 @@ scala_artifacts()
 ## scala_register_toolchains
 
 <pre>
-load("@//rules/scala:workspace.bzl", "scala_register_toolchains")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains")
 
 scala_register_toolchains(<a href="#scala_register_toolchains-default_scala_toolchain_name">default_scala_toolchain_name</a>, <a href="#scala_register_toolchains-toolchains">toolchains</a>)
 </pre>
@@ -42,7 +42,7 @@ Registers the provided Scala toolchains with Bazel and sets a default one to use
 ## scala_repositories
 
 <pre>
-load("@//rules/scala:workspace.bzl", "scala_repositories")
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_repositories")
 
 scala_repositories(<a href="#scala_repositories-java_launcher_version">java_launcher_version</a>, <a href="#scala_repositories-java_launcher_template_sha">java_launcher_template_sha</a>)
 </pre>

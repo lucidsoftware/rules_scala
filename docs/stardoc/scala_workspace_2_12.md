@@ -7,7 +7,7 @@
 ## scala_2_12_artifacts
 
 <pre>
-load("@//rules/scala:workspace_2_12.bzl", "scala_2_12_artifacts")
+load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_artifacts")
 
 scala_2_12_artifacts()
 </pre>
@@ -21,7 +21,7 @@ scala_2_12_artifacts()
 ## scala_2_12_repositories
 
 <pre>
-load("@//rules/scala:workspace_2_12.bzl", "scala_2_12_repositories")
+load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_repositories")
 
 scala_2_12_repositories()
 </pre>

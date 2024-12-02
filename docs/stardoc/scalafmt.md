@@ -7,7 +7,7 @@
 ## scala_format_test
 
 <pre>
-load("@//rules:scalafmt.bzl", "scala_format_test")
+load("@rules_scala_annex//rules:scalafmt.bzl", "scala_format_test")
 
 scala_format_test(<a href="#scala_format_test-name">name</a>, <a href="#scala_format_test-srcs">srcs</a>, <a href="#scala_format_test-config">config</a>)
 </pre>

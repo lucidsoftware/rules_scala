@@ -1,5 +1,7 @@
 module(name = "rules_scala_annex")
 
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+
 # TODO: Use buildifier instead of buildifier_prebuilt once
 # https://github.com/bazelbuild/bazel-central-registry/issues/380 is resolved
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1")

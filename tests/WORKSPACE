@@ -3,17 +3,6 @@ workspace(name = "rules_scala_annex_test")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 
-rules_license_tag = "1.0.0"
-
-http_archive(
-    name = "rules_license",
-    sha256 = "26d4021f6898e23b82ef953078389dd49ac2b5618ac564ade4ef87cced147b38",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
-        "https://github.com/bazelbuild/rules_license/releases/download/{tag}/rules_license-{tag}.tar.gz".format(tag = rules_license_tag),
-    ],
-)
-
 # skylib
 
 bazel_skylib_tag = "1.7.1"
@@ -33,37 +22,9 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-# rules_jvm_external
-rules_jvm_external_tag = "6.5"
-
-http_archive(
-    name = "rules_jvm_external",
-    sha256 = "c5b27928eeb8f0761f0805540587660f0ecc6946e9c04bf0d4c89e2f7d332b2b",
-    strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_tag),
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_tag),
-)
-
-load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
-
-rules_jvm_external_deps()
-
-load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
-
-rules_jvm_external_setup()
-
-load(
-    "@rules_scala_annex//rules/scala:workspace.bzl",
-    "scala_register_toolchains",
-    "scala_repositories",
-)
+load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains")
 
 # Scala 2.13 and 3
-scala_repositories()
-
-load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
-
-annex_pinned_maven_install()
-
 scala_register_toolchains(
     default_scala_toolchain_name = "test_zinc_2_13",
     toolchains = [
@@ -83,28 +44,9 @@ scala_register_toolchains(
     ],
 )
 
-#  Scala 2.12
-load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_repositories")
-
-scala_2_12_repositories()
-
-load("@annex_2_12//:defs.bzl", annex_2_12_pinned_maven_install = "pinned_maven_install")
-
-annex_2_12_pinned_maven_install()
-
-load(
-    "@rules_scala_annex//rules/scala_proto:workspace.bzl",
-    "scala_proto_register_toolchains",
-    "scala_proto_repositories",
-)
-
-scala_proto_repositories()
+load("@rules_scala_annex//rules/scala_proto:workspace.bzl", "scala_proto_register_toolchains")
 
 scala_proto_register_toolchains()
-
-load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven_install")
-
-annex_proto_pinned_maven_install()
 
 load("@rules_scala_annex//rules:external.bzl", "scala_import_external")
 load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")
@@ -124,33 +66,9 @@ emulate_rules_scala(
     scalatest = "@scalatest_2_13//jar",
 )
 
-load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config", "scalafmt_repositories")
-
-scalafmt_repositories()
-
-load("@annex_scalafmt//:defs.bzl", annex_scalafmt_pinned_maven_install = "pinned_maven_install")
-
-annex_scalafmt_pinned_maven_install()
+load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config")
 
 scalafmt_default_config()
-
-# 2.13 test dependencies
-load(":workspace.bzl", "test_dependencies")
-
-test_dependencies()
-
-load("@annex_test//:defs.bzl", annex_test_pinned_maven_install = "pinned_maven_install")
-
-annex_test_pinned_maven_install()
-
-# 2.12 test dependencies
-load(":workspace_2_12.bzl", "test_2_12_dependencies")
-
-test_2_12_dependencies()
-
-load("@annex_test_2_12//:defs.bzl", annex_test_2_12_pinned_maven_install = "pinned_maven_install")
-
-annex_test_2_12_pinned_maven_install()
 
 jvm_maven_import_external(
     name = "junit",
@@ -189,17 +107,3 @@ http_file(
     sha256 = "72c5bd08c7d97ccefc2fe871c47dd6aed4b12ba19f616e3ac30946907d1cc4d2",
     urls = ["https://repo.maven.apache.org/maven2/com/chuusai/shapeless_2.13/2.3.7/shapeless_2.13-2.3.7-sources.jar"],
 )
-
-# rules_python - this is needed by rules_jvm_external for some reason
-rules_python_tag = "0.36.0"
-
-http_archive(
-    name = "rules_python",
-    sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
-    strip_prefix = "rules_python-{}".format(rules_python_tag),
-    url = "https://github.com/bazelbuild/rules_python/releases/download/{}/rules_python-{}.tar.gz".format(rules_python_tag, rules_python_tag),
-)
-
-load("@rules_python//python:repositories.bzl", "py_repositories")
-
-py_repositories()

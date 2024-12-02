@@ -1,7 +1,4 @@
-exports_files([
-    "workspace.bzl",
-    "workspace_2_12.bzl",
-])
+exports_files(["workspace.bzl"])
 
 filegroup(
     name = "bzl",

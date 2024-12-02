@@ -1,6 +1,7 @@
 module(name = "rules_scala_annex_tests")
 
 bazel_dep(name = "rules_java", version = "7.12.2")
+bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_scala_annex")
 local_path_override(
     module_name = "rules_scala_annex",
@@ -8,3 +9,79 @@ local_path_override(
 )
 
 register_toolchains("//:repository_default_toolchain_21_definition")
+
+# Please ensure these stay up-to-date with the versions in `/rules/scala/versions.bzl`,
+# `/tests/MODULE.bazel`, and `/MODULE.bazel`. Unfortunately, `MODULE.bazel` files can't call `load`,
+# so we have to copy them here.
+scala_2_12_version = "2.12.19"
+
+scalapb_version = "0.11.17"
+
+zinc_version = "1.10.4"
+
+specs2_version = "4.20.9"
+
+scalatest_version = "3.2.19"
+
+scalacheck_version = "1.18.1"
+
+annex_test = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+annex_test.install(
+    name = "annex_test",
+    artifacts = [
+        "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
+        "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
+        "org.scala-lang.modules:scala-xml_2.13:2.3.0",
+        "org.scala-sbt:compiler-interface:{}".format(zinc_version),
+        "org.scalacheck:scalacheck_2.13:{}".format(scalacheck_version),
+        "org.scalactic:scalactic_2.13:{}".format(scalatest_version),
+        "org.scalameta:semanticdb-scalac_2.13.14:4.9.9",
+        "org.scalatest:scalatest_2.13:{}".format(scalatest_version),
+        "org.specs2:specs2-common_2.13:{}".format(specs2_version),
+        "org.specs2:specs2-core_2.13:{}".format(specs2_version),
+        "org.specs2:specs2-matcher_2.13:{}".format(specs2_version),
+        "org.typelevel:kind-projector_2.13.14:0.13.3",
+    ],
+    fetch_sources = True,
+    lock_file = "//:annex_test_install.json",
+    repositories = [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven-central.storage-download.googleapis.com/maven2",
+        "https://mirror.bazel.build/repo1.maven.org/maven2",
+    ],
+)
+use_repo(annex_test, "annex_test")
+
+annex_test_2_12 = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+annex_test_2_12.install(
+    name = "annex_test_2_12",
+    artifacts = [
+        "org.scala-lang:scala-compiler:{}".format(scala_2_12_version),
+        "org.scala-lang:scala-library:{}".format(scala_2_12_version),
+        "org.scala-lang:scala-reflect:{}".format(scala_2_12_version),
+        "org.specs2:specs2-common_2.12:{}".format(specs2_version),
+        "org.specs2:specs2-core_2.12:{}".format(specs2_version),
+        "org.specs2:specs2-matcher_2.12:{}".format(specs2_version),
+        "org.scalatest:scalatest_2.12:{}".format(scalatest_version),
+        "org.scalacheck:scalacheck_2.12:{}".format(scalacheck_version),
+    ],
+    fetch_sources = True,
+    lock_file = "//:annex_test_2_12_install.json",
+    repositories = [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven-central.storage-download.googleapis.com/maven2",
+        "https://mirror.bazel.build/repo1.maven.org/maven2",
+    ],
+)
+
+# The compiler bridge has a dependency on compiler-interface, which has a dependency on the Scala 2
+# library. We need to set this to neverlink = True to avoid this the Scala 2 library being pulled
+# onto the Scala 3, and other Scala versions like 2.12, compiler classpath during runtime.
+annex_test_2_12.artifact(
+    name = "annex_test_2_12",
+    artifact = "compiler-bridge_2.12",
+    group = "org.scala-sbt",
+    neverlink = True,
+    version = zinc_version,
+)
+use_repo(annex_test_2_12, "annex_test_2_12")

@@ -1,6 +1,6 @@
 load("//rules:register_toolchain.bzl", "register_bootstrap_toolchain", "register_zinc_toolchain")
 load("//rules:scala.bzl", "scala_library")
-load("//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
+load("//rules/scala:versions.bzl", "scala_2_13_version", "scala_3_version")
 
 # Scala 2.13
 compiler_classpath_2_13 = [

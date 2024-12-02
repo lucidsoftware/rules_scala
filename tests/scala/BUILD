@@ -4,19 +4,23 @@ load(
     "register_zinc_toolchain",
 )
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
-load("@rules_scala_annex//rules/scala:workspace_2_12.bzl", "scala_2_12_version")
+load(
+    "@rules_scala_annex//rules/scala:versions.bzl",
+    "scala_2_12_version",
+    "scala_2_13_version",
+    "scala_3_version",
+)
 
 # zinc 2.12
 
 compiler_classpath_2_12 = [
-    "@annex_2_12//:org_scala_lang_scala_compiler",
-    "@annex_2_12//:org_scala_lang_scala_reflect",
-    "@annex_2_12//:org_scala_lang_scala_library",
+    "@annex_test_2_12//:org_scala_lang_scala_compiler",
+    "@annex_test_2_12//:org_scala_lang_scala_reflect",
+    "@annex_test_2_12//:org_scala_lang_scala_library",
 ]
 
 runtime_classpath_2_12 = [
-    "@annex_2_12//:org_scala_lang_scala_library",
+    "@annex_test_2_12//:org_scala_lang_scala_library",
 ]
 
 register_bootstrap_toolchain(
@@ -29,7 +33,7 @@ register_bootstrap_toolchain(
 
 register_zinc_toolchain(
     name = "test_zinc_2_12",
-    compiler_bridge = "@annex_2_12//:org_scala_sbt_compiler_bridge_2_12",
+    compiler_bridge = "@annex_test_2_12//:org_scala_sbt_compiler_bridge_2_12",
     compiler_classpath = compiler_classpath_2_12,
     runtime_classpath = runtime_classpath_2_12,
     version = scala_2_12_version,

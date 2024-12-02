@@ -1,25 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
-load("@rules_jvm_external//:defs.bzl", "maven_install")
-
-def scalafmt_artifacts():
-    return [
-        "org.scalameta:parsers_2.13:4.9.7",
-        "org.scalameta:metaconfig-core_2.13:0.13.0",
-        "org.scalameta:scalafmt-core_2.13:3.8.2",
-    ]
-
-def scalafmt_repositories():
-    maven_install(
-        name = "annex_scalafmt",
-        artifacts = scalafmt_artifacts(),
-        repositories = [
-            "https://repo.maven.apache.org/maven2",
-            "https://maven-central.storage-download.googleapis.com/maven2",
-            "https://mirror.bazel.build/repo1.maven.org/maven2",
-        ],
-        fetch_sources = True,
-        maven_install_json = "@rules_scala_annex//:annex_scalafmt_install.json",
-    )
 
 def scalafmt_default_config(path = ".scalafmt.conf"):
     build = []

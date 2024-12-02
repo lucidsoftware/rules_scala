@@ -1,6 +1,6 @@
 load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version", "scala_3_version")
+load("@rules_scala_annex//rules/scala:versions.bzl", "scala_2_13_version", "scala_3_version")
 load(":rule.bzl", "read_semanticdb_info")
 
 register_zinc_toolchain(

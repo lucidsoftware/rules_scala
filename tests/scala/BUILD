@@ -43,13 +43,13 @@ register_zinc_toolchain(
 # zinc scala 2
 
 compiler_classpath_2_13 = [
-    "@annex//:org_scala_lang_scala_compiler",
-    "@annex//:org_scala_lang_scala_reflect",
-    "@annex//:org_scala_lang_scala_library",
+    "@annex_test//:org_scala_lang_scala_compiler",
+    "@annex_test//:org_scala_lang_scala_reflect",
+    "@annex_test//:org_scala_lang_scala_library",
 ]
 
 runtime_classpath_2_13 = [
-    "@annex//:org_scala_lang_scala_library",
+    "@annex_test//:org_scala_lang_scala_library",
 ]
 
 register_bootstrap_toolchain(
@@ -62,7 +62,7 @@ register_bootstrap_toolchain(
 
 register_zinc_toolchain(
     name = "test_zinc_2_13",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     global_scalacopts = [
         "-Ytasty-reader",
@@ -75,14 +75,14 @@ register_zinc_toolchain(
 # zinc scala 3
 
 compiler_classpath_3 = [
-    "@annex//:org_scala_lang_scala3_compiler_3",
-    "@annex//:org_scala_lang_scala3_library_3",
+    "@annex_test//:org_scala_lang_scala3_compiler_3",
+    "@annex_test//:org_scala_lang_scala3_library_3",
 ]
 
 runtime_classpath_3 = [
-    "@annex//:org_scala_lang_scala3_library_3",
-    "@annex//:org_scala_lang_scala3_interfaces",
-    "@annex//:org_scala_lang_tasty_core_3",
+    "@annex_test//:org_scala_lang_scala3_library_3",
+    "@annex_test//:org_scala_lang_scala3_interfaces",
+    "@annex_test//:org_scala_lang_tasty_core_3",
 ]
 
 register_bootstrap_toolchain(
@@ -96,7 +96,7 @@ register_bootstrap_toolchain(
 
 register_zinc_toolchain(
     name = "test_zinc_3",
-    compiler_bridge = "@annex//:org_scala_lang_scala3_sbt_bridge",
+    compiler_bridge = "@annex_test//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = compiler_classpath_3,
     runtime_classpath = runtime_classpath_3,
     use_ijar = True,
@@ -107,7 +107,7 @@ register_zinc_toolchain(
 # For global scalacoptions test
 register_zinc_toolchain(
     name = "test_zinc_2_13_fatal_deprecation_opt",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     global_scalacopts = [
         "-deprecation",
@@ -121,7 +121,7 @@ register_zinc_toolchain(
 # for log_level test
 register_zinc_toolchain(
     name = "test_zinc_2_13_log_level_debug",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     log_level = "debug",
     runtime_classpath = runtime_classpath_2_13,

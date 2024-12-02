@@ -15,6 +15,10 @@ register_toolchains("//:repository_default_toolchain_21_definition")
 # so we have to copy them here.
 scala_2_12_version = "2.12.19"
 
+scala_2_13_version = "2.13.15"
+
+scala_3_version = "3.5.2"
+
 scalapb_version = "0.11.17"
 
 zinc_version = "1.10.4"
@@ -31,8 +35,17 @@ annex_test.install(
     artifacts = [
         "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
         "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
+        "org.scala-lang:scala-compiler:{}".format(scala_2_13_version),
+        "org.scala-lang:scala-library:{}".format(scala_2_13_version),
+        "org.scala-lang:scala-reflect:{}".format(scala_2_13_version),
+        "org.scala-lang:scala3-compiler_3:{}".format(scala_3_version),
+        "org.scala-lang:scala3-library_3:{}".format(scala_3_version),
         "org.scala-lang.modules:scala-xml_2.13:2.3.0",
         "org.scala-sbt:compiler-interface:{}".format(zinc_version),
+        "org.scala-sbt:util-interface:{}".format(zinc_version),
+        "org.scala-sbt:util-logging_2.13:{}".format(zinc_version),
+        "org.scala-sbt:zinc-compile-core_2.13:{}".format(zinc_version),
+        "org.scala-sbt:zinc-persist_2.13:{}".format(zinc_version),
         "org.scalacheck:scalacheck_2.13:{}".format(scalacheck_version),
         "org.scalactic:scalactic_2.13:{}".format(scalatest_version),
         "org.scalameta:semanticdb-scalac_2.13.14:4.9.9",
@@ -49,6 +62,28 @@ annex_test.install(
         "https://maven-central.storage-download.googleapis.com/maven2",
         "https://mirror.bazel.build/repo1.maven.org/maven2",
     ],
+)
+
+# The compiler bridge has a dependency on compiler-interface, which has a dependency on the Scala 2
+# library. We need to set this to neverlink = True to avoid this the Scala 2 library being pulled
+# onto the Scala 3, and other Scala versions like 2.12, compiler classpath during runtime.
+annex_test.artifact(
+    name = "annex_test",
+    artifact = "scala3-sbt-bridge",
+    group = "org.scala-lang",
+    neverlink = True,
+    version = scala_3_version,
+)
+
+# The compiler bridge has a dependency on compiler-interface, which has a dependency on the Scala 2
+# library. We need to set this to neverlink = True to avoid this the Scala 2 library being pulled
+# onto the Scala 3, and other Scala versions like 2.12, compiler classpath during runtime.
+annex_test.artifact(
+    name = "annex_test",
+    artifact = "compiler-bridge_2.13",
+    group = "org.scala-sbt",
+    neverlink = True,
+    version = zinc_version,
 )
 use_repo(annex_test, "annex_test")
 

@@ -11,6 +11,6 @@ scala_binary(
     srcs = ["Reflect.scala"],
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )

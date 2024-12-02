@@ -40,8 +40,8 @@ scala_library(
     tags = ["manual"],
     deps = [
         ":plugin-lib",
-        "@annex//:org_scala_lang_scala_compiler",
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_compiler",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 

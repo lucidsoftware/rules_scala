@@ -5,29 +5,29 @@ load(":rule.bzl", "read_semanticdb_info")
 
 register_zinc_toolchain(
     name = "scala_2_13_with_semanticdb",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
-        "@annex//:org_scala_lang_scala_compiler",
-        "@annex//:org_scala_lang_scala_reflect",
-        "@annex//:org_scala_lang_scala_library",
+        "@annex_test//:org_scala_lang_scala_compiler",
+        "@annex_test//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_library",
     ],
     global_plugins = ["@annex_test//:org_scalameta_semanticdb_scalac_2_13_14"],
-    runtime_classpath = ["@annex//:org_scala_lang_scala_library"],
+    runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     semanticdb_bundle = False,
     version = scala_2_13_version,
 )
 
 register_zinc_toolchain(
     name = "scala_3_with_semanticdb",
-    compiler_bridge = "@annex//:org_scala_lang_scala3_sbt_bridge",
+    compiler_bridge = "@annex_test//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = [
-        "@annex//:org_scala_lang_scala3_compiler_3",
-        "@annex//:org_scala_lang_scala3_library_3",
+        "@annex_test//:org_scala_lang_scala3_compiler_3",
+        "@annex_test//:org_scala_lang_scala3_library_3",
     ],
     runtime_classpath = [
-        "@annex//:org_scala_lang_scala3_library_3",
-        "@annex//:org_scala_lang_scala3_interfaces",
-        "@annex//:org_scala_lang_tasty_core_3",
+        "@annex_test//:org_scala_lang_scala3_library_3",
+        "@annex_test//:org_scala_lang_scala3_interfaces",
+        "@annex_test//:org_scala_lang_tasty_core_3",
     ],
     semanticdb_bundle = False,
     use_ijar = True,

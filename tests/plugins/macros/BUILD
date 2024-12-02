@@ -6,7 +6,7 @@ scala_library(
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":macro_bad",
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 
@@ -17,7 +17,7 @@ scala_library(
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":util",
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 
@@ -28,7 +28,7 @@ scala_library(
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":macro",
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 
@@ -38,7 +38,7 @@ scala_library(
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
         ":util",
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 
@@ -47,7 +47,7 @@ scala_library(
     srcs = ["MacroUtil.scala"],
     scala_toolchain_name = "test_zinc_2_13",
     deps = [
-        "@annex//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_reflect",
     ],
 )
 

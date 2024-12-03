@@ -8,14 +8,14 @@ scala_test(
     ],
     scala_toolchain_name = "test_zinc_2_13",
     runtime_deps = [
-        "@hamcrest_core//jar",
-        "@junit_interface//jar",
+        "@annex_test//:com_novocode_junit_interface",
+        "@annex_test//:org_hamcrest_hamcrest_core",
     ],
     deps = [
         ":a1",
         ":a2",
         ":b1",
-        "@junit//jar",
+        "@annex_test//:junit_junit",
     ],
 )
 
@@ -27,7 +27,7 @@ java_test(
     test_class = "TestB2",
     deps = [
         ":b2",
-        "@junit//jar",
+        "@annex_test//:junit_junit",
     ],
 )
 

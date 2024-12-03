@@ -49,8 +49,11 @@ annex_test = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex_test.install(
     name = "annex_test",
     artifacts = [
+        "com.novocode:junit-interface:jar:0.11",
         "com.thesamet.scalapb:lenses_2.13:{}".format(scalapb_version),
         "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
+        "junit:junit:4.12",
+        "org.hamcrest:hamcrest-core:1.3",
         "org.scala-lang:scala-compiler:{}".format(scala_2_13_version),
         "org.scala-lang:scala-library:{}".format(scala_2_13_version),
         "org.scala-lang:scala-reflect:{}".format(scala_2_13_version),
@@ -136,3 +139,22 @@ annex_test_2_12.artifact(
     version = zinc_version,
 )
 use_repo(annex_test_2_12, "annex_test_2_12")
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+# We fetch these via `http_file` instead of `rules_jvm_external` because they're used in
+# `scala_import` targets. By them not having `JavaInfo` or any extra providers added, we test that
+# `scala_import` doesn't rely on any of this information.
+http_file(
+    name = "shapeless_jar",
+    downloaded_file_path = "shapeless.jar",
+    sha256 = "072c83eca9996aed92310dc7225cfc313edc7b74a3a96e2bf25459ebfc04ac96",
+    urls = ["https://repo.maven.apache.org/maven2/com/chuusai/shapeless_2.13/2.3.7/shapeless_2.13-2.3.7.jar"],
+)
+
+http_file(
+    name = "shapeless_srcjar",
+    downloaded_file_path = "shapeless-sources.jar",
+    sha256 = "72c5bd08c7d97ccefc2fe871c47dd6aed4b12ba19f616e3ac30946907d1cc4d2",
+    urls = ["https://repo.maven.apache.org/maven2/com/chuusai/shapeless_2.13/2.3.7/shapeless_2.13-2.3.7-sources.jar"],
+)

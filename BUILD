@@ -4,6 +4,7 @@ load(
     "DEFAULT_TOOLCHAIN_CONFIGURATION",
     "default_java_toolchain",
 )
+load("//rules/scalafmt:register_toolchain.bzl", "register_scalafmt_toolchain")
 
 default_java_toolchain(
     name = "repository_default_toolchain_21",
@@ -12,6 +13,11 @@ default_java_toolchain(
     javac_supports_worker_multiplex_sandboxing = True,
     source_version = "21",
     target_version = "21",
+)
+
+register_scalafmt_toolchain(
+    name = "annex_scalafmt",
+    config = ".scalafmt.conf",
 )
 
 buildifier(

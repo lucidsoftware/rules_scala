@@ -11,6 +11,7 @@ bazel_dep(name = "rules_pkg", version = "1.0.1")
 bazel_dep(name = "stardoc", version = "0.7.1")
 
 register_toolchains(
+    "//:annex_scalafmt",
     "//:repository_default_toolchain_21_definition",
     "//rules/scala_proto:scalapb_scala_proto_toolchain",
     "//src/main/scala:annex_bootstrap_2_13",

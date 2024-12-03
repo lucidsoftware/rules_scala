@@ -21,9 +21,10 @@ scala_format_test = rule(
             ),
         },
     ),
+    implementation = _scala_format_test_implementation,
     outputs = {
         "scalafmt_runner": "%{name}-format",
     },
     test = True,
-    implementation = _scala_format_test_implementation,
+    toolchains = ["//rules/scalafmt:toolchain_type"],
 )

@@ -5,10 +5,8 @@ load(
 )
 
 scala_format_attributes = {
-    "config": attr.label(
-        allow_single_file = [".conf"],
-        default = "@scalafmt_default//:config",
-        doc = "The Scalafmt configuration file.",
+    "scalafmt_toolchain_name": attr.string(
+        doc = "The name of the Scalafmt configuration toolchain.",
     ),
     "_fmt": attr.label(
         cfg = "exec",
@@ -36,13 +34,15 @@ def build_format(ctx):
     files = []
     runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._fmt])
     manifest_content = []
+    config = ctx.toolchains["//rules/scalafmt:toolchain_type"].scalafmt_config.config
+
     for src in ctx.files.srcs:
         if src.short_path.endswith(".scala") and src.is_source:
             file = ctx.actions.declare_file(src.short_path)
             files.append(file)
             args = ctx.actions.args()
             args.add("--config")
-            args.add(ctx.file.config)
+            args.add(config)
             args.add(src)
             args.add(file)
             args.set_param_file_format("multiline")
@@ -51,7 +51,7 @@ def build_format(ctx):
                 arguments = ["--jvm_flag=-Dfile.encoding=UTF-8", args],
                 executable = ctx.executable._fmt,
                 outputs = [file],
-                inputs = [ctx.file.config, src],
+                inputs = [config, src],
                 tools = runner_inputs,
                 execution_requirements = _resolve_execution_reqs(
                     ctx,

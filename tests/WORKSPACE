@@ -20,10 +20,6 @@ emulate_rules_scala(
     scalatest = "@scalatest_2_13//jar",
 )
 
-load("@rules_scala_annex//rules/scalafmt:workspace.bzl", "scalafmt_default_config")
-
-scalafmt_default_config()
-
 jvm_maven_import_external(
     name = "junit",
     artifact = "junit:junit:4.12",

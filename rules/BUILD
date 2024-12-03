@@ -34,7 +34,6 @@ bzl_library(
     name = "scala-rules",
     srcs = glob(["**/*.bzl"]) + [
         "//rules/common:bzl",
-        "//rules/external/third_party/bazel/tools/build_defs/repo:bzl",
         "//rules/jvm:bzl",
         "//rules/private:bzl",
         "//rules/scala:bzl",

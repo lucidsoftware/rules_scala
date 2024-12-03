@@ -1,7 +1,6 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
 _bzl_files_containing_rules = [
-    "rules_scala.bzl",
     "scala.bzl",
     "scala_proto.bzl",
     "scala_with_scalafmt.bzl",

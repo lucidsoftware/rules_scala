@@ -54,81 +54,29 @@ straightforward.
 
 ## Usage
 
-WORKSPACE
+`lucidsoftware/rules_scala` isn't on the [Bazel Central Registry](https://registry.bazel.build/), so
+you'll need to pull it in via `archive_override`. Be sure to replace `<COMMIT>` with the
+latest commit on `lucid-master` and `<INTEGRITY>` with the hash suggested by Bazel after the
+dependency is first loaded.
 
-```python
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+MODULE.bazel
 
-# rules_java
-http_archive(
-    name = "rules_java",
-    sha256 = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83",
-    url = "https://github.com/bazelbuild/rules_java/releases/download/7.12.2/rules_java-7.12.2.tar.gz",
-)
+```starlark
+bazel_dep(name = "rules_scala_annex")
 
-# Load rules_scala_annex
-rules_scala_annex_version = "lucid_2024-11-18"
+rules_scala_annex_version = "<COMMIT>"
 
-http_archive(
-    name = "rules_scala_annex",
-    integrity = "sha256-WjZvojiclkiyVxQ1NqkH1lDeGaDLyzQOGiDsCfhVAec=",
+archive_override(
+    module_name = "rules_scala_annex",
+    integrity = "<INTEGRITY>",
     strip_prefix = "rules_scala-{}".format(rules_scala_annex_version),
-    type = "zip",
-    url = "https://github.com/lucidsoftware/rules_scala/archive/{}.zip".format(rules_scala_annex_version),
+    urls = ["https://github.com/lucidsoftware/rules_scala/archive/refs/heads/{}.zip".format(rules_scala_annex_version)],
 )
-
-rules_jvm_external_version = "6.1"
-
-http_archive(
-    name = "rules_jvm_external",
-    sha256 = "42a6d48eb2c08089961c715a813304f30dc434df48e371ebdd868fc3636f0e82",
-    strip_prefix = "rules_jvm_external-{}".format(rules_jvm_external_version),
-    type = "zip",
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/{}.zip".format(rules_jvm_external_version),
-)
-
-load(
-    "@rules_scala_annex//rules/scala:workspace.bzl",
-    "scala_register_toolchains",
-    "scala_repositories",
-)
-
-load(
-    "@rules_scala_annex//rules/scala_proto:workspace.bzl",
-    "scala_proto_register_toolchains",
-    "scala_proto_repositories",
-)
-
-load(
-    "@rules_scala_annex//rules/scalafmt:workspace.bzl",
-    "scalafmt_default_config",
-    "scalafmt_repositories",
-)
-
-scala_repositories()
-
-load("@annex//:defs.bzl", annex_pinned_maven_install = "pinned_maven_install")
-
-annex_pinned_maven_install()
-
-scala_register_toolchains(default_scala_toolchain_name = "annex_zinc_3")
-scalafmt_repositories()
-
-load("@annex_scalafmt//:defs.bzl", annex_scalafmt_pinned_maven_install = "pinned_maven_install")
-
-annex_scalafmt_pinned_maven_install()
-scalafmt_default_config()
-scala_proto_repositories()
-
-load("@annex_proto//:defs.bzl", annex_proto_pinned_maven_install = "pinned_maven_install")
-
-annex_proto_pinned_maven_install()
-scala_proto_register_toolchains()
 ```
 
 BUILD
 
-```python
+```starlark
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 
 scala_library(

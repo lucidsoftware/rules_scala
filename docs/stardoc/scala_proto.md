@@ -43,7 +43,7 @@ This rule should be used with an accompanying `toolchain` that binds it and spec
 
 For example:
 
-```python
+```starlark
 scala_proto_toolchain(
     name = "scalapb_toolchain_example",
     compiler = ":worker",

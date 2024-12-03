@@ -21,27 +21,32 @@ $ ./scripts/format.sh
 
 ## Maven deps
 
-[rules_jvm_external](https://github.com/bazel-contrib/rules_jvm_external) is used to generate maven deps. If you need to change
-dependencies, modify `maven_install` in the following different `workspace.bzl` files
+[rules_jvm_external](https://github.com/bazel-contrib/rules_jvm_external) is used to resolve Maven
+dependencies. If you need to change dependencies, add your artifacts to the `annex*.install` calls
+in [`MODULE.bazel`](MODULE.bazel) or [`tests/MODULE.bazel`](tests/MODULE.bazel).
 
-```
-rules/scala/workspace.bzl
-rules/scala_proto/workspace.bzl
-rules/scalafmt/workspace.bzl
-tests/workspace.bzl
-```
-To reference the dependency, use the `name` attribute of the `maven_install` rule as the repository name and the versionless dependency as the target. E.g. `@<maven_install_name>//:<versionless_dependency>`.
+To reference the dependency, use the `name` attribute of the `annex*.install` call as the
+repository name and the versionless dependency as the target. E.g.
+`@<maven_install_name>//:<versionless_dependency>`.
 
-For example, if you'd like to add `org.scala-sbt:compiler-interface:1.2.1` as a dependency, simply add it to the `artifacts` list in `maven_install` with the attribute `name = "annex"`, and then refer to it with `@annex//:org_scala_sbt_compiler_interface`.
+For example, if you'd like to add `org.scala-sbt:compiler-interface:1.2.1` as a dependency, simply
+add it to the `artifacts` list of the `maven.install` call, and then refer to it with
+`@annex//:org_scala_sbt_compiler_interface`.
 
-```
-maven_install(
+```starlark
+annex.install(
     name = "annex",
     artifacts = [
+        ...,
         "org.scala-sbt:compiler-interface:1.2.1",
+        ...,
     ],
+    fetch_sources = True,
+    lock_file = "//:annex_install.json",
     repositories = [
         "https://repo.maven.apache.org/maven2",
+        "https://maven-central.storage-download.googleapis.com/maven2",
+        "https://mirror.bazel.build/repo1.maven.org/maven2",
     ],
 )
 ```

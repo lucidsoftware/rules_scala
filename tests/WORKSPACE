@@ -2,28 +2,6 @@ workspace(name = "rules_scala_annex_test")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains")
-
-# Scala 2.13 and 3
-scala_register_toolchains(
-    default_scala_toolchain_name = "test_zinc_2_13",
-    toolchains = [
-        "@//dependencies/indirect:test_zinc_2_13_direct_deps_off",
-        "@//dependencies/indirect:test_zinc_2_13_used_deps_off",
-        "@//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
-        "@//plugins/semanticdb:scala_2_13_with_semanticdb",
-        "@//plugins/semanticdb:scala_3_with_semanticdb",
-        "@//scala:test_bootstrap_2_12",
-        "@//scala:test_bootstrap_2_13",
-        "@//scala:test_bootstrap_3",
-        "@//scala:test_zinc_2_12",
-        "@//scala:test_zinc_2_13",
-        "@//scala:test_zinc_3",
-        "@//scala:test_zinc_2_13_fatal_deprecation_opt",
-        "@//scala:test_zinc_2_13_log_level_debug",
-    ],
-)
-
 load("@rules_scala_annex//rules:external.bzl", "scala_import_external")
 load("@rules_scala_annex//rules:rules_scala.bzl", "emulate_rules_scala")
 

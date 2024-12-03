@@ -49,6 +49,5 @@ bzl_library(
         "@bazel_skylib//lib:shell",
         "@rules_java//toolchains:toolchain_utils",
         "@rules_jvm_external//:implementation",
-        "@rules_scala_annex_scala_toolchain//:default",
     ],
 )

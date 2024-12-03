@@ -41,3 +41,4 @@ test --test_output=all
 
 common:rules --disk_cache=.bazel_cache
 common:tests --disk_cache=../.bazel_cache
+common:tests --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_2_13

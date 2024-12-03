@@ -6,7 +6,6 @@ _bzl_files_containing_rules = [
     "scala_proto.bzl",
     "scala_with_scalafmt.bzl",
     "scalafmt.bzl",
-    "//rules/scala:workspace.bzl",
     "//rules/scalafmt:workspace.bzl",
 ]
 

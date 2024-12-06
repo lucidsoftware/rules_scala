@@ -1,19 +1,19 @@
 load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version")
+load("@rules_scala_annex//rules/scala:versions.bzl", "scala_2_13_version")
 
 # used_deps off
 register_zinc_toolchain(
     name = "test_zinc_2_13_used_deps_off",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
-        "@annex//:org_scala_lang_scala_compiler",
-        "@annex//:org_scala_lang_scala_reflect",
-        "@annex//:org_scala_lang_scala_library",
+        "@annex_test//:org_scala_lang_scala_compiler",
+        "@annex_test//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_library",
     ],
     deps_used = "off",
     global_scalacopts = ["-Ytasty-reader"],
-    runtime_classpath = ["@annex//:org_scala_lang_scala_library"],
+    runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     version = scala_2_13_version,
     visibility = ["//visibility:public"],
 )
@@ -41,15 +41,15 @@ scala_library(
 # direct_deps off
 register_zinc_toolchain(
     name = "test_zinc_2_13_direct_deps_off",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
-        "@annex//:org_scala_lang_scala_compiler",
-        "@annex//:org_scala_lang_scala_reflect",
-        "@annex//:org_scala_lang_scala_library",
+        "@annex_test//:org_scala_lang_scala_compiler",
+        "@annex_test//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_library",
     ],
     deps_direct = "off",
     global_scalacopts = ["-Ytasty-reader"],
-    runtime_classpath = ["@annex//:org_scala_lang_scala_library"],
+    runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     version = scala_2_13_version,
     visibility = ["//visibility:public"],
 )

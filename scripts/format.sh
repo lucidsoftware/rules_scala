@@ -15,7 +15,7 @@ else
 fi
 
 if [ "$1" != check ]; then
-    bazel run buildifier
+    bazel run //dev:buildifier
 else
-    bazel run buildifier_check
+    bazel run //dev:buildifier_check
 fi

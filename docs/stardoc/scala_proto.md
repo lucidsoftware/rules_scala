@@ -7,7 +7,7 @@
 ## scala_proto_library
 
 <pre>
-load("@//rules:scala_proto.bzl", "scala_proto_library")
+load("@rules_scala_annex//rules:scala_proto.bzl", "scala_proto_library")
 
 scala_proto_library(<a href="#scala_proto_library-name">name</a>, <a href="#scala_proto_library-deps">deps</a>, <a href="#scala_proto_library-grpc">grpc</a>)
 </pre>
@@ -31,7 +31,7 @@ See example use in [/tests/proto/BUILD](/tests/proto/BUILD)
 ## scala_proto_toolchain
 
 <pre>
-load("@//rules:scala_proto.bzl", "scala_proto_toolchain")
+load("@rules_scala_annex//rules:scala_proto.bzl", "scala_proto_toolchain")
 
 scala_proto_toolchain(<a href="#scala_proto_toolchain-name">name</a>, <a href="#scala_proto_toolchain-compiler">compiler</a>, <a href="#scala_proto_toolchain-compiler_supports_workers">compiler_supports_workers</a>)
 </pre>
@@ -43,7 +43,7 @@ This rule should be used with an accompanying `toolchain` that binds it and spec
 
 For example:
 
-```python
+```starlark
 scala_proto_toolchain(
     name = "scalapb_toolchain_example",
     compiler = ":worker",

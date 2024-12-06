@@ -1,9 +1,9 @@
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 load(
     "@rules_java//toolchains:default_java_toolchain.bzl",
     "DEFAULT_TOOLCHAIN_CONFIGURATION",
     "default_java_toolchain",
 )
+load("//rules/scalafmt:register_toolchain.bzl", "register_scalafmt_toolchain")
 
 default_java_toolchain(
     name = "repository_default_toolchain_21",
@@ -14,11 +14,7 @@ default_java_toolchain(
     target_version = "21",
 )
 
-buildifier(
-    name = "buildifier",
-)
-
-buildifier(
-    name = "buildifier_check",
-    mode = "check",
+register_scalafmt_toolchain(
+    name = "annex_scalafmt",
+    config = ".scalafmt.conf",
 )

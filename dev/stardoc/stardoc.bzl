@@ -1,22 +1,18 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
 _bzl_files_containing_rules = [
-    "rules_scala.bzl",
-    "scala.bzl",
-    "scala_proto.bzl",
-    "scala_with_scalafmt.bzl",
-    "scalafmt.bzl",
-    "//rules/scala:workspace_2_12.bzl",
-    "//rules/scala:workspace.bzl",
-    "//rules/scala_proto:workspace.bzl",
-    "//rules/scalafmt:workspace.bzl",
+    "//rules:scala.bzl",
+    "//rules:scala_proto.bzl",
+    "//rules:scala_with_scalafmt.bzl",
+    "//rules:scalafmt.bzl",
+    "//rules/scalafmt:register_toolchain.bzl",
 ]
 
 def _get_stardoc_targets():
     result = []
 
     for label in _bzl_files_containing_rules:
-        sanitized_name = label.removeprefix("//rules/").replace(":", "_")
+        sanitized_name = label.removeprefix("//rules:").removeprefix("//rules/").replace(":", "_")
 
         result.append(
             struct(

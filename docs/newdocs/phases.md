@@ -3,7 +3,7 @@
 Most rules in `lucidsoftware/rules_scala` are architected using phases. Phases break down the Bazel Analysis stage into logical chunks.
 For example, the implementation of `scala_binary` is:
 
-```python
+```starlark
 def _scala_binary_implementation(ctx):
     return _run_phases(ctx, [
         ("resources", _phase_resources),

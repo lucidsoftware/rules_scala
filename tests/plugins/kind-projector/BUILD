@@ -1,6 +1,6 @@
 load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_2_13_version")
+load("@rules_scala_annex//rules/scala:versions.bzl", "scala_2_13_version")
 
 scala_library(
     name = "kind-projector",
@@ -13,17 +13,17 @@ scala_library(
 
 register_zinc_toolchain(
     name = "test_zinc_2_13_with_kind_projector",
-    compiler_bridge = "@annex//:org_scala_sbt_compiler_bridge_2_13",
+    compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = [
-        "@annex//:org_scala_lang_scala_compiler",
-        "@annex//:org_scala_lang_scala_reflect",
-        "@annex//:org_scala_lang_scala_library",
+        "@annex_test//:org_scala_lang_scala_compiler",
+        "@annex_test//:org_scala_lang_scala_reflect",
+        "@annex_test//:org_scala_lang_scala_library",
     ],
     global_plugins = [
         "@annex_test//:org_typelevel_kind_projector_2_13_14",
     ],
     runtime_classpath = [
-        "@annex//:org_scala_lang_scala_library",
+        "@annex_test//:org_scala_lang_scala_library",
     ],
     version = scala_2_13_version,
 )

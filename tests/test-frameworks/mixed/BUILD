@@ -7,10 +7,11 @@ scala_test(
     shard_count = 2,
     tags = ["manual"],
     runtime_deps = [
-        "@hamcrest_core//jar",
-        "@junit_interface//jar",
+        "@annex_test//:com_novocode_junit_interface",
+        "@annex_test//:org_hamcrest_hamcrest_core",
     ],
     deps = [
+        "@annex_test//:junit_junit",
         "@annex_test//:org_scalacheck_scalacheck_2_13",
         "@annex_test//:org_scalactic_scalactic_2_13",
         "@annex_test//:org_scalatest_scalatest_compatible",
@@ -19,7 +20,6 @@ scala_test(
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",
         "@annex_test//:org_specs2_specs2_matcher_2_13",
-        "@junit//jar",
     ],
 )
 
@@ -30,10 +30,11 @@ scala_test(
     shard_count = 2,
     tags = ["manual"],
     runtime_deps = [
-        "@hamcrest_core//jar",
-        "@junit_interface//jar",
+        "@annex_test//:com_novocode_junit_interface",
+        "@annex_test//:org_hamcrest_hamcrest_core",
     ],
     deps = [
+        "@annex_test//:junit_junit",
         "@annex_test_2_12//:org_scalacheck_scalacheck_2_12",
         "@annex_test_2_12//:org_scalactic_scalactic_2_12",
         "@annex_test_2_12//:org_scalatest_scalatest_compatible",
@@ -42,6 +43,5 @@ scala_test(
         "@annex_test_2_12//:org_specs2_specs2_common_2_12",
         "@annex_test_2_12//:org_specs2_specs2_core_2_12",
         "@annex_test_2_12//:org_specs2_specs2_matcher_2_12",
-        "@junit//jar",
     ],
 )

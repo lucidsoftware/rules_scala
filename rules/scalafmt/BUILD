@@ -1,8 +1,17 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag", "string_setting")
 load("//rules:scala.bzl", "scala_binary")
 load("//rules:scalafmt.bzl", "scala_format_test")
 load(
     ":ext.bzl",
     _add_non_default_format_phase_singleton = "add_non_default_format_phase_singleton",
+)
+
+exports_files(["register_toolchain.bzl"])
+
+filegroup(
+    name = "bzl",
+    srcs = glob(["**/*.bzl"]),
+    visibility = ["//rules:__pkg__"],
 )
 
 filegroup(
@@ -14,6 +23,23 @@ filegroup(
 filegroup(
     name = "testrunner",
     srcs = ["private/format-test.template.sh"],
+    visibility = ["//visibility:public"],
+)
+
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+string_setting(
+    name = "original-scalafmt-toolchain",
+    build_setting_default = "",
+    visibility = ["//visibility:public"],
+)
+
+string_flag(
+    name = "scalafmt-toolchain",
+    build_setting_default = "annex_scalafmt",
     visibility = ["//visibility:public"],
 )
 
@@ -38,14 +64,6 @@ scala_binary(
 scala_format_test(
     name = "format",
     srcs = glob(["**/*.scala"]),
-)
-
-exports_files(["workspace.bzl"])
-
-filegroup(
-    name = "bzl",
-    srcs = glob(["**/*.bzl"]),
-    visibility = ["//rules:__pkg__"],
 )
 
 _add_non_default_format_phase_singleton(

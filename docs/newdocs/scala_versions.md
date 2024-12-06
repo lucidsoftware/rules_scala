@@ -19,45 +19,40 @@ unused/undeclared dependency checking and test code coverage checking) via the
 repository is mapped to `rules_scala_annex`:
 
 */BUILD.bazel*
-```python
+
+```starlark
 load(
     "@rules_scala_annex//rules/register_toolchain.bzl",
     "register_bootstrap_toolchain",
     "register_zinc_toolchain",
 )
 
+
+# You'll need to pull these in via `rules_jvm_external`. Note that `@maven` should be replaced with
+# the name of your dependency tree, as specified in the `name` attribute of `maven.install` or
+# `maven.artifact`.
 compiler_classpath_2_13 = [
-    "@scala_compiler_2_13//jar",
-    "@scala_library_2_13//jar",
-    "@scala_reflect_2_13//jar",
+    "@maven//:org_scala_lang_scala_compiler",
+    "@maven//:org_scala_lang_scala_library",
+    "@maven//:org_scala_lang_scala_reflect",
 ]
 
-runtime_classpath_2_13 = ["@scala_library_2_13//jar"]
+# You'll need to pull thus in via `rules_jvm_external`
+runtime_classpath_2_13 = ["@maven//:org_scala_lang_scala_library",]
 
 register_bootstrap_toolchain(
-    name = "annex_bootstrap_2_13",
+    name = "bootstrap_2_13",
     compiler_classpath = compiler_classpath_2_13,
     runtime_classpath = runtime_classpath_2_13,
     version = "2.13.14",
     visibility = ["//visibility:public"],
 )
 
-# compiler bridge needed to configure zinc compiler
-scala_library(
-    name = "compiler_bridge_2_13",
-    srcs = ["@compiler_bridge_2_13//:src"],
-    scala_toolchain_name = "annex_bootstrap_2_13",
-    visibility = ["//visibility:public"],
-    deps = compiler_classpath_2_13 + [
-        "@scala_annex_org_scala_sbt_compiler_interface//jar",
-        "@scala_annex_org_scala_sbt_util_interface//jar",
-    ],
-)
-
 # This augments the configuration to configure the zinc compiler
 register_zinc_toolchain(
-    name = "annex_zinc_2_13",
-    compiler_bridge = ":compiler_bridge_2_13",
+    name = "zinc_2_13",
+    # You'll need to pull this in via `rules_jvm_external`
+    compiler_bridge = "@maven//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     runtime_classpath = runtime_classpath_2_13,
     version = "2.13.14",
@@ -65,18 +60,19 @@ register_zinc_toolchain(
 )
 ```
 
-*/WORKSPACE*
-```python
-load("@rules_scala_annex//rules/scala:workspace.bzl", "scala_register_toolchains")
+*/MODULE.bazel*
 
-...
-
-scala_register_toolchains(
-    toolchains = ["//:annex_bootstrap_2_13", "//:annex_zinc_2_13"],
-    default_scala_toolchain_name = "annex_zinc_2_13",
+```starlark
+register_toolchains(
+    "//:bootstrap_2_13",
+    "//:zinc_2_13",
 )
+```
 
-...
+*/.bazelrc*
+
+```
+common --@rules_scala_annex//rules/scala:scala-toolchain=zinc_2_13
 ```
 
 Take note of the `scala_toolchain_name` attribute on `scala_library` and the other Scala rules. Each
@@ -86,22 +82,22 @@ attribute.
 
 For example:
 
-```python
+```starlark
 scala_library(
-  name = "example_compiled_with_scalac",
-  srcs = glob(["**/*.scala"])
-  scala_toolchain_name = "annex_bootstrap_2_13",
+    name = "example_compiled_with_scalac",
+    srcs = glob(["**/*.scala"])
+    scala_toolchain_name = "bootstrap_2_13",
 )
 
 scala_library(
-  name = "example_compiled_with_zinc",
-  srcs = glob(["**/*.scala"])
-  scala_toolchain_name = "annex_zinc_2_13",
+    name = "example_compiled_with_zinc",
+    srcs = glob(["**/*.scala"])
+    scala_toolchain_name = "zinc_2_13",
 )
 
 # This would use the default toolchain, which we configured via `scala_register_toolchains` above
 scala_library(
-  name = "example_compiled_with_default_scala",
-  srcs = glob(["**/*.scala"])
+    name = "example_compiled_with_default_scala",
+    srcs = glob(["**/*.scala"])
 )
 ```

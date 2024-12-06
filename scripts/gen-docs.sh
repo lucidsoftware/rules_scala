@@ -11,5 +11,5 @@ set -x
 
 rm -fr docs/stardoc
 mkdir -p docs/stardoc
-bazel build rules:docs
-tar xf "$(bazel info bazel-bin)/rules/docs.tar" -C docs/stardoc
+bazel build //dev/stardoc:docs
+tar xf "$(bazel info bazel-bin)/dev/stardoc/docs.tar" -C docs/stardoc

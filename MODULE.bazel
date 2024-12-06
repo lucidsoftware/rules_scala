@@ -2,13 +2,13 @@ module(name = "rules_scala_annex")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
-# TODO: Use buildifier instead of buildifier_prebuilt once
-# https://github.com/bazelbuild/bazel-central-registry/issues/380 is resolved
-bazel_dep(name = "buildifier_prebuilt", version = "7.3.1")
+bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
+
 bazel_dep(name = "rules_java", version = "7.12.2")
 bazel_dep(name = "rules_jvm_external", version = "6.5")
-bazel_dep(name = "rules_pkg", version = "1.0.1")
-bazel_dep(name = "stardoc", version = "0.7.1")
+
+bazel_dep(name = "rules_pkg", version = "1.0.1", dev_dependency = True)
+bazel_dep(name = "stardoc", version = "0.7.1", dev_dependency = True)
 
 register_toolchains(
     "//:annex_scalafmt",

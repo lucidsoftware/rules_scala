@@ -1,4 +1,3 @@
-load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load(
     "@rules_java//toolchains:default_java_toolchain.bzl",
     "DEFAULT_TOOLCHAIN_CONFIGURATION",
@@ -18,13 +17,4 @@ default_java_toolchain(
 register_scalafmt_toolchain(
     name = "annex_scalafmt",
     config = ".scalafmt.conf",
-)
-
-buildifier(
-    name = "buildifier",
-)
-
-buildifier(
-    name = "buildifier_check",
-    mode = "check",
 )

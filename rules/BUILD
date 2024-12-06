@@ -1,23 +1,11 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
-load("@stardoc//stardoc:stardoc.bzl", "stardoc")
-load(":stardoc.bzl", "stardoc_targets")
 
-[
-    stardoc(
-        name = stardoc_target.name,
-        out = stardoc_target.out,
-        input = stardoc_target.input,
-        deps = [":scala-rules"],
-    )
-    for stardoc_target in stardoc_targets
-]
-
-pkg_tar(
-    name = "docs",
-    srcs = [stardoc_target.out for stardoc_target in stardoc_targets],
-    mode = "0644",
-)
+exports_files([
+    "scala.bzl",
+    "scala_proto.bzl",
+    "scala_with_scalafmt.bzl",
+    "scalafmt.bzl",
+])
 
 bzl_library(
     name = "bazel_tools_build_defs_repo",

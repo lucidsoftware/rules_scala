@@ -4,7 +4,7 @@ package workers.common
 import xsbti.compile.ScalaInstance
 import java.io.File
 import java.net.URLClassLoader
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.immutable.TreeMap
@@ -110,8 +110,14 @@ object AnnexScalaInstance {
           // Copying a file is not atomic, so we don't want to end up in a funky state where two
           // copies of the same file happen at the same time and cause something bad to happen.
           if (!Files.exists(workerJar)) {
-            Files.createDirectories(workerJar.getParent())
-            Files.copy(workRequestJar, workerJar)
+            try {
+              Files.createDirectories(workerJar.getParent())
+              Files.copy(workRequestJar, workerJar)
+            } catch {
+              // We do not care if the file already exists
+              case _: FileAlreadyExistsException => {}
+              case e: Throwable                  => throw new Exception("Error adding file to instance cache", e)
+            }
           }
         }
       }

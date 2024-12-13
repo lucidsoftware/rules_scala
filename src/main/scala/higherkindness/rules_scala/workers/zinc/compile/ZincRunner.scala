@@ -212,13 +212,11 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         .withSources(sources.map(source => PlainVirtualFile(source.toAbsolutePath().normalize())).toArray)
         .withClasspath((classesOutputDir +: deps.map(_.classpath)).map(path => PlainVirtualFile(path)).toArray)
         .withClassesDirectory(classesOutputDir)
-        .withJavacOptions(workRequest.javaCompilerOptions.toArray)
+        .withJavacOptions(workRequest.javaCompilerOptions)
         .withScalacOptions(
-          (
-            workRequest.plugins.map(p => s"-Xplugin:$p") ++
-              workRequest.compilerOptions ++
-              workRequest.compilerOptionsReferencingPaths
-          ).toArray,
+          workRequest.plugins.view.map(p => s"-Xplugin:$p").toArray ++
+            workRequest.compilerOptions ++
+            workRequest.compilerOptionsReferencingPaths.toArray,
         )
 
     val compilers = {

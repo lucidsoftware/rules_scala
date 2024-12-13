@@ -302,11 +302,6 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     // create analyses
     val pathString = analysisStorePath.toAbsolutePath().normalize().toString()
-    val analysisStoreText = AnalysisUtil.getAnalysisStore(
-      new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
-      true,
-      readWriteMappers,
-    )
     // Filter out libraryClassNames from the analysis because it is non-deterministic.
     // Can stop doing this once the bug in Zinc is fixed. Check the comment on FilteredRelations
     // for more info.
@@ -317,7 +312,18 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         infos = FilteredInfos.getFilteredInfos(originalResultAnalysis.infos),
       )
     }
-    analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+
+    // This will be true if the `--worker_verbose` Bazel flag is set
+    if (verbosity >= 10) {
+      val analysisStoreText = AnalysisUtil.getAnalysisStore(
+        new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
+        true,
+        readWriteMappers,
+      )
+
+      analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+    }
+
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
     // create used deps

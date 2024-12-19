@@ -209,8 +209,8 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     val compileOptions =
       CompileOptions.create
-        .withSources(sources.map(source => PlainVirtualFile(source.toAbsolutePath().normalize())).toArray)
-        .withClasspath((classesOutputDir +: deps.map(_.classpath)).map(path => PlainVirtualFile(path)).toArray)
+        .withSources(sources.view.map(source => PlainVirtualFile(source.toAbsolutePath().normalize())).toArray)
+        .withClasspath((classesOutputDir +: deps.view.map(_.classpath)).map(path => PlainVirtualFile(path)).toArray)
         .withClassesDirectory(classesOutputDir)
         .withJavacOptions(workRequest.javaCompilerOptions)
         .withScalacOptions(
@@ -333,7 +333,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       deps.filter(Dep.used(deps, resultAnalysis.relations, lookup)).filterNot { dep =>
         val filteredDepFileName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(dep.file)
 
-        scalaInstance.libraryJars
+        scalaInstance.libraryJars.view
           .map(FileUtil.getNameWithoutRulesJvmExternalStampPrefix)
           .contains(filteredDepFileName)
       }

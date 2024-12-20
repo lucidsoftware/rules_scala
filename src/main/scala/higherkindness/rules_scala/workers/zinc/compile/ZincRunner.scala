@@ -209,16 +209,14 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     val compileOptions =
       CompileOptions.create
-        .withSources(sources.map(source => PlainVirtualFile(source.toAbsolutePath().normalize())).toArray)
-        .withClasspath((classesOutputDir +: deps.map(_.classpath)).map(path => PlainVirtualFile(path)).toArray)
+        .withSources(sources.view.map(source => PlainVirtualFile(source.toAbsolutePath().normalize())).toArray)
+        .withClasspath((classesOutputDir +: deps.view.map(_.classpath)).map(path => PlainVirtualFile(path)).toArray)
         .withClassesDirectory(classesOutputDir)
-        .withJavacOptions(workRequest.javaCompilerOptions.toArray)
+        .withJavacOptions(workRequest.javaCompilerOptions)
         .withScalacOptions(
-          (
-            workRequest.plugins.map(p => s"-Xplugin:$p") ++
-              workRequest.compilerOptions ++
-              workRequest.compilerOptionsReferencingPaths
-          ).toArray,
+          workRequest.plugins.view.map(p => s"-Xplugin:$p").toArray ++
+            workRequest.compilerOptions ++
+            workRequest.compilerOptionsReferencingPaths.toArray,
         )
 
     val compilers = {
@@ -304,11 +302,6 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     // create analyses
     val pathString = analysisStorePath.toAbsolutePath().normalize().toString()
-    val analysisStoreText = AnalysisUtil.getAnalysisStore(
-      new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
-      true,
-      readWriteMappers,
-    )
     // Filter out libraryClassNames from the analysis because it is non-deterministic.
     // Can stop doing this once the bug in Zinc is fixed. Check the comment on FilteredRelations
     // for more info.
@@ -319,7 +312,18 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         infos = FilteredInfos.getFilteredInfos(originalResultAnalysis.infos),
       )
     }
-    analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+
+    // This will be true if the `--worker_verbose` Bazel flag is set
+    if (verbosity >= 10) {
+      val analysisStoreText = AnalysisUtil.getAnalysisStore(
+        new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
+        true,
+        readWriteMappers,
+      )
+
+      analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
+    }
+
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
     // create used deps
@@ -329,7 +333,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       deps.filter(Dep.used(deps, resultAnalysis.relations, lookup)).filterNot { dep =>
         val filteredDepFileName = FileUtil.getNameWithoutRulesJvmExternalStampPrefix(dep.file)
 
-        scalaInstance.libraryJars
+        scalaInstance.libraryJars.view
           .map(FileUtil.getNameWithoutRulesJvmExternalStampPrefix)
           .contains(filteredDepFileName)
       }

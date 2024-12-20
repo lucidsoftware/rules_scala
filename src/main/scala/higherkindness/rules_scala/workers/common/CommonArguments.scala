@@ -17,7 +17,7 @@ class CommonArguments private (
   val analyses: List[Analysis],
   val compilerBridge: Path,
   val compilerClasspath: List[Path],
-  val compilerOptions: List[String],
+  val compilerOptions: Array[String],
 
   /**
    * With [[https://bazel.build/remote/multiplex#multiplex_sandboxing multiplex sandboxing]], Bazel generates a separate
@@ -32,7 +32,7 @@ class CommonArguments private (
   val compilerOptionsReferencingPaths: List[String],
   val classpath: List[Path],
   val debug: Boolean,
-  val javaCompilerOptions: List[String],
+  val javaCompilerOptions: Array[String],
   val label: String,
   val logLevel: LogLevel,
   val mainManifest: Path,
@@ -215,8 +215,8 @@ object CommonArguments {
       compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
       compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
       compilerOptions = Option(namespace.getList[String]("compiler_option"))
-        .map(_.asScala.toList)
-        .getOrElse(List.empty),
+        .map(_.asScala.toArray)
+        .getOrElse(Array.empty),
       compilerOptionsReferencingPaths = adjustCompilerOptions(
         workDir,
         Option(namespace.getList[String]("compiler_option_referencing_path"))
@@ -225,7 +225,7 @@ object CommonArguments {
       ),
       classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
       debug = namespace.getBoolean("debug"),
-      javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toList,
+      javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toArray,
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("main_manifest")),

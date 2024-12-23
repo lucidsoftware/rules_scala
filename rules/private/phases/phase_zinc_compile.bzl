@@ -38,7 +38,9 @@ def phase_zinc_compile(ctx, g):
     common_scalacopts = toolchain.scala_configuration.global_scalacopts + ctx.attr.scalacopts
 
     args = ctx.actions.args()
-    args.add_all(depset(transitive = [zinc.deps for zinc in zincs]), map_each = _compile_analysis)
+    if toolchain.zinc_configuration.incremental:
+        args.add_all(depset(transitive = [zinc.deps for zinc in zincs]), map_each = _compile_analysis)
+
     args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
     args.add_all("--classpath", g.classpaths.compile)
@@ -69,7 +71,7 @@ def phase_zinc_compile(ctx, g):
             g.classpaths.plugin,
             g.classpaths.compile,
             g.classpaths.compiler,
-        ] + [zinc.deps_files for zinc in zincs],
+        ] + ([zinc.deps_files for zinc in zincs] if toolchain.zinc_configuration.incremental else []),
     )
 
     outputs = [

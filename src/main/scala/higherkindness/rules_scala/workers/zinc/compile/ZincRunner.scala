@@ -25,6 +25,9 @@ import scala.util.control.NonFatal
 import xsbti.{T2, VirtualFile, VirtualFileRef}
 import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
 
+/**
+ * Adding a useless comment here to break the cache
+ */
 class ZincRunnerWorkerConfig private (
   val persistenceDir: Option[Path],
   val usePersistence: Boolean,

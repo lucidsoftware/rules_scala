@@ -1,0 +1,20 @@
+load("@rules_scala_annex//rules:scala.bzl", "scala_library")
+
+scala_library(
+    name = "dependency",
+    srcs = [
+        "Dependency.scala",
+        "DependencyCacheInvalidation.scala",
+    ],
+    scala_toolchain_name = "test_zinc_2_13",
+)
+
+scala_library(
+    name = "dependent",
+    srcs = [
+        "Dependent.scala",
+        "DependentCacheInvalidation.scala",
+    ],
+    scala_toolchain_name = "test_zinc_2_13",
+    deps = [":dependency"],
+)

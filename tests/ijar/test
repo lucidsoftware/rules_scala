@@ -1,0 +1,32 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../common.sh
+
+invalidate_dependency_cache() {
+  echo "// $(cat /proc/sys/kernel/random/uuid)" > DependencyCacheInvalidation.scala
+}
+
+invalidate_dependent_cache() {
+  echo "// $(cat /proc/sys/kernel/random/uuid)" > DependentCacheInvalidation.scala
+}
+
+test_actions_executed() {
+  scalacompile_runs="$(
+    bazel build --color no --subcommands "$1" |& \
+      grep '^SUBCOMMAND: # //ijar:.* \[.*, mnemonic: ScalaCompile\]$' | \
+      wc -l
+  )"
+
+  if [ "$scalacompile_runs" -ne "$2" ]; then
+    echo "Expected 1 \`ScalaCompile\` action to be executed, but got $scalacompile_runs"
+    exit 1
+  fi
+}
+
+trap ": > DependencyCacheInvalidation.scala; : > DependentCacheInvalidation.scala" EXIT
+
+invalidate_dependency_cache
+invalidate_dependent_cache
+test_actions_executed //ijar:dependent 2
+
+invalidate_dependency_cache
+test_actions_executed //ijar:dependent 1

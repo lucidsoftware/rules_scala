@@ -43,12 +43,16 @@ common:tests --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_2_13
 # These are backwards incompatible options; we should check to see if their values have been flipped
 # when upgrading to new major Bazel version.
 common --incompatible_auto_exec_groups
-#common --incompatible_autoload_externally=
+common --incompatible_autoload_externally=sh_binary # sh_binary is used by rules_jvm_external
 #common --incompatible_config_setting_private_default_visibility
 common --incompatible_disable_native_repo_rules
 common --incompatible_disable_starlark_host_transitions
 common --incompatible_disable_target_provider_fields
+
+# Unfortunately, this can't be enabled just yet because of
+# https://github.com/bazelbuild/rules_java/issues/264
 #common --incompatible_stop_exporting_language_modules
+
 common --noincompatible_disallow_ctx_resolve_tools
 common --noincompatible_disallow_struct_provider_syntax
 

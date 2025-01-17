@@ -102,15 +102,16 @@ def phase_zinc_compile(ctx, g):
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(
-        mnemonic = "ScalaCompile",
-        inputs = inputs,
-        outputs = outputs,
+        arguments = [args],
         executable = worker.files_to_run,
         execution_requirements = _resolve_execution_reqs(
             ctx,
             execution_requirements_tags,
         ),
-        arguments = [args],
+        inputs = inputs,
+        mnemonic = "ScalaCompile",
+        outputs = outputs,
+        toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )
 
     jars = []

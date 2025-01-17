@@ -71,6 +71,7 @@ def scaladoc_implementation(ctx):
         ),
         mnemonic = "ScalaDoc",
         outputs = [html, tmp],
+        toolchain = None,
     )
 
     return [

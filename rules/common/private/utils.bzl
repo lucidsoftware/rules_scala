@@ -1,6 +1,7 @@
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@rules_java//java/common:java_common.bzl", "java_common")
 
 #
 # Helper utilities

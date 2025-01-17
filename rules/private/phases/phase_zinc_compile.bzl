@@ -1,3 +1,4 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load(
     "@rules_scala_annex//rules:providers.bzl",

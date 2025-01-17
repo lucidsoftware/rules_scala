@@ -1,3 +1,4 @@
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//rules:providers.bzl",
     "CodeCoverageConfiguration",

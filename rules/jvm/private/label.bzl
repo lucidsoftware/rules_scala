@@ -1,3 +1,4 @@
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("@rules_scala_annex//rules:providers.bzl", "LabeledJars")
 
 def labeled_jars_implementation(target, ctx):

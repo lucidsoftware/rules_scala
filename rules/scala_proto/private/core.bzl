@@ -1,3 +1,4 @@
+load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load(
     "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",

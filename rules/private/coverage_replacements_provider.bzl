@@ -1,4 +1,5 @@
 load("@bazel_skylib//lib:dicts.bzl", _dicts = "dicts")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 
 #
 # Coverage Replacements are a mapping of normal compiled artifacts to

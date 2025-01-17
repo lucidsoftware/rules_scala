@@ -3,6 +3,8 @@
 ##
 
 load("@bazel_skylib//lib:dicts.bzl", _dicts = "dicts")
+load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",

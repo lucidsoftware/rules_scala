@@ -32,7 +32,6 @@ scala_non_default_format_attributes = {
 
 def build_format(ctx):
     files = []
-    runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._fmt])
     manifest_content = []
     config = ctx.toolchains["//rules/scalafmt:toolchain_type"].scalafmt_config.config
 
@@ -64,7 +63,6 @@ def build_format(ctx):
                 mnemonic = "ScalaFmt",
                 outputs = [file],
                 toolchain = None,
-                tools = runner_inputs,
             )
             manifest_content.append("{} {}".format(src.short_path, file.short_path))
 

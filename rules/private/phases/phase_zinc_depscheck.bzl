@@ -19,7 +19,6 @@ load(
 def phase_zinc_depscheck(ctx, g):
     deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
-    worker_inputs, _ = ctx.resolve_tools(tools = [deps_configuration.worker])
     outputs = []
 
     for name in ("direct", "used"):
@@ -54,7 +53,7 @@ def phase_zinc_depscheck(ctx, g):
                     "supports-path-mapping": "1",
                 },
             ),
-            inputs = [g.compile.used] + worker_inputs.to_list(),
+            inputs = [g.compile.used],
             mnemonic = "ScalaCheckDeps",
             outputs = [deps_check],
             toolchain = "@rules_scala_annex//rules/scala:toolchain_type",

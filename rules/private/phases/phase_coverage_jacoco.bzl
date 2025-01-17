@@ -16,9 +16,6 @@ def phase_coverage_jacoco(ctx, g):
         return
 
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
-    worker_inputs, _ = ctx.resolve_tools(
-        tools = [toolchain.code_coverage_configuration.instrumentation_worker],
-    )
 
     args = ctx.actions.args()
 
@@ -46,7 +43,7 @@ def phase_coverage_jacoco(ctx, g):
                 "supports-path-mapping": "1",
             },
         ),
-        inputs = [in_out_pair[0] for in_out_pair in in_out_pairs] + worker_inputs.to_list(),
+        inputs = [in_out_pair[0] for in_out_pair in in_out_pairs],
         mnemonic = "JacocoInstrumenter",
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",

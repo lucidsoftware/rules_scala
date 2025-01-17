@@ -52,8 +52,6 @@ def scaladoc_implementation(ctx):
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
 
-    runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._runner])
-
     ctx.actions.run(
         arguments = [args],
         executable = ctx.attr._runner.files_to_run,

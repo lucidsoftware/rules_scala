@@ -65,9 +65,8 @@ def phase_zinc_compile(ctx, g):
 
     worker = toolchain.zinc_configuration.compile_worker
 
-    worker_inputs, _ = ctx.resolve_tools(tools = [worker])
     inputs = depset(
-        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs.to_list(),
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs,
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,

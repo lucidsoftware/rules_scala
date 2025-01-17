@@ -1,12 +1,11 @@
 module(name = "rules_scala_annex")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
-
-bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
-
+bazel_dep(name = "protobuf", version = "29.3")
 bazel_dep(name = "rules_java", version = "7.12.2")
 bazel_dep(name = "rules_jvm_external", version = "6.5")
 
+bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
 bazel_dep(name = "rules_pkg", version = "1.0.1", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.7.1", dev_dependency = True)
 
@@ -113,9 +112,8 @@ annex_proto = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex_proto.install(
     name = "annex_proto",
     artifacts = [
-        "com.github.os72:protoc-jar:3.11.4",
-        "com.thesamet.scalapb:compilerplugin_2.13:0.11.17",
-        "com.thesamet.scalapb:protoc-bridge_2.13:0.9.7",
+        "com.thesamet.scalapb:compilerplugin_2.13:1.0.0-alpha.1",
+        "com.thesamet.scalapb:protoc-bridge_2.13:0.9.8",
     ],
     fetch_sources = True,
     lock_file = "//:annex_proto_install.json",

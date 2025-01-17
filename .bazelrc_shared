@@ -42,7 +42,7 @@ common:tests --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_2_13
 
 # These are backwards incompatible options; we should check to see if their values have been flipped
 # when upgrading to new major Bazel version.
-#common --incompatible_auto_exec_groups
+common --incompatible_auto_exec_groups
 #common --incompatible_autoload_externally=
 #common --incompatible_config_setting_private_default_visibility
 common --incompatible_disable_native_repo_rules

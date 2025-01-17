@@ -34,9 +34,7 @@ def phase_coverage_jacoco(ctx, g):
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
     ctx.actions.run(
-        mnemonic = "JacocoInstrumenter",
-        inputs = [in_out_pair[0] for in_out_pair in in_out_pairs] + worker_inputs.to_list(),
-        outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
+        arguments = [args],
         executable = toolchain.code_coverage_configuration.instrumentation_worker.files_to_run,
         execution_requirements = _resolve_execution_reqs(
             ctx,
@@ -48,7 +46,10 @@ def phase_coverage_jacoco(ctx, g):
                 "supports-path-mapping": "1",
             },
         ),
-        arguments = [args],
+        inputs = [in_out_pair[0] for in_out_pair in in_out_pairs] + worker_inputs.to_list(),
+        mnemonic = "JacocoInstrumenter",
+        outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
+        toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )
 
     replacements = {i: o for (i, o) in in_out_pairs}

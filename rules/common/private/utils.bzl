@@ -206,10 +206,11 @@ def action_singlejar(
                 "supports-path-mapping": "1",
             },
         ),
-        mnemonic = _SINGLE_JAR_MNEMONIC,
         inputs = all_inputs,
+        mnemonic = _SINGLE_JAR_MNEMONIC,
         outputs = [output],
         progress_message = progress_message,
+        toolchain = None,
     )
 
 def separate_src_jars_srcs_and_other(files):

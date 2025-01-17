@@ -50,9 +50,6 @@ def build_format(ctx):
             ctx.actions.run(
                 arguments = ["--jvm_flag=-Dfile.encoding=UTF-8", args],
                 executable = ctx.executable._fmt,
-                outputs = [file],
-                inputs = [config, src],
-                tools = runner_inputs,
                 execution_requirements = _resolve_execution_reqs(
                     ctx,
                     {
@@ -63,7 +60,11 @@ def build_format(ctx):
                         "supports-path-mapping": "1",
                     },
                 ),
+                inputs = [config, src],
                 mnemonic = "ScalaFmt",
+                outputs = [file],
+                toolchain = None,
+                tools = runner_inputs,
             )
             manifest_content.append("{} {}".format(src.short_path, file.short_path))
 
@@ -80,14 +81,15 @@ def format_runner(ctx, manifest, files):
     args.add(ctx.outputs.scalafmt_runner)
 
     ctx.actions.run_shell(
-        inputs = [ctx.file._runner, manifest] + files,
-        outputs = [ctx.outputs.scalafmt_runner],
-        command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
         arguments = [args],
+        command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        inputs = [ctx.file._runner, manifest] + files,
         mnemonic = "CreateScalaFmtRunner",
+        outputs = [ctx.outputs.scalafmt_runner],
+        toolchain = None,
     )
 
 def format_tester(ctx, manifest, files):
@@ -98,14 +100,15 @@ def format_tester(ctx, manifest, files):
     args.add(ctx.outputs.scalafmt_testrunner)
 
     ctx.actions.run_shell(
-        inputs = [ctx.file._testrunner, manifest] + files,
-        outputs = [ctx.outputs.scalafmt_testrunner],
-        command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
         arguments = [args],
+        command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        inputs = [ctx.file._testrunner, manifest] + files,
         mnemonic = "CreateScalaFmtTester",
+        outputs = [ctx.outputs.scalafmt_testrunner],
+        toolchain = None,
     )
 
 def scala_format_test_implementation(ctx):

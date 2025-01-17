@@ -8,9 +8,8 @@ def _impl(ctx):
     args.use_param_file("@%s", use_always = True)
 
     ctx.actions.run(
-        outputs = outputs,
         arguments = [args],
-        mnemonic = "VerbositySpecWorkerRun",
+        executable = ctx.executable.verbosity_spec_worker,
         execution_requirements = {
             "supports-multiplex-workers": "1",
             "supports-workers": "1",
@@ -18,8 +17,10 @@ def _impl(ctx):
             "supports-worker-cancellation": "1",
             "supports-path-mapping": "1",
         },
+        mnemonic = "VerbositySpecWorkerRun",
+        outputs = outputs,
         progress_message = "Running verbosity spec worker %{label}",
-        executable = ctx.executable.verbosity_spec_worker,
+        toolchain = None,
     )
 
     return [

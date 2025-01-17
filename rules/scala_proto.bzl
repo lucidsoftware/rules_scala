@@ -34,17 +34,26 @@ def _scala_proto_toolchain_implementation(ctx):
     return [platform_common.ToolchainInfo(
         compiler = ctx.attr.compiler,
         compiler_supports_workers = ctx.attr.compiler_supports_workers,
+        protoc = ctx.executable.protoc,
     )]
 
 scala_proto_toolchain = rule(
     attrs = {
         "compiler": attr.label(
-            doc = "The compiler to use to generate Scala form proto sources",
             allow_files = True,
-            executable = True,
             cfg = "exec",
+            doc = "The compiler to use to generate Scala form proto sources",
+            executable = True,
+            mandatory = True,
         ),
         "compiler_supports_workers": attr.bool(default = False),
+        "protoc": attr.label(
+            allow_single_file = True,
+            cfg = "exec",
+            default = Label("@protobuf//:protoc"),
+            doc = "The protoc binary to use",
+            executable = True,
+        ),
     },
     doc = """
 Specifies a toolchain of the `@rules_scala_annex//rules/scala_proto:compiler_toolchain_type` toolchain type.

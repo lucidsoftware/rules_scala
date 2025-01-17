@@ -18,8 +18,6 @@ def scala_proto_library_implementation(ctx):
 
     compiler = ctx.toolchains["@rules_scala_annex//rules/scala_proto:compiler_toolchain_type"]
 
-    compiler_inputs, _ = ctx.resolve_tools(tools = [compiler.compiler])
-
     srcjar = ctx.outputs.srcjar
 
     gendir_base_path = "tmp"
@@ -30,6 +28,7 @@ def scala_proto_library_implementation(ctx):
     args = ctx.actions.args()
     args.add_all("--output_dir", [gendir], expand_directories = False)
     args.add_all("--proto_paths", transitive_proto_path)
+    args.add("--protoc", compiler.protoc)
     if ctx.attr.grpc:
         args.add("--grpc")
     args.add_all("--", transitive_sources)
@@ -59,7 +58,7 @@ def scala_proto_library_implementation(ctx):
         outputs = [gendir],
         progress_message = "Compiling %{label} protobuf into Scala source",
         toolchain = "@rules_scala_annex//rules/scala_proto:compiler_toolchain_type",
-        tools = compiler_inputs,
+        tools = [compiler.protoc],
     )
 
     shell_args = ctx.actions.args()

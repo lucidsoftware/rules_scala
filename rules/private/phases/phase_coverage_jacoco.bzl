@@ -57,14 +57,7 @@ def phase_coverage_jacoco(ctx, g):
         ),
     ])
 
-    return struct(
-        instrumented_files = struct(
-            dependency_attributes = _coverage_replacements_provider.dependency_attributes,
-            extensions = ["scala", "java"],
-            source_attributes = ["srcs"],
-        ),
-        replacements = replacements,
-    )
+    return struct(replacements = replacements)
 
 def _format_in_out_pairs(in_out_pair):
     return (["--jar", "%s=%s" % (in_out_pair[0].path, in_out_pair[1].path)])

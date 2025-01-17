@@ -57,8 +57,6 @@ common --incompatible_disable_target_provider_fields
 #
 #common --incompatible_stop_exporting_language_modules
 
-common --noincompatible_disallow_struct_provider_syntax
-
 # This is disabled because rules_python (and possibly other rulesets we depend on) rely on
 # deprecated `Label` APIs:
 # https://github.com/bazelbuild/rules_python/blob/main/python/private/pythons_hub.bzl#L82

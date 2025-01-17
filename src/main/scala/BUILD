@@ -100,6 +100,7 @@ config_setting(
     define_values = {
         "scala_deps_used": "off",
     },
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -107,4 +108,5 @@ config_setting(
     define_values = {
         "scala_deps_direct": "off",
     },
+    visibility = ["//visibility:public"],
 )

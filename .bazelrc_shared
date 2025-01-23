@@ -6,7 +6,6 @@ build --tool_java_language_version="21"
 build --tool_java_runtime_version="remotejdk_21"
 
 # Other options
-build --experimental_strict_action_env
 build --experimental_use_hermetic_linux_sandbox
 build --experimental_worker_cancellation
 build --experimental_worker_multiplex_sandboxing
@@ -41,6 +40,7 @@ common --incompatible_config_setting_private_default_visibility
 common --incompatible_disable_native_repo_rules
 common --incompatible_disable_starlark_host_transitions
 common --incompatible_disable_target_provider_fields
+common --incompatible_strict_action_env
 
 # Unfortunately, this can't be enabled just yet because of
 # https://github.com/bazelbuild/rules_java/issues/264

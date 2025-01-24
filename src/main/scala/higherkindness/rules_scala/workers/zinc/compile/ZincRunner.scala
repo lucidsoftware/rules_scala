@@ -28,7 +28,7 @@ import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptions
 /**
  * Adding a useless comment here to break the cache
  * This time with remote persistent workers
- * Okay for real real real real
+ * Okay for real real real real real
  */
 class ZincRunnerWorkerConfig private (
   val persistenceDir: Option[Path],

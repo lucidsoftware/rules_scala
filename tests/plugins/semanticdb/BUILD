@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_java//java:java_library.bzl", "java_library")
 load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 load("@rules_scala_annex//rules/scala:versions.bzl", "scala_2_13_version", "scala_3_version")
@@ -38,7 +40,6 @@ scala_library(
     name = "semanticdb-2_13",
     srcs = glob(["*.scala"]),
     scala_toolchain_name = "scala_2_13_with_semanticdb",
-    tags = ["manual"],
 )
 
 read_semanticdb_info(
@@ -50,7 +51,6 @@ scala_library(
     name = "semanticdb-3",
     srcs = glob(["*.scala"]),
     scala_toolchain_name = "scala_3_with_semanticdb",
-    tags = ["manual"],
 )
 
 read_semanticdb_info(
@@ -60,7 +60,27 @@ read_semanticdb_info(
 
 scala_library(
     name = "semanticdb-empty",
-    srcs = [],
     scala_toolchain_name = "scala_2_13_with_semanticdb",
-    tags = ["manual"],
+)
+
+java_library(
+    name = "sourcejar-library",
+    resources = glob(["*.scala"]),
+)
+
+copy_file(
+    name = "sourcejar",
+    src = ":sourcejar-library",
+    out = "sourcejar.srcjar",
+)
+
+scala_library(
+    name = "semanticdb-sourcejar",
+    srcs = [":sourcejar"],
+    scala_toolchain_name = "scala_2_13_with_semanticdb",
+)
+
+read_semanticdb_info(
+    name = "semanticdb-sourcejar-semanticdb-info",
+    scala_target = ":semanticdb-sourcejar",
 )

@@ -15,7 +15,7 @@ def _semanticdb_directory_from_file(file):
     nested function closure by default.
     """
 
-    return file.path[:file.path.find("META-INF") - 1]
+    return "{}/semanticdb".format(file.dirname)
 
 #
 # PHASE: semanticdb
@@ -33,7 +33,9 @@ def phase_semanticdb(ctx, g):
     outputs = []
 
     for source in ctx.files.srcs:
-        if source.extension == "scala":
+        if (source.extension == "scala" and
+        source.is_source and
+        source.owner.repo_name == ctx.label.repo_name):
             path = paths.join(
                 directory_name,
                 "META-INF",
@@ -44,20 +46,19 @@ def phase_semanticdb(ctx, g):
             outputs.append(ctx.actions.declare_file(path))
 
     def add_scalacopts(arguments):
-        if len(outputs) == 0:
-            return
+        output_jar = g.classpaths.jar
 
         if toolchain.scala_configuration.version.startswith("2"):
             arguments.add("--compiler_option=-P:semanticdb:failures:error")
             arguments.add("--compiler_option_referencing_path=-P:semanticdb:sourceroot:${workDir}")
             arguments.add_all(
-                [outputs[0]],
+                [output_jar],
                 format_each = "--compiler_option_referencing_path=-P:semanticdb:targetroot:${path} %s",
                 map_each = _semanticdb_directory_from_file,
             )
         else:
             arguments.add_all(
-                [outputs[0]],
+                [output_jar],
                 format_each = "--compiler_option_referencing_path=-semanticdb-target:${path} %s",
                 map_each = _semanticdb_directory_from_file,
             )

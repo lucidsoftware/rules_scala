@@ -5,17 +5,15 @@ load(
     _SemanticDbInfo = "SemanticDbInfo",
 )
 
-def _semanticdb_directory_from_file(file):
+def _semanticdb_directory_from_output_jar(file):
     """
-    This is janky, but we're limited in what we can do in this function. From the
-    [documentation](https://bazel.build/rules/lib/builtins/Args#add_all) on `Args#add_all`:
-
-    To avoid unintended retention of large analysis-phase data structures into the execution phase,
-    the `map_each` function must be declared by a top-level `def` statement; it may not be a
-    nested function closure by default.
+    Using the path of the output JAR to determine the SemanticDB target root is janky, but the
+    output directory won't be known at build-time, so we have to use the output JAR path as a proxy.
+    It should be built under the same configuration as the SemanticDB files, since both are produced
+    by the same compilation action.
     """
 
-    return file.path[:file.path.find("META-INF") - 1]
+    return "{}/semanticdb".format(file.dirname)
 
 #
 # PHASE: semanticdb
@@ -33,7 +31,13 @@ def phase_semanticdb(ctx, g):
     outputs = []
 
     for source in ctx.files.srcs:
-        if source.extension == "scala":
+        # Generated or external files will have the output directory (beginning with `bazel-out`) in
+        # their paths, which we don't want because it isn't guaranteed to be consistent
+        if (
+            source.extension == "scala" and
+            source.is_source and
+            source.owner.repo_name == ctx.label.repo_name
+        ):
             path = paths.join(
                 directory_name,
                 "META-INF",
@@ -44,22 +48,21 @@ def phase_semanticdb(ctx, g):
             outputs.append(ctx.actions.declare_file(path))
 
     def add_scalacopts(arguments):
-        if len(outputs) == 0:
-            return
+        output_jar = g.classpaths.jar
 
         if toolchain.scala_configuration.version.startswith("2"):
             arguments.add("--compiler_option=-P:semanticdb:failures:error")
             arguments.add("--compiler_option_referencing_path=-P:semanticdb:sourceroot:${workDir}")
             arguments.add_all(
-                [outputs[0]],
+                [output_jar],
                 format_each = "--compiler_option_referencing_path=-P:semanticdb:targetroot:${path} %s",
-                map_each = _semanticdb_directory_from_file,
+                map_each = _semanticdb_directory_from_output_jar,
             )
         else:
             arguments.add_all(
-                [outputs[0]],
+                [output_jar],
                 format_each = "--compiler_option_referencing_path=-semanticdb-target:${path} %s",
-                map_each = _semanticdb_directory_from_file,
+                map_each = _semanticdb_directory_from_output_jar,
             )
 
             arguments.add("--compiler_option_referencing_path=-sourceroot:${workDir}")

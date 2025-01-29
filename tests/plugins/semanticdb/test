@@ -5,7 +5,7 @@ bazel_bin="$(bazel info bazel-bin)"
 
 check_for_semanticdb_files() {
 	for filename in "A.scala.semanticdb" "B.scala.semanticdb"; do
-		path="../../bazel-bin/plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb/$filename"
+		path="../../bazel-bin/plugins/semanticdb/$1/semanticdb/META-INF/semanticdb/plugins/semanticdb/$filename"
 
 		if [ ! -f "$path" ]; then
 			echo "Error: $path doesn't exist"
@@ -15,22 +15,42 @@ check_for_semanticdb_files() {
 }
 
 check_semanticdb_info() {
-	bazel build ":semanticdb-$1-semanticdb-info"
+	bazel build ":$1-semanticdb-info"
 
-	output_path="$bazel_bin/plugins/semanticdb/semanticdb-$1-semanticdb-info.txt"
+	output_path="$bazel_bin/plugins/semanticdb/$1-semanticdb-info.txt"
 	reported_semanticdb_files="$(jq -r '.semanticDbFiles[]' "$output_path" | sed -E 's_^bazel-out/[^\n/]+/bin/__g')"
-	semanticdb_file_directory="plugins/semanticdb/semanticdb-$1/semanticdb/META-INF/semanticdb/plugins/semanticdb"
+	semanticdb_file_directory="plugins/semanticdb/$1/semanticdb/META-INF/semanticdb/plugins/semanticdb"
 
-	[ "$(jq '.targetRoot' "$output_path")" = "\"plugins/semanticdb/semanticdb-$1/semanticdb\"" ]
+	[ "$(jq '.targetRoot' "$output_path")" = "\"plugins/semanticdb/$1/semanticdb\"" ]
 	[ "$reported_semanticdb_files" = "$semanticdb_file_directory/A.scala.semanticdb"$'\n'"$semanticdb_file_directory/B.scala.semanticdb" ]
 }
 
-bazel build :semanticdb-2_13
-check_for_semanticdb_files 2_13
-check_semanticdb_info 2_13
+works_with_scala_2_13() {
+	bazel build :semanticdb-2_13
+	check_for_semanticdb_files semanticdb-2_13
+	check_semanticdb_info semanticdb-2_13
+}
 
-bazel build :semanticdb-3
-check_for_semanticdb_files '3'
-check_semanticdb_info '3'
+works_with_scala_3() {
+	bazel build :semanticdb-3
+	check_for_semanticdb_files semanticdb-3
+	check_semanticdb_info semanticdb-3
+}
 
-bazel build :semanticdb-empty
+works_with_no_sources() {
+	bazel build :semanticdb-empty
+}
+
+does_not_produce_semanticdb_for_source_jars() {
+	bazel build :semanticdb-sourcejar-semanticdb-info
+
+	semanticdb_info_path="$bazel_bin/plugins/semanticdb/semanticdb-sourcejar-semanticdb-info.txt"
+
+	[ "$(jq '.semanticDbFiles' "$semanticdb_info_path")" = '[]' ]
+	[ "$(jq '.targetRoot' "$semanticdb_info_path")" = '"plugins/semanticdb/semanticdb-sourcejar/semanticdb"' ]
+}
+
+works_with_scala_2_13
+works_with_scala_3
+works_with_no_sources
+does_not_produce_semanticdb_for_source_jars

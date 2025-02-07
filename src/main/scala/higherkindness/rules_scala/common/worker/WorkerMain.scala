@@ -218,28 +218,37 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
         }
 
       case args =>
-        Using.Manager { use =>
+        val returnCode = Using.Manager { use =>
           val outStream = use(new ByteArrayOutputStream())
           val out = use(new PrintStream(outStream))
-          try {
-            work(
-              init(args = None),
-              args.toArray,
-              out,
-              workDir = Path.of(""),
-              verbosity = 0,
-            )
-          } catch {
-            // This error means the work function encountered an error that we want to not be caught
-            // inside that function. That way it stops work and exits the function. However, we
-            // also don't want to crash the whole program.
-            case e: AnnexWorkerError => e.print(out)
-          } finally {
-            out.flush()
-          }
+          val returnCode =
+            try {
+              work(
+                init(args = None),
+                args.toArray,
+                out,
+                workDir = Path.of(""),
+                verbosity = 0,
+              )
+
+              0
+            } catch {
+              // This error means the work function encountered an error that we want to not be caught
+              // inside that function. That way it stops work and exits the function. However, we
+              // also don't want to crash the whole program.
+              case e: AnnexWorkerError =>
+                e.print(out)
+                e.code
+            } finally {
+              out.flush()
+            }
 
           outStream.writeTo(System.err)
+
+          returnCode
         }.get
+
+        sys.exit(returnCode)
     }
   }
 }

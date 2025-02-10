@@ -1,4 +1,4 @@
-load("@rules_scala_annex//rules:scala.bzl", "scala_library", "scala_test")
+load("@rules_scala_annex//rules:scala.bzl", "scala_binary", "scala_library", "scala_test")
 
 scala_library(
     name = "fatal-error-spec-workers",
@@ -46,5 +46,14 @@ scala_test(
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/error",
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
         "@rules_scala_annex//third_party/bazel/src/main/protobuf:worker_protocol_java_proto",
+    ],
+)
+
+scala_binary(
+    name = "worker-throwing-annexworkererror",
+    srcs = ["WorkerThrowingAnnexWorkerError.scala"],
+    deps = [
+        "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/error",
+        "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
     ],
 )

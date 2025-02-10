@@ -1,5 +1,12 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../common.sh
 
+worker_run_directly_returns_proper_exit_code() {
+    bazel run :worker-throwing-annexworkererror ||
+
+    [ $? -eq 1 ]
+}
+
 bazel test :error-spec
 bazel test :fatal-error-spec |& grep -q 'java.lang.OutOfMemoryError'
+worker_run_directly_returns_proper_exit_code

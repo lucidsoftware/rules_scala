@@ -39,13 +39,13 @@ class ZincRunnerWorkerConfig private (
 object ZincRunnerWorkerConfig {
   def apply(namespace: Namespace): ZincRunnerWorkerConfig = {
     new ZincRunnerWorkerConfig(
-      pathFromBustBustBustBustBust("persistence_dir", namespace),
+      pathFromRBEBust1("persistence_dir", namespace),
       Option(namespace.getBoolean("use_persistence")).map(Boolean.unbox).getOrElse(false),
-      pathFromBustBustBustBustBust("extracted_file_cache", namespace),
+      pathFromRBEBust1("extracted_file_cache", namespace),
     )
   }
 
-  private def pathFromBustBustBustBustBust(arg: String, namespace: Namespace): Option[Path] = {
+  private def pathFromRBEBust1(arg: String, namespace: Namespace): Option[Path] = {
     Option(namespace.getString(arg)).map { pathString =>
       if (pathString.startsWith("~" + File.separator)) {
         Paths.get(pathString.replace("~", sys.props.getOrElse("user.home", "")))

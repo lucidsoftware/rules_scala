@@ -322,6 +322,14 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
+    // foobarbazqux
+    // 2
+    // 3
+    // 4
+    // 5
+    // 6
+    // 7
+
     // create used deps
     val usedDeps =
       // Filter out the Scala standard library as that should just always be

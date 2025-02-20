@@ -125,14 +125,14 @@ annex_proto.install(
 )
 use_repo(annex_proto, "annex_proto")
 
-java_launcher_version = "7.4.1"
+java_launcher_version = "8.9.0"
 
-java_launcher_template_sha = "ee4aa47ae5e639632c67be5cc0ccbc4e941a67a1b884a1ce0c4329357a4b62b2"
+java_launcher_template_sha = "289d8c13a3e2680bfbe21a2c6a57cc428ecdc6a0f2c04bda4d4dc2da40311eaa"
 
 java_stub_template_url = (
-    "raw.githubusercontent.com/bazelbuild/bazel/" +
+    "raw.githubusercontent.com/bazelbuild/rules_java/" +
     java_launcher_version +
-    "/src/main/java/com/google/devtools/build/lib/bazel/rules/java/" +
+    "/java/bazel/rules/" +
     "java_stub_template.txt"
 )
 

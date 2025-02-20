@@ -15,10 +15,11 @@ def phase_binary_launcher(ctx, g):
 
     if ctx.attr.main_class != "":
         main_class = ctx.attr.main_class
+        mains_file = None
     else:
+        main_class = None
         mains_file = g.compile.mains_file
         inputs = inputs + [mains_file]
-        main_class = "$(head -1 $JAVA_RUNFILES/{}/{})".format(ctx.workspace_name, mains_file.short_path)
 
     files = _write_launcher(
         ctx,
@@ -27,6 +28,7 @@ def phase_binary_launcher(ctx, g):
         g.javainfo.java_info.transitive_runtime_jars,
         jvm_flags = [ctx.expand_location(f, ctx.attr.data) for f in ctx.attr.jvm_flags],
         main_class = main_class,
+        mains_file = mains_file,
     )
 
     g.out.providers.append(DefaultInfo(

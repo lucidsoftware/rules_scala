@@ -30,6 +30,11 @@ def _strip_margin_line(line, delim):
 
 _SINGLE_JAR_MNEMONIC = "SingleJar"
 
+def _format_mains_file(runfiles_enabled, workspace_prefix, mains_file):
+    if runfiles_enabled:
+        return "$(head -1 $JAVA_RUNFILES/{}/{})".format(workspace_prefix, mains_file.short_path)
+    return "$(head -1 $(rlocation " + paths.normalize(workspace_prefix + mains_file.short_path) + "))"
+
 def _format_jacoco_metadata_file(runfiles_enabled, workspace_prefix, metadata_file):
     if runfiles_enabled:
         return "export JACOCO_METADATA_JAR=\"$JAVA_RUNFILES/{}/{}\"".format(workspace_prefix, metadata_file.short_path)
@@ -62,11 +67,13 @@ def write_launcher(
         main_class,
         jvm_flags,
         extra = "",
-        jacoco_classpath = None):
+        jacoco_classpath = None,
+        mains_file = None):
     """Macro that writes out a launcher script shell script. Some of this is from Bazel's Starlark Java builtins.
       Args:
         runtime_classpath: File containing the classpath required to launch this java target.
         main_class: the main class to launch.
+        mains_file: the file containing a string representing the main class to launch
         jvm_flags: The flags that should be passed to the jvm.
         args: Args that should be passed to the Binary.
     """
@@ -120,19 +127,35 @@ def write_launcher(
 
         more_substitutions = {
             "%java_start_class%": "com.google.testing.coverage.JacocoCoverageRunner",
-            "%set_jacoco_main_class%": """export JACOCO_MAIN_CLASS={}""".format(main_class),
             "%set_jacoco_java_runfiles_root%": """export JACOCO_JAVA_RUNFILES_ROOT=$JAVA_RUNFILES/{}/""".format(ctx.workspace_name),
             "%set_java_coverage_new_implementation%": """export JAVA_COVERAGE_NEW_IMPLEMENTATION=YES""",
         }
+
+        if mains_file:
+            template_dict.add(
+                "%set_jacoco_main_class%",
+                "export JACOCO_MAIN_CLASS={}".format(
+                    _format_mains_file(runfiles_enabled, workspace_prefix, mains_file),
+                ),
+            )
+        else:
+            more_substitutions["%set_jacoco_main_class%"] = "export JACOCO_MAIN_CLASS={}".format(main_class)
     else:
         more_outputs = []
         more_substitutions = {
-            "%java_start_class%": main_class,
             "%set_jacoco_metadata%": "",
             "%set_jacoco_main_class%": "",
             "%set_jacoco_java_runfiles_root%": "",
             "%set_java_coverage_new_implementation%": "",
         }
+
+        if mains_file:
+            template_dict.add(
+                "%java_start_class%",
+                _format_mains_file(runfiles_enabled, workspace_prefix, mains_file),
+            )
+        else:
+            more_substitutions["%java_start_class%"] = main_class
 
     ctx.actions.expand_template(
         template = ctx.file._java_stub_template,

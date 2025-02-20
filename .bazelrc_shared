@@ -14,9 +14,7 @@ build --verbose_failures
 build --worker_max_instances=4
 build --worker_sandboxing
 
-# Disable skymeld to fix files missing from the sandbox.
-# See https://github.com/bazelbuild/bazel/issues/23743 for more info.
-common --noexperimental_merged_skyframe_analysis_execution
+common --experimental_merged_skyframe_analysis_execution
 
 common --experimental_output_paths=strip
 common --modify_execution_info=CppCompile=+supports-path-mapping

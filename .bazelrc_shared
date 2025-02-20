@@ -15,14 +15,10 @@ build --verbose_failures
 build --worker_max_instances=4
 build --worker_sandboxing
 
-# TODO: enable path mapping when we move to Bazel 8. There is a bug in 7. See:
-# https://github.com/bazelbuild/bazel/issues/23990
-# In the meantime, if you need to test path mapping you should disable multiplex
-# workers with the following build option:
-#build --noworker_multiplex
-#common --experimental_output_paths=strip
-#common --modify_execution_info=CppCompile=+supports-path-mapping
-
+common --experimental_output_paths=strip
+common --modify_execution_info=CppArchive=+supports-path-mapping
+common --modify_execution_info=CppCompile=+supports-path-mapping
+common --modify_execution_info=CppModuleMap=+supports-path-mapping
 
 common --announce_rc
 common --color=yes

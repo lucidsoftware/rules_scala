@@ -3,11 +3,13 @@ package common.worker
 
 import common.error.{AnnexDuplicateActiveRequestException, AnnexWorkerError}
 import com.google.devtools.build.lib.worker.WorkerProtocol
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream, PrintStream}
-import java.nio.file.{Path, Paths}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, FileNotFoundException, InputStream, OutputStream, PrintStream}
+import java.nio.file.{NoSuchFileException, Path, Paths}
 import java.util.concurrent.{Callable, CancellationException, ConcurrentHashMap, ForkJoinPool, FutureTask}
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, ExecutionException, Future}
+import scala.jdk.CollectionConverters.*
+import scala.sys.process.*
 import scala.util.{Failure, Success, Using}
 
 abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream = System.out) {
@@ -133,6 +135,16 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                 work(ctx, args, out, sandboxDir, verbosity)
                 0
               } catch {
+                case exception
+                    if exception.isInstanceOf[FileNotFoundException] || exception.isInstanceOf[NoSuchFileException] =>
+                  out.println(s"Working directory: ${Paths.get(".").toAbsolutePath}")
+                  out.println(s"Inputs: ${request.getInputsList.asScala.map(_.getPath)}")
+
+                  List("find", System.getProperty("user.dir"))
+                    .!(ProcessLogger(stdout => out.println(stdout), stderr => out.println(stderr)))
+
+                  throw exception
+
                 case e @ AnnexWorkerError(code, _, _) =>
                   e.print(out)
                   code

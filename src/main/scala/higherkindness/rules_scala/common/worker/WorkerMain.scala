@@ -112,7 +112,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
             }
           } else {
             val args = request.getArgumentsList.toArray(Array.empty[String])
-            val sandboxDir = Path.of(request.getSandboxDir())
+            val sandboxDir = Path.of(request.getSandboxDir()).toAbsolutePath.normalize
             logVerbose(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
 
             // We go through this hullabaloo with output streams being defined out here, so we can

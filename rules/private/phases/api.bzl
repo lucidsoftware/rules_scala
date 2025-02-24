@@ -1,5 +1,8 @@
 load(
     "@rules_scala_annex//rules:providers.bzl",
+    _PhasesInfo = "PhasesInfo",
+    _PhasesInitInfo = "PhasesInitInfo",
+    _PhasesOutInfo = "PhasesOutInfo",
     _ScalaConfiguration = "ScalaConfiguration",
     _ScalaRulePhase = "ScalaRulePhase",
 )
@@ -19,23 +22,23 @@ def run_phases(ctx, phases):
         )
 
     result_dict = {
-        "init": struct(
+        "init": _PhasesInitInfo(
             scala_configuration = toolchain.scala_configuration,
         ),
-        "out": struct(
+        "out": _PhasesOutInfo(
             output_groups = {},
             providers = [],
         ),
     }
 
-    result = struct(**result_dict)
+    result = _PhasesInfo(**result_dict)
 
     for (name, function) in phases:
         addition = function(ctx, result)
 
         if addition != None:
             result_dict[name] = addition
-            result = struct(**result_dict)
+            result = _PhasesInfo(**result_dict)
 
     return result
 

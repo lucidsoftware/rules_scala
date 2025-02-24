@@ -7,6 +7,7 @@ build --tool_java_runtime_version="remotejdk_21"
 
 # Other options
 build --experimental_use_hermetic_linux_sandbox
+build --experimental_worker_sandbox_hardening
 build --experimental_worker_cancellation
 build --experimental_worker_multiplex_sandboxing
 build --strategy=worker,sandboxed,local
@@ -23,9 +24,6 @@ common --modify_execution_info=CppCompile=+supports-path-mapping
 common --modify_execution_info=CppModuleMap=+supports-path-mapping
 common --modify_execution_info=CppArchive=+supports-path-mapping
 
-# This is disabled as it was causing some issues with some javac targets when used
-# with path mapping. If that is resolved, then we can turn it back on.
-#build --experimental_worker_sandbox_hardening
 
 common --announce_rc
 common --color=yes

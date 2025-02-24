@@ -2,6 +2,7 @@ load(
     "@rules_scala_annex//rules:providers.bzl",
     _DepsConfiguration = "DepsConfiguration",
     _LabeledJars = "LabeledJars",
+    _ZincCompilationInfo = "ZincCompilationInfo",
 )
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",

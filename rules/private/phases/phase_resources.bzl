@@ -1,6 +1,6 @@
 load(
-    "//rules/common:private/utils.bzl",
-    _action_singlejar = "action_singlejar",
+    "@rules_scala_annex//rules:providers.bzl",
+    _ResourcesInfo = "ResourcesInfo",
 )
 #
 # PHASE: resources
@@ -10,6 +10,11 @@ load(
 # The output is returned in the jar field so the singlejar
 # phase will merge it into the final jar.
 #
+
+load(
+    "//rules/common:private/utils.bzl",
+    _action_singlejar = "action_singlejar",
+)
 
 def phase_resources(ctx, g):
     if ctx.files.resources:
@@ -24,9 +29,9 @@ def phase_resources(ctx, g):
                 for file in ctx.files.resources
             },
         )
-        return struct(jar = resource_jar)
+        return _ResourcesInfo(jar = resource_jar)
     else:
-        return struct()
+        return _ResourcesInfo()
 
 def _resources_make_path(file, strip_prefix):
     if strip_prefix:

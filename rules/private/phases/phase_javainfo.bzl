@@ -3,6 +3,7 @@ load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load(
     "@rules_scala_annex//rules:providers.bzl",
+    _JavaScalaInfo = "JavaInfoPhaseInfo",
     _ScalaConfiguration = "ScalaConfiguration",
     _ScalaInfo = "ScalaInfo",
 )
@@ -70,7 +71,7 @@ def phase_javainfo(ctx, g):
     g.out.providers.append(java_info)
     g.out.providers.append(scala_info)
 
-    return struct(
+    return _JavaScalaInfo(
         java_info = java_info,
         scala_info = scala_info,
     )

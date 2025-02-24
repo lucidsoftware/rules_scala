@@ -3,6 +3,7 @@ load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
     _SemanticDbInfo = "SemanticDbInfo",
+    _SemanticDbPhaseInfo = "SemanticDbPhaseInfo",
 )
 
 def _semanticdb_directory_from_output_jar(file):
@@ -25,7 +26,7 @@ def phase_semanticdb(ctx, g):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
 
     if toolchain.scala_configuration.semanticdb_bundle:
-        return struct(outputs = [], arguments_modifier = lambda _: None)
+        return _SemanticDbPhaseInfo(outputs = [], arguments_modifier = lambda _: None)
 
     directory_name = "{}/semanticdb".format(ctx.label.name)
     outputs = []
@@ -75,4 +76,4 @@ def phase_semanticdb(ctx, g):
         ),
     )
 
-    return struct(outputs = outputs, arguments_modifier = add_scalacopts)
+    return _SemanticDbPhaseInfo(outputs = outputs, arguments_modifier = add_scalacopts)

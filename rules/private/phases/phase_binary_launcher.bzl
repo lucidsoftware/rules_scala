@@ -1,5 +1,9 @@
 load("@rules_java//java/common:java_common.bzl", "java_common")
 load(
+    "@rules_scala_annex//rules:providers.bzl",
+    _ZincCompilationInfo = "ZincCompilationInfo",
+)
+load(
     "//rules/common:private/utils.bzl",
     _write_launcher = "write_launcher",
 )

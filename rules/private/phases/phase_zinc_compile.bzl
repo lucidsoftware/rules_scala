@@ -3,7 +3,9 @@ load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
+    _ZincCompilationInfo = "ZincCompilationInfo",
     _ZincConfiguration = "ZincConfiguration",
+    _ZincDepInfo = "ZincDepInfo",
     _ZincInfo = "ZincInfo",
 )
 load(
@@ -123,7 +125,7 @@ def phase_zinc_compile(ctx, g):
         deps_files = depset([analysis_store], transitive = [zinc.deps_files for zinc in zincs]),
         label = ctx.label,
         deps = depset(
-            [struct(
+            [_ZincDepInfo(
                 analysis_store = analysis_store,
                 jars = tuple(jars),
                 label = ctx.label,
@@ -133,7 +135,7 @@ def phase_zinc_compile(ctx, g):
     )
 
     g.out.providers.append(zinc_info)
-    return struct(
+    return _ZincCompilationInfo(
         mains_file = mains_file,
         used = used,
         # todo: see about cleaning up & generalizing fields below

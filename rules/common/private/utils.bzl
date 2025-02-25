@@ -231,7 +231,7 @@ def action_singlejar(
             },
         ),
         inputs = all_inputs,
-        mnemonic = _SINGLE_JAR_MNEMONIC,
+        mnemonic = _SINGLE_JAR_MNEMONIC + sanitize_label_for_mnemonic(ctx.label),
         outputs = [output],
         progress_message = progress_message,
         toolchain = None,
@@ -262,3 +262,14 @@ def _is_src(file):
 def short_path(file):
     """Convenience function for getting the short_path that was being duplicated in a few files"""
     return file.short_path
+
+# Turn a label into string we can append to a mnemonic in order to work around
+# https://github.com/bazelbuild/bazel/issues/22589
+def sanitize_label_for_mnemonic(label):
+    res_array = []
+    for char in str(label).elems():
+        if char.isalnum():
+            res_array.append(char)
+        else:
+            res_array.append("0")
+    return "".join(res_array)

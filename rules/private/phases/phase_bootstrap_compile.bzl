@@ -2,6 +2,7 @@ load("@rules_java//java/common:java_common.bzl", "java_common")
 load(
     "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
     _strip_margin = "strip_margin",
 )
 
@@ -128,7 +129,7 @@ def phase_bootstrap_compile(ctx, g):
             },
         ),
         inputs = inputs,
-        mnemonic = "BootstrapScalacompile",
+        mnemonic = "BootstrapScalacompile{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [g.classpaths.jar, tmp],
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
         tools = [ctx.executable._jar_creator],

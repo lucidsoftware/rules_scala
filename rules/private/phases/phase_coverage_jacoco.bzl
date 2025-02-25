@@ -6,6 +6,7 @@ load(
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
 )
 load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
@@ -45,7 +46,7 @@ def phase_coverage_jacoco(ctx, g):
             },
         ),
         inputs = [in_out_pair[0] for in_out_pair in in_out_pairs],
-        mnemonic = "JacocoInstrumenter",
+        mnemonic = "JacocoInstrumenter{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )

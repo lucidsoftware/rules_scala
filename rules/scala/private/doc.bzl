@@ -9,6 +9,7 @@ load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
     _separate_src_jars_srcs_and_other = "separate_src_jars_srcs_and_other",
 )
 
@@ -69,7 +70,7 @@ def scaladoc_implementation(ctx):
             src_jars + srcs + [toolchain.zinc_configuration.compiler_bridge],
             transitive = [classpath, compiler_classpath],
         ),
-        mnemonic = "ScalaDoc",
+        mnemonic = "ScalaDoc{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [html, tmp],
         toolchain = None,
     )

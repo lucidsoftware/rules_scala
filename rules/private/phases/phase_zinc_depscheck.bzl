@@ -7,6 +7,7 @@ load(
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
     _short_path = "short_path",
 )
 
@@ -55,7 +56,7 @@ def phase_zinc_depscheck(ctx, g):
                 },
             ),
             inputs = [g.compile.used],
-            mnemonic = "ScalaCheckDeps",
+            mnemonic = "ScalaCheckDeps{}".format(_sanitize_label_for_mnemonic(ctx.label)),
             outputs = [deps_check],
             toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
         )

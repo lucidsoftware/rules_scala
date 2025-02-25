@@ -8,7 +8,7 @@
 bazel shutdown
 # Using a worker here prevents a println this tests needs from making it
 # to the command line, so we use sandboxed instead.
-bazel build :inefficient-usage --strategy=ScalaCompile=sandboxed --nouse_action_cache |& \
+bazel build :inefficient-usage --spawn_strategy=sandboxed --nouse_action_cache |& \
   awk '
       BEGIN                           {z  = 2}
       /slightly inefficient/          {z -= 1}

@@ -3,6 +3,7 @@ load(
     "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
     _safe_name = "safe_name",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
 )
 
 scala_proto_library_private_attributes = {}
@@ -55,7 +56,7 @@ def scala_proto_library_implementation(ctx):
             },
         ),
         inputs = depset(direct = [], transitive = [transitive_sources]),
-        mnemonic = "ScalaProtoCompile",
+        mnemonic = "ScalaProtoCompile{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [gendir],
         progress_message = "Compiling %{label} protobuf into Scala source",
         toolchain = "@rules_scala_annex//rules/scala_proto:compiler_toolchain_type",
@@ -75,7 +76,7 @@ def scala_proto_library_implementation(ctx):
             "supports-path-mapping": "1",
         }),
         inputs = [gendir],
-        mnemonic = "SrcJar",
+        mnemonic = "SrcJar{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [srcjar],
         progress_message = "Bundling compiled Scala into srcjar for %{label}",
         toolchain = None,

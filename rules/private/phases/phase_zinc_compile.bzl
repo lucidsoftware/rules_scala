@@ -11,6 +11,7 @@ load(
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
 )
 
 #
@@ -111,7 +112,7 @@ def phase_zinc_compile(ctx, g):
             execution_requirements_tags,
         ),
         inputs = inputs,
-        mnemonic = "ScalaCompile",
+        mnemonic = "ScalaCompile{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = outputs,
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )

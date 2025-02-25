@@ -1,6 +1,7 @@
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
+    _sanitize_label_for_mnemonic = "sanitize_label_for_mnemonic",
     _short_path = "short_path",
 )
 
@@ -60,7 +61,7 @@ def build_format(ctx):
                     },
                 ),
                 inputs = [config, src],
-                mnemonic = "ScalaFmt",
+                mnemonic = "ScalaFmt{}".format(_sanitize_label_for_mnemonic(ctx.label)),
                 outputs = [file],
                 toolchain = None,
             )
@@ -85,7 +86,7 @@ def format_runner(ctx, manifest, files):
             "supports-path-mapping": "1",
         }),
         inputs = [ctx.file._runner, manifest] + files,
-        mnemonic = "CreateScalaFmtRunner",
+        mnemonic = "CreateScalaFmtRunner{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [ctx.outputs.scalafmt_runner],
         toolchain = None,
     )
@@ -104,7 +105,7 @@ def format_tester(ctx, manifest, files):
             "supports-path-mapping": "1",
         }),
         inputs = [ctx.file._testrunner, manifest] + files,
-        mnemonic = "CreateScalaFmtTester",
+        mnemonic = "CreateScalaFmtTester{}".format(_sanitize_label_for_mnemonic(ctx.label)),
         outputs = [ctx.outputs.scalafmt_testrunner],
         toolchain = None,
     )

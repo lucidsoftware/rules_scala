@@ -11,7 +11,7 @@ build --experimental_worker_cancellation
 build --experimental_worker_multiplex_sandboxing
 build --strategy=worker,sandboxed,local
 build --verbose_failures
-build --worker_max_instances=4
+build --worker_max_instances=1
 build --worker_sandboxing
 
 # Disable skymeld to fix files missing from the sandbox.

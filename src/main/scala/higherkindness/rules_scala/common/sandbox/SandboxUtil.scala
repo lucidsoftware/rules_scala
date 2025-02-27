@@ -5,7 +5,7 @@ import java.io.File
 import java.nio.file.Path
 import java.util.List as JList
 import scala.collection.mutable.Buffer
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object SandboxUtil {
 

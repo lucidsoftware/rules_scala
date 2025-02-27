@@ -12,13 +12,13 @@ trait ZincPersistence {
 }
 
 class FilePersistence(cacheDir: Path, analysisStorePath: Path, jar: Path) extends ZincPersistence {
-  private[this] val cacheAnalysisStorePath: Path = cacheDir.resolve("analysis_store.gz")
-  private[this] val cacheJar: Path = cacheDir.resolve("classes.jar")
+  private val cacheAnalysisStorePath: Path = cacheDir.resolve("analysis_store.gz")
+  private val cacheJar: Path = cacheDir.resolve("classes.jar")
 
   /**
    * Existence indicates that files are incomplete.
    */
-  private[this] val tmpMarker: Path = cacheDir.resolve(".tmp")
+  private val tmpMarker: Path = cacheDir.resolve(".tmp")
 
   def load(): Unit = {
     if (Files.exists(cacheDir) && Files.notExists(tmpMarker)) {

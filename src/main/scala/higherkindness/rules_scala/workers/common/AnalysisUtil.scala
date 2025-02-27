@@ -3,7 +3,7 @@ package workers.common
 
 import java.io.File
 import java.nio.file.{Path, Paths}
-import sbt.internal.inc.Analysis
+import sbt.internal.inc
 import sbt.internal.inc.consistent.ConsistentFileAnalysisStore
 import xsbti.compile.AnalysisStore
 import xsbti.compile.analysis.ReadWriteMappers
@@ -29,18 +29,18 @@ object AnalysisUtil {
       ConsistentFileAnalysisStore.text(
         analysisStoreFile,
         readWriteMappers,
-        sort = true,
+        reproducible = true,
       )
     } else {
       ConsistentFileAnalysisStore.binary(
         analysisStoreFile,
         readWriteMappers,
-        sort = true,
+        reproducible = true,
       )
     }
   }
 
-  def getAnalysis(analysisStore: AnalysisStore): Analysis = {
-    analysisStore.get().get().getAnalysis.asInstanceOf[Analysis]
+  def getAnalysis(analysisStore: AnalysisStore): inc.Analysis = {
+    analysisStore.get().get().getAnalysis.asInstanceOf[inc.Analysis]
   }
 }

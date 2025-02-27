@@ -13,14 +13,14 @@ import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 import java.util.Optional
 import sbt.internal.inc.binary.converters.{ProtobufReaders, ProtobufWriters}
 import sbt.internal.inc.Schema.Type.{Projection, Structure}
-import sbt.internal.inc.{APIs, Analysis, FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter, Relations, Schema, SourceInfos, Stamp => StampImpl, Stamper, Stamps}
-import sbt.internal.inc.Schema.{Access, AnalyzedClass, Annotation, AnnotationArgument, ClassDefinition, ClassDependencies, ClassLike, Companions, MethodParameter, NameHash, ParameterList, Path => SchemaPath, Qualifier, Type, TypeParameter, UsedName, UsedNames, Values}
+import sbt.internal.inc.{APIs, Analysis, FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter, Relations, Schema, SourceInfos, Stamp as StampImpl, Stamper, Stamps}
+import sbt.internal.inc.Schema.{Access, AnalyzedClass, Annotation, AnnotationArgument, ClassDefinition, ClassDependencies, ClassLike, Companions, MethodParameter, NameHash, ParameterList, Path as SchemaPath, Qualifier, Type, TypeParameter, UsedName, UsedNames, Values}
 import sbt.internal.shaded.com.google.protobuf.GeneratedMessageV3
 import sbt.io.IO
 import scala.collection.immutable.TreeMap
 import xsbti.compile.analysis.{GenericMapper, ReadMapper, ReadWriteMappers, Stamp, WriteMapper}
 import xsbti.compile.{AnalysisContents, AnalysisStore, MiniSetup}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import xsbti.VirtualFileRef
 import java.util.Objects
 
@@ -72,9 +72,9 @@ object AnnexMapper {
 }
 
 final class AnxWriteMapper(root: Path) extends WriteMapper {
-  private[this] val rootAbs = root.toAbsolutePath().normalize()
+  private val rootAbs = root.toAbsolutePath().normalize()
 
-  private[this] def mapFile(path: Path): Path = {
+  private def mapFile(path: Path): Path = {
     if (path.toAbsolutePath().normalize().startsWith(rootAbs)) {
       AnnexMapper.rootPlaceholder.resolve(rootAbs.relativize(path.toAbsolutePath().normalize()))
     } else {
@@ -82,7 +82,7 @@ final class AnxWriteMapper(root: Path) extends WriteMapper {
     }
   }
 
-  private[this] def mapFile(virtualFileRef: VirtualFileRef): Path = {
+  private def mapFile(virtualFileRef: VirtualFileRef): Path = {
     mapFile(PlainVirtualFileConverter.converter.toPath(virtualFileRef))
   }
 
@@ -111,13 +111,13 @@ final class AnxWriteMapper(root: Path) extends WriteMapper {
 }
 
 final class AnxReadMapper(root: Path, isIncremental: Boolean) extends ReadMapper {
-  private[this] val rootAbs = root.toAbsolutePath().normalize()
+  private val rootAbs = root.toAbsolutePath().normalize()
 
-  private[this] def mapFile(virtualFileRef: VirtualFileRef): Path = {
+  private def mapFile(virtualFileRef: VirtualFileRef): Path = {
     mapFile(PlainVirtualFileConverter.converter.toPath(virtualFileRef))
   }
 
-  private[this] def mapFile(path: Path): Path = {
+  private def mapFile(path: Path): Path = {
     if (path.startsWith(AnnexMapper.rootPlaceholder)) {
       rootAbs.resolve(AnnexMapper.rootPlaceholder.relativize(path))
     } else {

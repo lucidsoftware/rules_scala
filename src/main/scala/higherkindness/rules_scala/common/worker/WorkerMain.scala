@@ -12,11 +12,11 @@ import scala.util.{Failure, Success, Using}
 
 abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream = System.out) {
 
-  protected[this] def init(args: Option[Array[String]]): S
+  protected def init(args: Option[Array[String]]): S
 
-  protected[this] def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit
+  protected def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit
 
-  protected[this] var isWorker = false
+  protected var isWorker = false
 
   final def main(args: Array[String]): Unit = {
     args.toList match {

@@ -3,7 +3,7 @@ package workers.zinc.doc
 
 import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits._
+import common.args.implicits.*
 import common.interrupt.InterruptUtil
 import common.worker.WorkerMain
 import common.sandbox.SandboxUtil
@@ -17,12 +17,12 @@ import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.{PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import xsbti.Logger
 
 object DocRunner extends WorkerMain[Unit] {
 
-  private[this] class DocRequest private (
+  private class DocRequest private (
     val classpath: List[Path],
     val compilerBridge: Path,
     val compilerClasspath: List[Path],
@@ -34,7 +34,7 @@ object DocRunner extends WorkerMain[Unit] {
     val tmpDir: Path,
   )
 
-  private[this] object DocRequest {
+  private object DocRequest {
     def apply(workDir: Path, namespace: Namespace): DocRequest = {
       new DocRequest(
         classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
@@ -50,9 +50,9 @@ object DocRunner extends WorkerMain[Unit] {
     }
   }
 
-  private[this] val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
+  private val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("doc").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
     parser
       .addArgument("--classpath")

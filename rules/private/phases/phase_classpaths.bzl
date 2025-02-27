@@ -1,5 +1,8 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "@rules_scala_annex//rules:providers.bzl",
+    _ClasspathInfo = "ClasspathInfo",
     _ScalaInfo = "ScalaInfo",
 )
 load(
@@ -62,7 +65,7 @@ def phase_classpaths(ctx, g):
 
     jar = ctx.actions.declare_file("{}/classes.jar".format(ctx.label.name))
 
-    return struct(
+    return _ClasspathInfo(
         srcs = srcs,
         compile = compile_classpath,
         compiler = compiler_classpath,

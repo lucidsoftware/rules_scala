@@ -15,6 +15,7 @@ import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import protocbridge.{ProtocBridge, ProtocRunner}
 import scala.jdk.CollectionConverters._
+import scala.sys.process.*
 import scalapb.ScalaPbCodeGenerator
 
 object ScalaProtoWorker extends WorkerMain[Unit] {
@@ -22,6 +23,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
   private class ScalaProtoRequest private (
     val isGrpc: Boolean,
     val outputDir: Path,
+    val protoc: Path,
     val protoPaths: List[Path],
     val sources: List[Path],
   )
@@ -31,6 +33,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
       new ScalaProtoRequest(
         isGrpc = namespace.getBoolean("grpc"),
         outputDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_dir")),
+        protoc = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("protoc")),
         protoPaths = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("proto_paths")),
         sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
       )
@@ -49,6 +52,11 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
       .nargs("*")
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--protoc")
+      .help("The protoc binary to use")
+      .metavar("protoc")
+      .`type`(PathArgumentType.apply())
     parser
       .addArgument("--grpc")
       .action(Arguments.storeTrue)
@@ -81,7 +89,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
     class MyProtocRunner[ExitCode] extends ProtocRunner[Int] {
       def run(args: Seq[String], extraEnv: Seq[(String, String)]): Int = {
-        com.github.os72.protocjar.Protoc.runProtoc(args.toArray)
+        (workRequest.protoc.toString +: args).!
       }
     }
 

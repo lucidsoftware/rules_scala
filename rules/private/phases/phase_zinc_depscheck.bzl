@@ -2,6 +2,7 @@ load(
     "@rules_scala_annex//rules:providers.bzl",
     _DepsConfiguration = "DepsConfiguration",
     _LabeledJars = "LabeledJars",
+    _ZincCompilationInfo = "ZincCompilationInfo",
 )
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
@@ -19,7 +20,6 @@ load(
 def phase_zinc_depscheck(ctx, g):
     deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
-    worker_inputs, _ = ctx.resolve_tools(tools = [deps_configuration.worker])
     outputs = []
 
     for name in ("direct", "used"):
@@ -42,9 +42,7 @@ def phase_zinc_depscheck(ctx, g):
         deps_args.set_param_file_format("multiline")
         deps_args.use_param_file("@%s", use_always = True)
         ctx.actions.run(
-            mnemonic = "ScalaCheckDeps",
-            inputs = [g.compile.used] + worker_inputs.to_list(),
-            outputs = [deps_check],
+            arguments = [deps_args],
             executable = deps_configuration.worker.files_to_run,
             execution_requirements = _resolve_execution_reqs(
                 ctx,
@@ -56,7 +54,10 @@ def phase_zinc_depscheck(ctx, g):
                     "supports-path-mapping": "1",
                 },
             ),
-            arguments = [deps_args],
+            inputs = [g.compile.used],
+            mnemonic = "ScalaCheckDeps",
+            outputs = [deps_check],
+            toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
         )
 
         if getattr(deps_configuration, name) == "error":

@@ -1,8 +1,11 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
+    _ZincCompilationInfo = "ZincCompilationInfo",
     _ZincConfiguration = "ZincConfiguration",
+    _ZincDepInfo = "ZincDepInfo",
     _ZincInfo = "ZincInfo",
 )
 load(
@@ -64,9 +67,8 @@ def phase_zinc_compile(ctx, g):
 
     worker = toolchain.zinc_configuration.compile_worker
 
-    worker_inputs, _ = ctx.resolve_tools(tools = [worker])
     inputs = depset(
-        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + worker_inputs.to_list(),
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs,
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
@@ -102,15 +104,16 @@ def phase_zinc_compile(ctx, g):
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(
-        mnemonic = "ScalaCompile",
-        inputs = inputs,
-        outputs = outputs,
+        arguments = [args],
         executable = worker.files_to_run,
         execution_requirements = _resolve_execution_reqs(
             ctx,
             execution_requirements_tags,
         ),
-        arguments = [args],
+        inputs = inputs,
+        mnemonic = "ScalaCompile",
+        outputs = outputs,
+        toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )
 
     jars = []
@@ -122,7 +125,7 @@ def phase_zinc_compile(ctx, g):
         deps_files = depset([analysis_store], transitive = [zinc.deps_files for zinc in zincs]),
         label = ctx.label,
         deps = depset(
-            [struct(
+            [_ZincDepInfo(
                 analysis_store = analysis_store,
                 jars = tuple(jars),
                 label = ctx.label,
@@ -132,7 +135,7 @@ def phase_zinc_compile(ctx, g):
     )
 
     g.out.providers.append(zinc_info)
-    return struct(
+    return _ZincCompilationInfo(
         mains_file = mains_file,
         used = used,
         # todo: see about cleaning up & generalizing fields below

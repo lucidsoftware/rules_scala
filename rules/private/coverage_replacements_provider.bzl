@@ -1,4 +1,9 @@
 load("@bazel_skylib//lib:dicts.bzl", _dicts = "dicts")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
+load(
+    "@rules_scala_annex//rules:providers.bzl",
+    _CoverageReplacementsData = "CoverageReplacementsData",
+)
 
 #
 # Coverage Replacements are a mapping of normal compiled artifacts to
@@ -72,7 +77,7 @@ _aspect = aspect(
     implementation = _aspect_impl,
 )
 
-coverage_replacements_provider = struct(
+coverage_replacements_provider = _CoverageReplacementsData(
     aspect = _aspect,
     dependency_attributes = _dependency_attributes,
     combine = _combine,

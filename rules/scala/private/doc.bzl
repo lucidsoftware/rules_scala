@@ -1,3 +1,5 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
@@ -50,8 +52,6 @@ def scaladoc_implementation(ctx):
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
 
-    runner_inputs, _ = ctx.resolve_tools(tools = [ctx.attr._runner])
-
     ctx.actions.run(
         arguments = [args],
         executable = ctx.attr._runner.files_to_run,
@@ -71,6 +71,7 @@ def scaladoc_implementation(ctx):
         ),
         mnemonic = "ScalaDoc",
         outputs = [html, tmp],
+        toolchain = None,
     )
 
     return [

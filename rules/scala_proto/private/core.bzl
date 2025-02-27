@@ -1,3 +1,4 @@
+load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load(
     "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
@@ -18,8 +19,6 @@ def scala_proto_library_implementation(ctx):
 
     compiler = ctx.toolchains["@rules_scala_annex//rules/scala_proto:compiler_toolchain_type"]
 
-    compiler_inputs, _ = ctx.resolve_tools(tools = [compiler.compiler])
-
     srcjar = ctx.outputs.srcjar
 
     gendir_base_path = "tmp"
@@ -30,6 +29,7 @@ def scala_proto_library_implementation(ctx):
     args = ctx.actions.args()
     args.add_all("--output_dir", [gendir], expand_directories = False)
     args.add_all("--proto_paths", transitive_proto_path)
+    args.add("--protoc", compiler.protoc)
     if ctx.attr.grpc:
         args.add("--grpc")
     args.add_all("--", transitive_sources)
@@ -42,12 +42,8 @@ def scala_proto_library_implementation(ctx):
         supports_workers = "0"
 
     ctx.actions.run(
-        mnemonic = "ScalaProtoCompile",
-        inputs = depset(direct = [], transitive = [transitive_sources]),
-        outputs = [gendir],
+        arguments = [args],
         executable = compiler.compiler.files_to_run,
-        tools = compiler_inputs,
-        progress_message = "Compiling %{label} protobuf into Scala source",
         execution_requirements = _resolve_execution_reqs(
             ctx,
             {
@@ -58,7 +54,12 @@ def scala_proto_library_implementation(ctx):
                 "supports-path-mapping": supports_workers,
             },
         ),
-        arguments = [args],
+        inputs = depset(direct = [], transitive = [transitive_sources]),
+        mnemonic = "ScalaProtoCompile",
+        outputs = [gendir],
+        progress_message = "Compiling %{label} protobuf into Scala source",
+        toolchain = "@rules_scala_annex//rules/scala_proto:compiler_toolchain_type",
+        tools = [compiler.protoc],
     )
 
     shell_args = ctx.actions.args()
@@ -68,16 +69,17 @@ def scala_proto_library_implementation(ctx):
     shell_args.add(srcjar)
 
     ctx.actions.run_shell(
-        inputs = [gendir],
-        outputs = [srcjar],
         arguments = [shell_args],
         command = """$1 c $4 META-INF/= $(find -L $2 -type f | while read v; do echo ${v#"${2%$3}"}=$v; done)""",
-        progress_message = "Bundling compiled Scala into srcjar for %{label}",
-        tools = [ctx.executable._zipper],
         execution_requirements = _resolve_execution_reqs(ctx, {
             "supports-path-mapping": "1",
         }),
+        inputs = [gendir],
         mnemonic = "SrcJar",
+        outputs = [srcjar],
+        progress_message = "Bundling compiled Scala into srcjar for %{label}",
+        toolchain = None,
+        tools = [ctx.executable._zipper],
     )
 
     return [OutputGroupInfo(

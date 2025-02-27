@@ -1,3 +1,4 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
 load(
     "//rules/common:private/utils.bzl",
     _resolve_execution_reqs = "resolve_execution_reqs",
@@ -119,10 +120,6 @@ def phase_bootstrap_compile(ctx, g):
 
     ctx.actions.run_shell(
         arguments = [args],
-        inputs = inputs,
-        tools = [ctx.executable._jar_creator],
-        mnemonic = "BootstrapScalacompile",
-        outputs = [g.classpaths.jar, tmp],
         command = command,
         execution_requirements = _resolve_execution_reqs(
             ctx,
@@ -130,4 +127,9 @@ def phase_bootstrap_compile(ctx, g):
                 "supports-path-mapping": "1",
             },
         ),
+        inputs = inputs,
+        mnemonic = "BootstrapScalacompile",
+        outputs = [g.classpaths.jar, tmp],
+        toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
+        tools = [ctx.executable._jar_creator],
     )

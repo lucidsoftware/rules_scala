@@ -1,3 +1,5 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load("@rules_scala_annex//rules:providers.bzl", _IntellijInfo = "IntellijInfo")
 load(
@@ -66,14 +68,7 @@ def scala_import_implementation(ctx):
 
     intellij_info = create_intellij_info(ctx.label, ctx.attr.deps, java_info)
 
-    return struct(
-        # IntelliJ reads from java
-        java = intellij_info,
-        providers = [
-            intellij_info,
-            java_info,
-        ],
-    )
+    return [intellij_info, java_info]
 
 def create_intellij_info(label, deps, java_info):
     # note: tried using transitive_exports from a JavaInfo that was given non-empty exports, but it was always empty

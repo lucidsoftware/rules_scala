@@ -8,12 +8,11 @@ cd "$(dirname "$0")/.."
 echo "$(dirname "$0")/.."
 
 echo "generating dependencies for main workspace"
-bazel run @unpinned_annex//:pin
-bazel run @unpinned_annex_2_12//:pin
-bazel run @unpinned_annex_scalafmt//:pin
-bazel run @unpinned_annex_proto//:pin
+bazel run @annex//:pin
+bazel run @annex_scalafmt//:pin
+bazel run @annex_proto//:pin
 
 echo "generating dependencies for tests workspace"
 cd "tests"
-bazel run @unpinned_annex_test//:pin
-bazel run @unpinned_annex_test_2_12//:pin
+bazel run @annex_test//:pin
+bazel run @annex_test_2_12//:pin

@@ -2,7 +2,7 @@ package higherkindness.rules_scala
 package workers.zinc.repl
 
 import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits._
+import common.args.implicits.*
 import common.sandbox.SandboxUtil
 import workers.common.LogLevel
 import workers.common.AnnexLogger
@@ -15,16 +15,16 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import sbt.internal.inc.{PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import xsbti.Logger
 
 object ReplRunner {
 
-  private[this] class ReplArgs private (
+  private class ReplArgs private (
     val logLevel: LogLevel,
   )
 
-  private[this] object ReplArgs {
+  private object ReplArgs {
     def apply(namespace: Namespace): ReplArgs = {
       new ReplArgs(
         logLevel = LogLevel(namespace.getString("log_level")),
@@ -32,7 +32,7 @@ object ReplRunner {
     }
   }
 
-  private[this] val argParser = {
+  private val argParser = {
     val parser = ArgumentParsers.newFor("repl").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
     parser
       .addArgument("--log_level")
@@ -42,14 +42,14 @@ object ReplRunner {
     parser
   }
 
-  private[this] class ReplRequest private (
+  private class ReplRequest private (
     val classpath: List[Path],
     val compilerBridge: Path,
     val compilerClasspath: List[Path],
     val compilerOptions: List[String],
   )
 
-  private[this] object ReplRequest {
+  private object ReplRequest {
     def apply(runPath: Path, namespace: Namespace): ReplRequest = {
       new ReplRequest(
         classpath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("classpath")),
@@ -61,7 +61,7 @@ object ReplRunner {
     }
   }
 
-  private[this] val replArgParser = {
+  private val replArgParser = {
     val parser = ArgumentParsers.newFor("repl-args").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
     parser
       .addArgument("--classpath")

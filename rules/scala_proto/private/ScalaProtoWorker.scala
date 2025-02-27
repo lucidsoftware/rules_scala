@@ -2,7 +2,7 @@ package annex.scala.proto
 
 import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
-import higherkindness.rules_scala.common.args.implicits._
+import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
@@ -14,7 +14,7 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import protocbridge.{ProtocBridge, ProtocRunner}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.sys.process.*
 import scalapb.ScalaPbCodeGenerator
 

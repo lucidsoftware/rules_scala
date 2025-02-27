@@ -5,7 +5,7 @@ scala_binary(
     name = "compile",
     srcs = glob(["**/*.scala"]),
     main_class = "higherkindness.rules_scala.workers.zinc.compile.ZincRunner",
-    scala_toolchain_name = "annex_bootstrap_2_13",
+    scala_toolchain_name = "annex_bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/error",

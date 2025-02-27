@@ -3,7 +3,7 @@ package workers.deps
 
 import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits._
+import common.args.implicits.*
 import common.interrupt.InterruptUtil
 import common.worker.WorkerMain
 import common.sandbox.SandboxUtil
@@ -16,11 +16,11 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.Namespace
 import scala.collection.mutable.Buffer
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object DepsRunner extends WorkerMain[Unit] {
 
-  private[this] class DepsRunnerRequest private (
+  private class DepsRunnerRequest private (
     val checkDirect: Boolean,
     val checkUsed: Boolean,
     val directDepLabels: List[String],
@@ -32,7 +32,7 @@ object DepsRunner extends WorkerMain[Unit] {
     val successFile: Path,
   )
 
-  private[this] object DepsRunnerRequest {
+  private object DepsRunnerRequest {
     def apply(workDir: Path, namespace: Namespace): DepsRunnerRequest = {
       val groups = Option(namespace.getList[java.util.List[String]]("group"))
         .map(_.asScala)
@@ -60,12 +60,12 @@ object DepsRunner extends WorkerMain[Unit] {
     }
   }
 
-  private[this] class Group private (
+  private class Group private (
     val label: String,
     val jars: Set[String],
   )
 
-  private[this] object Group {
+  private object Group {
     def apply(workDir: Path, prependedLabel: String, jars: Seq[String]): Group = {
       new Group(
         prependedLabel.tail,
@@ -74,7 +74,7 @@ object DepsRunner extends WorkerMain[Unit] {
     }
   }
 
-  private[this] val argParser = {
+  private val argParser = {
     val parser = ArgumentParsers.newFor("deps").addHelp(true).fromFilePrefix("@").build
     parser.addArgument("--check_direct").`type`(Arguments.booleanType)
     parser.addArgument("--check_used").`type`(Arguments.booleanType)

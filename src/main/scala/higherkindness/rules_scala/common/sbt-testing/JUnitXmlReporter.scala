@@ -10,7 +10,7 @@ import scala.xml.{Elem, Utility, XML}
 class JUnitXmlReporter(tasksAndEvents: ListBuffer[(String, ListBuffer[Event])]) {
   private def escape(info: String): String = info match {
     case str: String => Utility.escape(str)
-    case _           => ""
+    case null        => ""
   }
 
   def result: Elem =

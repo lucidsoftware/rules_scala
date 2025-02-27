@@ -17,22 +17,22 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.Collections
-import java.util.{List => JList}
+import java.util.List as JList
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import net.sourceforge.argparse4j.impl.Arguments
 import org.jacoco.core.instr.Instrumenter
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
 object JacocoInstrumenter extends WorkerMain[Unit] {
 
-  private[this] class JacocoRequest private (
+  private class JacocoRequest private (
     val jars: List[(Path, Path)],
   )
 
-  private[this] object JacocoRequest {
+  private object JacocoRequest {
     def apply(workDir: Path, namespace: Namespace): JacocoRequest = {
       val pathPairs = namespace
         .getList[JList[String]]("jar")
@@ -55,7 +55,7 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
     }
   }
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("jacoco-instrumenter").addHelp(true).fromFilePrefix("@").build
     parser
       .addArgument("--jar")

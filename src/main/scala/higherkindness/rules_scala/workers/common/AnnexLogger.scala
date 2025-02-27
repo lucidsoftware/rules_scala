@@ -8,9 +8,9 @@ import java.util.function.Supplier
 
 final class AnnexLogger(level: LogLevel, workDir: Path, out: PrintStream) extends Logger {
 
-  private[this] val root = s"${workDir.toAbsolutePath().normalize()}/"
+  private val root = s"${workDir.toAbsolutePath().normalize()}/"
 
-  private[this] def format(value: String): String = value.replace(root, "")
+  private def format(value: String): String = value.replace(root, "")
 
   def debug(msg: Supplier[String]): Unit = level match {
     case LogLevel.Debug => out.println(format(msg.get))

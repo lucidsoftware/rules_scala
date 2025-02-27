@@ -47,7 +47,7 @@ scala_binary(
     name = "scalafmt",
     srcs = glob(["scalafmt/**/*.scala"]),
     main_class = "annex.scalafmt.ScalafmtRunner",
-    scala_toolchain_name = "annex_bootstrap_2_13",
+    scala_toolchain_name = "annex_bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",

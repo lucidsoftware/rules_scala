@@ -30,7 +30,7 @@ scala_3_version = "3.5.2"
 
 scalapb_version = "0.11.17"
 
-zinc_version = "1.10.4"
+zinc_version = "1.10.7"
 
 annex = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex.install(

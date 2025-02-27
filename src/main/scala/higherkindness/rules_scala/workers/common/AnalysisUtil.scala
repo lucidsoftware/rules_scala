@@ -29,13 +29,13 @@ object AnalysisUtil {
       ConsistentFileAnalysisStore.text(
         analysisStoreFile,
         readWriteMappers,
-        sort = true,
+        reproducible = true,
       )
     } else {
       ConsistentFileAnalysisStore.binary(
         analysisStoreFile,
         readWriteMappers,
-        sort = true,
+        reproducible = true,
       )
     }
   }

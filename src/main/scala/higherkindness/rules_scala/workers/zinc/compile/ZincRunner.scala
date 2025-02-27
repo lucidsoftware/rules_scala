@@ -76,16 +76,16 @@ object ZincRunnerWorkerConfig {
  */
 object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
-  private[this] val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
+  private val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
 
-  private[this] val compilerCache = CompilerCache.fresh
+  private val compilerCache = CompilerCache.fresh
 
   // prevents GC of the soft reference in classloaderCache
-  private[this] var lastCompiler: AnyRef = null
+  private var lastCompiler: AnyRef = null
 
-  private[this] def labelToPath(label: String) = Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
+  private def labelToPath(label: String) = Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
 
-  protected[this] def init(args: Option[Array[String]]): ZincRunnerWorkerConfig = {
+  protected def init(args: Option[Array[String]]): ZincRunnerWorkerConfig = {
     val parser = ArgumentParsers.newFor("zinc-worker").addHelp(true).build
     parser.addArgument("--persistence_dir", /* deprecated */ "--persistenceDir").metavar("path")
     parser.addArgument("--use_persistence").`type`(Arg.booleanType)
@@ -96,12 +96,12 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     ZincRunnerWorkerConfig(namespace)
   }
 
-  private[this] val parser = {
+  private val parser = {
     val parser = ArgumentParsers.newFor("zinc").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
     CommonArguments.add(parser)
   }
 
-  protected[this] def work(
+  protected def work(
     workerConfig: ZincRunnerWorkerConfig,
     args: Array[String],
     out: PrintStream,

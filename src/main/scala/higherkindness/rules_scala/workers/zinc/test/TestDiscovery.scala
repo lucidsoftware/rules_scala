@@ -11,7 +11,7 @@ import xsbt.api.Discovery
 import xsbti.api.{AnalyzedClass, ClassLike, Definition}
 
 class TestDiscovery(framework: Framework) {
-  private[this] val (annotatedPrints, subclassPrints) = {
+  private val (annotatedPrints, subclassPrints) = {
     val annotatedPrints = mutable.ArrayBuffer.empty[TestAnnotatedFingerprint]
     val subclassPrints = mutable.ArrayBuffer.empty[TestSubclassFingerprint]
     framework.fingerprints.foreach {
@@ -22,14 +22,14 @@ class TestDiscovery(framework: Framework) {
     (annotatedPrints.toSet, subclassPrints.toSet)
   }
 
-  private[this] def definitions(classes: Set[AnalyzedClass]) = {
+  private def definitions(classes: Set[AnalyzedClass]) = {
     classes.toSeq
       .flatMap(`class` => Seq(`class`.api.classApi, `class`.api.objectApi))
       .flatMap(api => Seq(api, api.structure.declared, api.structure.inherited))
       .collect { case cl: ClassLike if cl.topLevel => cl }
   }
 
-  private[this] def discover(definitions: Seq[Definition]) =
+  private def discover(definitions: Seq[Definition]) =
     Discovery(subclassPrints.map(_.superclassName), annotatedPrints.map(_.annotationName))(
       definitions,
     )

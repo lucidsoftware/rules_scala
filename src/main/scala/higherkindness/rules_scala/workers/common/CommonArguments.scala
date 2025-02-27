@@ -2,9 +2,9 @@ package higherkindness.rules_scala
 package workers.common
 
 import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits._
+import common.args.implicits.*
 import common.sandbox.SandboxUtil
-import net.sourceforge.argparse4j.impl.{Arguments => ArgumentsImpl}
+import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
 import net.sourceforge.argparse4j.inf.{Argument, ArgumentParser, ArgumentType, Namespace}
 import java.util.{Collections, List as JList}
 import scala.annotation.nowarn
@@ -71,14 +71,14 @@ object CommonArguments {
       val path = option.slice(i + 1, option.length)
 
       template.replace(
-        "${path}": @nowarn("cat=lint-missing-interpolator"),
+        "${path}",
         SandboxUtil.getSandboxPath(workDir, Paths.get(path)).toString,
       )
     }
 
     // Use an absolute path here for the work dir to avoid problems when the working directory is " "
     withPathReplaced
-      .replace("${workDir}": @nowarn("cat=lint-missing-interpolator"), workDir.toAbsolutePath().normalize().toString())
+      .replace("${workDir}", workDir.toAbsolutePath().normalize().toString())
   }
 
   /**

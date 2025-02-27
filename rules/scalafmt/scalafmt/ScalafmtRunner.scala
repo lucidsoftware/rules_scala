@@ -19,13 +19,13 @@ import scala.io.Codec
 
 object ScalafmtRunner extends WorkerMain[Unit] {
 
-  private[this] class ScalafmtRequest private (
+  private class ScalafmtRequest private (
     val configFile: Path,
     val inputFile: Path,
     val outputFile: Path,
   )
 
-  private[this] object ScalafmtRequest {
+  private object ScalafmtRequest {
     def apply(workDir: Path, namespace: Namespace): ScalafmtRequest = {
       new ScalafmtRequest(
         configFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("config")),
@@ -35,7 +35,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
     }
   }
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("scalafmt").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build
     parser.addArgument("--config").required(true).`type`(PathArgumentType.apply())
     parser.addArgument("input").`type`(PathArgumentType.apply())
@@ -43,9 +43,9 @@ object ScalafmtRunner extends WorkerMain[Unit] {
     parser
   }
 
-  protected[this] def init(args: Option[Array[String]]): Unit = {}
+  protected def init(args: Option[Array[String]]): Unit = {}
 
-  protected[this] def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
+  protected def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
     val workRequest = ScalafmtRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
     InterruptUtil.throwIfInterrupted()
 

@@ -3,7 +3,7 @@ package workers.zinc.test
 
 import common.args.ArgsUtil.PathArgumentType
 import common.classloaders.ClassLoaders
-import common.args.implicits._
+import common.args.implicits.*
 import common.sandbox.SandboxUtil
 import common.sbt_testing.AnnexTestingLogger
 import common.sbt_testing.TestDefinition
@@ -20,12 +20,12 @@ import java.util.regex.Pattern
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import net.sourceforge.argparse4j.impl.Arguments
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 
 object TestRunner {
-  private[this] sealed abstract class Isolation(val level: String)
-  private[this] object Isolation {
+  private sealed abstract class Isolation(val level: String)
+  private object Isolation {
     case object ClassLoader extends Isolation("classloader")
     case object None extends Isolation("none")
     case object Process extends Isolation("process")
@@ -38,7 +38,7 @@ object TestRunner {
     def apply(level: String): Isolation = values(level)
   }
 
-  private[this] class TestRunnerArgs private (
+  private class TestRunnerArgs private (
     val color: Boolean,
     val subprocessArgs: List[String],
     val verbosity: Verbosity,
@@ -46,7 +46,7 @@ object TestRunner {
     val testClassSelector: Option[String],
   )
 
-  private[this] object TestRunnerArgs {
+  private object TestRunnerArgs {
     def apply(namespace: Namespace): TestRunnerArgs = {
       new TestRunnerArgs(
         color = namespace.getBoolean("color"),
@@ -59,7 +59,7 @@ object TestRunner {
     }
   }
 
-  private[this] val argParser: ArgumentParser = {
+  private val argParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("test-runner").addHelp(true).fromFilePrefix("@").build()
     parser.description("Run tests")
     parser
@@ -86,7 +86,7 @@ object TestRunner {
     parser
   }
 
-  private[this] class TestRunnerRequest private (
+  private class TestRunnerRequest private (
     val analysisStore: Path,
     val subprocessExecutable: Option[Path],
     val isolation: Isolation,
@@ -95,7 +95,7 @@ object TestRunner {
     val testClasspath: List[Path],
   )
 
-  private[this] object TestRunnerRequest {
+  private object TestRunnerRequest {
     def apply(runPath: Path, namespace: Namespace): TestRunnerRequest = {
       new TestRunnerRequest(
         analysisStore = SandboxUtil.getSandboxPath(runPath, namespace.get[Path]("analysis_store")),
@@ -109,7 +109,7 @@ object TestRunner {
     }
   }
 
-  private[this] val testArgParser: ArgumentParser = {
+  private val testArgParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("test").addHelp(true).build()
     parser
       .addArgument("--analysis_store")

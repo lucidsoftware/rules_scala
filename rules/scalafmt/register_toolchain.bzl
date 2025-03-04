@@ -1,3 +1,5 @@
+load("//rules:register_toolchain.bzl", "scalafmt_toolchain_setting")
+
 _ScalafmtConfig = provider(
     fields = {
         "config": "The Scalafmt configuration file.",
@@ -40,7 +42,7 @@ def register_scalafmt_toolchain(name, config, visibility = ["//visibility:public
     native.config_setting(
         name = "{}-setting".format(name),
         flag_values = {
-            "//rules/scalafmt:scalafmt-toolchain": name,
+            scalafmt_toolchain_setting: name,
         },
     )
 
@@ -48,6 +50,6 @@ def register_scalafmt_toolchain(name, config, visibility = ["//visibility:public
         name = name,
         target_settings = [":{}-setting".format(name)],
         toolchain = ":{}-configuration".format(name),
-        toolchain_type = "//rules/scalafmt:toolchain_type",
+        toolchain_type = "@rules_scala_annex//rules/scalafmt:toolchain_type",
         visibility = visibility,
     )

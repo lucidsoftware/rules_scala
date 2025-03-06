@@ -99,6 +99,9 @@ def write_launcher(
         join_with = ctx.configuration.host_path_separator,
         format_joined = "\"%s\"",
         allow_closure = True,
+        # TODO: figure out why the runtime_classpath sometimes has duplicate jars in it
+        # related to the compiler classpath. Then fix that bug and remove this uniquify.
+        uniquify = True,
     )
 
     base_substitutions = {

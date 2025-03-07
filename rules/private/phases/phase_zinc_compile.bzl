@@ -8,10 +8,6 @@ load(
     _ZincDepInfo = "ZincDepInfo",
     _ZincInfo = "ZincInfo",
 )
-load(
-    "@rules_scala_annex//rules/common:private/utils.bzl",
-    _resolve_execution_reqs = "resolve_execution_reqs",
-)
 
 #
 # PHASE: compile
@@ -106,10 +102,7 @@ def phase_zinc_compile(ctx, g):
     ctx.actions.run(
         arguments = [args],
         executable = worker.files_to_run,
-        execution_requirements = _resolve_execution_reqs(
-            ctx,
-            execution_requirements_tags,
-        ),
+        execution_requirements = execution_requirements_tags,
         inputs = inputs,
         mnemonic = "ScalaCompile",
         outputs = outputs,

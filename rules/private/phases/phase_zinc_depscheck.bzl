@@ -6,7 +6,6 @@ load(
 )
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
-    _resolve_execution_reqs = "resolve_execution_reqs",
     _short_path = "short_path",
 )
 
@@ -44,16 +43,13 @@ def phase_zinc_depscheck(ctx, g):
         ctx.actions.run(
             arguments = [deps_args],
             executable = deps_configuration.worker.files_to_run,
-            execution_requirements = _resolve_execution_reqs(
-                ctx,
-                {
-                    "supports-multiplex-workers": "1",
-                    "supports-workers": "1",
-                    "supports-multiplex-sandboxing": "1",
-                    "supports-worker-cancellation": "1",
-                    "supports-path-mapping": "1",
-                },
-            ),
+            execution_requirements = {
+                "supports-multiplex-workers": "1",
+                "supports-workers": "1",
+                "supports-multiplex-sandboxing": "1",
+                "supports-worker-cancellation": "1",
+                "supports-path-mapping": "1",
+            },
             inputs = [g.compile.used],
             mnemonic = "ScalaCheckDeps",
             outputs = [deps_check],

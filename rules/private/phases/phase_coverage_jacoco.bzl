@@ -4,10 +4,6 @@ load(
     _JacocoInfo = "JacocoInfo",
 )
 load(
-    "@rules_scala_annex//rules/common:private/utils.bzl",
-    _resolve_execution_reqs = "resolve_execution_reqs",
-)
-load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
@@ -34,16 +30,13 @@ def phase_coverage_jacoco(ctx, g):
     ctx.actions.run(
         arguments = [args],
         executable = toolchain.code_coverage_configuration.instrumentation_worker.files_to_run,
-        execution_requirements = _resolve_execution_reqs(
-            ctx,
-            {
-                "supports-multiplex-workers": "1",
-                "supports-workers": "1",
-                "supports-multiplex-sandboxing": "1",
-                "supports-worker-cancellation": "1",
-                "supports-path-mapping": "1",
-            },
-        ),
+        execution_requirements = {
+            "supports-multiplex-workers": "1",
+            "supports-workers": "1",
+            "supports-multiplex-sandboxing": "1",
+            "supports-worker-cancellation": "1",
+            "supports-path-mapping": "1",
+        },
         inputs = [in_out_pair[0] for in_out_pair in in_out_pairs],
         mnemonic = "JacocoInstrumenter",
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],

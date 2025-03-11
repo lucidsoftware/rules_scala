@@ -173,18 +173,6 @@ def safe_name(value):
 def _short_path(file):
     return file.short_path
 
-# This propagates specific tags as execution requirements to be passed to an action
-# A fix to bazelbuild/bazel that will make this no longer necessary is underway; we can remove this once that's released and we've obtained it
-PROPAGATABLE_TAGS = ["no-remote", "no-cache", "no-sandbox", "no-remote-exec", "no-remote-cache"]
-
-def resolve_execution_reqs(ctx, base_exec_reqs):
-    exec_reqs = {}
-    for tag in ctx.attr.tags:
-        if tag in PROPAGATABLE_TAGS:
-            exec_reqs.update({tag: "1"})
-    exec_reqs.update(base_exec_reqs)
-    return exec_reqs
-
 def _format_resources_item(item):
     key, value = item
     return "{}:{}".format(value.path, key)
@@ -223,13 +211,10 @@ def action_singlejar(
     ctx.actions.run(
         arguments = [args],
         executable = ctx.executable._singlejar,
-        execution_requirements = resolve_execution_reqs(
-            ctx,
-            {
-                "supports-workers": "0",
-                "supports-path-mapping": "1",
-            },
-        ),
+        execution_requirements = {
+            "supports-workers": "0",
+            "supports-path-mapping": "1",
+        },
         inputs = all_inputs,
         mnemonic = _SINGLE_JAR_MNEMONIC,
         outputs = [output],

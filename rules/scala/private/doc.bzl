@@ -8,7 +8,6 @@ load(
 load(
     "//rules/common:private/utils.bzl",
     _collect = "collect",
-    _resolve_execution_reqs = "resolve_execution_reqs",
     _separate_src_jars_srcs_and_other = "separate_src_jars_srcs_and_other",
 )
 
@@ -55,16 +54,13 @@ def scaladoc_implementation(ctx):
     ctx.actions.run(
         arguments = [args],
         executable = ctx.attr._runner.files_to_run,
-        execution_requirements = _resolve_execution_reqs(
-            ctx,
-            {
-                "supports-multiplex-workers": "1",
-                "supports-workers": "1",
-                "supports-multiplex-sandboxing": "1",
-                "supports-worker-cancellation": "1",
-                "supports-path-mapping": "1",
-            },
-        ),
+        execution_requirements = {
+            "supports-multiplex-workers": "1",
+            "supports-workers": "1",
+            "supports-multiplex-sandboxing": "1",
+            "supports-worker-cancellation": "1",
+            "supports-path-mapping": "1",
+        },
         inputs = depset(
             src_jars + srcs + [toolchain.zinc_configuration.compiler_bridge],
             transitive = [classpath, compiler_classpath],

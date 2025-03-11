@@ -175,7 +175,7 @@ def _short_path(file):
 
 def _format_resources_item(item):
     key, value = item
-    return "{}:{}".format(value.path, key)
+    return "\"{}\":\"{}\"".format(value.path, key)
 
 def action_singlejar(
         ctx,

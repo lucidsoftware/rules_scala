@@ -215,8 +215,8 @@ def action_singlejar(
     args.add("--output", output)
     if main_class != None:
         args.add("--main_class", main_class)
-        args.set_param_file_format("multiline")
-        args.use_param_file("@%s", use_always = True)
+    args.set_param_file_format("multiline")
+    args.use_param_file("@%s", use_always = True)
 
     all_inputs = depset(resources.values(), transitive = [inputs])
 

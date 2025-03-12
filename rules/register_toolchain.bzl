@@ -215,16 +215,29 @@ register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
 def _scala_incoming_transition_impl(settings, attr):
     result = dict(settings)
 
-    if attr.scala_toolchain_name != "":
+    if attr.scala_toolchain_name != "" and attr.scala_toolchain_name != settings[scala_toolchain_setting]:
         # We set `original_scala_toolchain_setting` so we can reset the toolchain to its
         # original value in `scala_outgoing_transition`. That way, we can ensure every target is
         # built under a single toolchain, thus preventing duplicate builds.
+        #
+        # We do not do this work when the toolchain name is set, but is no different than what is
+        # already set. By having that check we avoid the failure mode where the original toolchain
+        # name gets set equal to the current toolchain name and destroys whatever the actual original
+        # toolchain name was. For example
+        #  State 1:              State 2:          State 3:
+        #    Setting: A      =>    Setting: B  =>    Setting: B  => Game over
+        #    Original: Unset       Original: A       Original: B
+        #
+        # Note that the check described above should ideally not be required due to outgoing
+        # transitions but it is, so something is going wrong. As a result, the check is probably
+        # temporary, but who knows.
         #
         # This is inspired by what the rules_go folks are doing.
         result[original_scala_toolchain_setting] = settings[scala_toolchain_setting]
         result[scala_toolchain_setting] = attr.scala_toolchain_name
 
-    if hasattr(attr, "scalafmt_toolchain_name") and attr.scalafmt_toolchain_name != "":
+    if (hasattr(attr, "scalafmt_toolchain_name") and attr.scalafmt_toolchain_name != "" and
+        attr.scalafmt_toolchain_name != settings[scalafmt_toolchain_setting]):
         result[original_scalafmt_toolchain_setting] = settings[scalafmt_toolchain_setting]
         result[scalafmt_toolchain_setting] = attr.scalafmt_toolchain_name
 

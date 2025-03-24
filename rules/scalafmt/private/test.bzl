@@ -1,6 +1,5 @@
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
-    _resolve_execution_reqs = "resolve_execution_reqs",
     _short_path = "short_path",
 )
 
@@ -49,16 +48,13 @@ def build_format(ctx):
             ctx.actions.run(
                 arguments = ["--jvm_flag=-Dfile.encoding=UTF-8", args],
                 executable = ctx.executable._fmt,
-                execution_requirements = _resolve_execution_reqs(
-                    ctx,
-                    {
-                        "supports-multiplex-workers": "1",
-                        "supports-workers": "1",
-                        "supports-multiplex-sandboxing": "1",
-                        "supports-worker-cancellation": "1",
-                        "supports-path-mapping": "1",
-                    },
-                ),
+                execution_requirements = {
+                    "supports-multiplex-workers": "1",
+                    "supports-workers": "1",
+                    "supports-multiplex-sandboxing": "1",
+                    "supports-worker-cancellation": "1",
+                    "supports-path-mapping": "1",
+                },
                 inputs = [config, src],
                 mnemonic = "ScalaFmt",
                 outputs = [file],
@@ -81,9 +77,9 @@ def format_runner(ctx, manifest, files):
     ctx.actions.run_shell(
         arguments = [args],
         command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
-        execution_requirements = _resolve_execution_reqs(ctx, {
+        execution_requirements = {
             "supports-path-mapping": "1",
-        }),
+        },
         inputs = [ctx.file._runner, manifest] + files,
         mnemonic = "CreateScalaFmtRunner",
         outputs = [ctx.outputs.scalafmt_runner],
@@ -100,9 +96,9 @@ def format_tester(ctx, manifest, files):
     ctx.actions.run_shell(
         arguments = [args],
         command = "cat $1 | sed -e s#%workspace%#$2# -e s#%manifest%#$3# > $4",
-        execution_requirements = _resolve_execution_reqs(ctx, {
+        execution_requirements = {
             "supports-path-mapping": "1",
-        }),
+        },
         inputs = [ctx.file._testrunner, manifest] + files,
         mnemonic = "CreateScalaFmtTester",
         outputs = [ctx.outputs.scalafmt_testrunner],

@@ -1,7 +1,6 @@
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load(
     "//rules/common:private/utils.bzl",
-    _resolve_execution_reqs = "resolve_execution_reqs",
     _safe_name = "safe_name",
 )
 
@@ -44,16 +43,13 @@ def scala_proto_library_implementation(ctx):
     ctx.actions.run(
         arguments = [args],
         executable = compiler.compiler.files_to_run,
-        execution_requirements = _resolve_execution_reqs(
-            ctx,
-            {
-                "supports-multiplex-workers": supports_workers,
-                "supports-workers": supports_workers,
-                "supports-multiplex-sandboxing": supports_workers,
-                "supports-worker-cancellation": supports_workers,
-                "supports-path-mapping": supports_workers,
-            },
-        ),
+        execution_requirements = {
+            "supports-multiplex-workers": supports_workers,
+            "supports-workers": supports_workers,
+            "supports-multiplex-sandboxing": supports_workers,
+            "supports-worker-cancellation": supports_workers,
+            "supports-path-mapping": supports_workers,
+        },
         inputs = depset(direct = [], transitive = [transitive_sources]),
         mnemonic = "ScalaProtoCompile",
         outputs = [gendir],
@@ -71,9 +67,9 @@ def scala_proto_library_implementation(ctx):
     ctx.actions.run_shell(
         arguments = [shell_args],
         command = """$1 c $4 META-INF/= $(find -L $2 -type f | while read v; do echo ${v#"${2%$3}"}=$v; done)""",
-        execution_requirements = _resolve_execution_reqs(ctx, {
+        execution_requirements = {
             "supports-path-mapping": "1",
-        }),
+        },
         inputs = [gendir],
         mnemonic = "SrcJar",
         outputs = [srcjar],

@@ -57,7 +57,7 @@ _compile_private_attributes = {
     ),
     "_singlejar": attr.label(
         cfg = "exec",
-        default = "@bazel_tools//tools/jdk:singlejar",
+        default = "@rules_java//toolchains:singlejar",
         executable = True,
     ),
 

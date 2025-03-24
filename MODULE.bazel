@@ -124,22 +124,3 @@ annex_proto.install(
     ],
 )
 use_repo(annex_proto, "annex_proto")
-
-java_launcher_version = "8.9.0"
-
-java_launcher_template_sha = "289d8c13a3e2680bfbe21a2c6a57cc428ecdc6a0f2c04bda4d4dc2da40311eaa"
-
-java_stub_template_url = (
-    "raw.githubusercontent.com/bazelbuild/rules_java/" +
-    java_launcher_version +
-    "/java/bazel/rules/" +
-    "java_stub_template.txt"
-)
-
-http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-
-http_file(
-    name = "anx_java_stub_template",
-    sha256 = java_launcher_template_sha,
-    urls = ["https://%s" % java_stub_template_url],
-)

@@ -181,7 +181,7 @@ _runtime_private_attributes = {
     ),
     "_java_stub_template": attr.label(
         cfg = _scala_outgoing_transition,
-        default = Label("@anx_java_stub_template//file"),
+        default = Label("//third_party/java_stub_template:java_stub_template.txt"),
         allow_single_file = True,
     ),
 }

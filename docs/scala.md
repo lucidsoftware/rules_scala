@@ -62,7 +62,7 @@ e.g. ScalaTest, specs2, ScalaCheck, utest.
     * example: `my.package.MyTest`
     * example: `my.package.MyTest#some test name here` (remember to escape the whitespace)
 
-* [java_stub_template](https://github.com/bazelbuild/bazel/blob/0.27.0/src/main/java/com/google/devtools/build/lib/bazel/rules/java/java_stub_template.txt) options.
+* [java_stub_template](https://github.com/bazelbuild/rules_java/blob/8.11.0/java/bazel/rules/java_stub_template.txt) options.
 
 * Additional options: ANSI color codes and verbosity
 

@@ -1,0 +1,5 @@
+# We use a custom java_stub_template in this ruleset because of this bazel
+# issue: https://github.com/bazelbuild/bazel/issues/19036
+# Once Bazel drops Java 8 support, this will be easier to resolve upstream.
+# If someone wants to fix it upstream before then, go nuts.
+exports_files(["java_stub_template.txt"])

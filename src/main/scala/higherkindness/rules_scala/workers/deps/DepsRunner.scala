@@ -4,9 +4,10 @@ package workers.deps
 import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
 import common.args.implicits.*
+import common.error.AnnexWorkerError
 import common.interrupt.InterruptUtil
-import common.worker.WorkerMain
 import common.sandbox.SandboxUtil
+import common.worker.WorkerMain
 import workers.common.AnnexMapper
 import workers.common.FileUtil
 import java.io.{File, PrintStream}
@@ -163,11 +164,6 @@ object DepsRunner extends WorkerMain[Unit] {
     } else {
       Nil
     }
-    labelsToRemove.foreach { depLabel =>
-      out.println(s"Target '$depLabel' not used, please remove it from the deps.")
-      out.println(s"You can use the following buildozer command:")
-      out.println(s"buildozer 'remove deps $depLabel' ${workRequest.label}")
-    }
 
     InterruptUtil.throwIfInterrupted()
     val labelsToAdd = if (workRequest.checkDirect) {
@@ -182,16 +178,26 @@ object DepsRunner extends WorkerMain[Unit] {
     } else {
       Nil
     }
-    labelsToAdd.foreach { depLabel =>
-      out.println(s"Target '$depLabel' is used but isn't explicitly declared, please add it to the deps.")
-      out.println(s"You can use the following buildozer command:")
-      out.println(s"buildozer 'add deps $depLabel' ${workRequest.label}")
-    }
 
     if (labelsToAdd.isEmpty && labelsToRemove.isEmpty) {
       try Files.createFile(workRequest.successFile)
       catch { case _: FileAlreadyExistsException => }
+    } else {
+      val errorMessage = new StringBuilder()
+      labelsToRemove.foreach { depLabel =>
+        errorMessage.append(s"Target '$depLabel' not used, please remove it from the deps.\n")
+        errorMessage.append("You can use the following buildozer command:\n")
+        errorMessage.append(s"buildozer 'remove deps $depLabel' ${workRequest.label}\n")
+      }
+
+      labelsToAdd.foreach { depLabel =>
+        errorMessage.append(s"Target '$depLabel' is used but isn't explicitly declared, please add it to the deps.\n")
+        errorMessage.append("You can use the following buildozer command:\n")
+        errorMessage.append(s"buildozer 'add deps $depLabel' ${workRequest.label}\n")
+      }
+      throw new AnnexWorkerError(1, errorMessage.result())
     }
+
     InterruptUtil.throwIfInterrupted()
   }
 }

@@ -4,15 +4,21 @@ package workers.common
 import xsbti.compile.ScalaInstance
 import java.io.File
 import java.net.URLClassLoader
-import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
+import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.immutable.TreeMap
+import scala.util.control.NonFatal
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
   private val instanceCache: ConcurrentHashMap[Set[Path], AnnexScalaInstance] =
     new ConcurrentHashMap[Set[Path], AnnexScalaInstance]()
+
+  // The worker will use this directory to store temp files in order to better perform
+  // atomic file copies.
+  private val tmpWorkerJarDir = Paths.get("annex-tmp-worker-jars")
+  Files.createDirectories(tmpWorkerJarDir)
 
   /**
    * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
@@ -106,18 +112,30 @@ object AnnexScalaInstance {
       // This should only happen once per compiler version, so it shouldn't happen often.
       workRequestJarToWorkerJar.foreach { case (workRequestJar, workerJar) =>
         this.synchronized {
-          // Check for existence of the file just in case another request is also writing these jars
-          // Copying a file is not atomic, so we don't want to end up in a funky state where two
-          // copies of the same file happen at the same time and cause something bad to happen.
-          if (!Files.exists(workerJar)) {
+          // Do a more atomic copy of a file by creating a temp file and then moving
+          // the temp file to the destination. We can do a move atomically, but cannot do
+          // a copy atomically. Copying risks the file existing at the destination in a
+          // partially completed state.
+          if (Files.notExists(workerJar)) {
+            var tmpWorkerJar: Option[Path] = None
             try {
+              tmpWorkerJar = Some(Files.createTempFile(tmpWorkerJarDir, workerJar.getFileName.toString, "tmp"))
+              Files.copy(workRequestJar, tmpWorkerJar.get, StandardCopyOption.REPLACE_EXISTING)
+
               Files.createDirectories(workerJar.getParent())
-              Files.copy(workRequestJar, workerJar)
+              Files.move(tmpWorkerJar.get, workerJar, StandardCopyOption.ATOMIC_MOVE)
             } catch {
-              // We do not care if the file already exists
-              case _: FileAlreadyExistsException => {}
-              case e: Throwable                  => throw new Exception("Error adding file to instance cache", e)
+              case NonFatal(e) =>
+                throw new Exception(s"Error copying worker jar: ${workerJar}", e)
+            } finally {
+              tmpWorkerJar.foreach { tmpWorkerJar =>
+                Files.deleteIfExists(tmpWorkerJar)
+              }
             }
+          } else if (!Files.exists(workerJar)) {
+            // Files.exists is not the complement of Files.notExists because both return false
+            // when the existence of the file cannot be determined.
+            throw new Exception(s"Cannot determine existence of worker jar: ${workerJar}")
           }
         }
       }

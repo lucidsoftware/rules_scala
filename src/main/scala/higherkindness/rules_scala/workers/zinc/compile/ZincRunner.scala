@@ -224,7 +224,15 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         .scalaCompiler(scalaInstance, workRequest.compilerBridge)
         .withClassLoaderCache(classloaderCache)
       lastCompiler = scalaCompiler
-      ZincUtil.compilers(scalaInstance, ClasspathOptionsUtil.boot, None, scalaCompiler)
+      ZincUtil.compilers(
+        scalaInstance,
+        // This doesn't use -bootclasspath for Scala 2.13 and 3.x. It does use it for older versions.
+        // The newer versions no longer need that option. See this commit for more info:
+        // https://github.com/sbt/zinc/commit/8e4186a55dbe63df57e72cc37a1e8e92aa3b4bcd
+        ClasspathOptionsUtil.noboot(scalaInstance.actualVersion),
+        None,
+        scalaCompiler,
+      )
     }
 
     val lookup = {

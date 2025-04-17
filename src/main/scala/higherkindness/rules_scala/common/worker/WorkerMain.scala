@@ -9,6 +9,7 @@ import java.util.concurrent.{Callable, CancellationException, ConcurrentHashMap,
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, ExecutionException, Future}
 import scala.util.{Failure, Success, Using}
+import java.time.{ZoneId, ZonedDateTime}
 
 abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream = System.out) {
 
@@ -92,14 +93,20 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           val verbosity = request.getVerbosity()
           def logVerbose(message: String) = {
             if (verbosity >= 10) {
-              System.err.println(message)
+              val now = ZonedDateTime.now(ZoneId.of("UTC"))
+              System.err.println(s"${now}: ${message}")
             }
           }
 
           // If this is a cancel request, we need to cancel a previously sent WorkRequest
           // Arguments and inputs fields on cancel requests "must be empty and should be ignored"
           if (request.getCancel()) {
-            logVerbose(s"Cancellation WorkRequest received for request id: $requestId")
+            // TODO: Cancellation requests when worker_verbose is set don't set verbosity = 10, so
+            // this is unlikely to ever log. See this issue for more info:
+            // https://github.com/bazelbuild/bazel/issues/25803
+            logVerbose(
+              s"Cancellation WorkRequest received for request id: $requestId",
+            )
 
             // From the Bazel doc: "The server may send cancel requests for requests that the worker
             // has already responded to, in which case the cancel request must be ignored."
@@ -111,7 +118,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           } else {
             val args = request.getArgumentsList.toArray(Array.empty[String])
             val sandboxDir = Path.of(request.getSandboxDir())
-            logVerbose(s"WorkRequest $requestId received with args: ${request.getArgumentsList}")
+            logVerbose(s"WorkRequest received with id: $requestId and args: ${request.getArgumentsList}")
 
             // We go through this hullabaloo with output streams being defined out here, so we can
             // close them after the async work in the Future is all done.
@@ -145,7 +152,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                 case Success(code) =>
                   flushOut()
                   writeResponse(requestId, maybeOutStream, Some(code))
-                  logVerbose(s"WorkResponse $requestId sent with code $code")
+                  logVerbose(s"WorkResponse for request id: $requestId sent with code $code")
 
                 case Failure(e: ExecutionException) =>
                   e.getCause() match {
@@ -164,7 +171,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                       writeResponse(requestId, maybeOutStream, Some(-1))
                       logVerbose(
                         "Encountered an uncaught exception that was wrapped in an ExecutionException while" +
-                          s" proccessing the Future for WorkRequest $requestId. This usually means a non-fatal" +
+                          s" proccessing the Future for WorkRequest id: $requestId. This usually means a non-fatal" +
                           " error was thrown in the Future.",
                       )
                       e.printStackTrace(System.err)
@@ -175,8 +182,8 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   flushOut()
                   writeResponse(requestId, None, None, wasCancelled = true)
                   logVerbose(
-                    s"Cancellation WorkResponse sent for request id: $requestId in response to a" +
-                      " CancellationException",
+                    s"Cancellation WorkResponse sent for request id: $requestId in response to a " +
+                      e.getClass.getCanonicalName,
                   )
 
                 // Work task threw an uncaught exception
@@ -184,7 +191,9 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   maybeOut.map(e.printStackTrace(_))
                   flushOut()
                   writeResponse(requestId, maybeOutStream, Some(-1))
-                  logVerbose(s"Uncaught exception in Future while proccessing WorkRequest $requestId:")
+                  logVerbose(
+                    s"Uncaught exception in Future while proccessing WorkRequest id: $requestId\nType: ${e.getClass.getCanonicalName}",
+                  )
                   e.printStackTrace(System.err)
               }(scala.concurrent.ExecutionContext.global)
               .andThen { case _ =>
@@ -197,7 +206,9 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
             // two active requests with the same ID. Either of which is not good and something we
             // should just crash on.
             if (activeRequests.putIfAbsent(requestId, workTask) != null) {
-              throw new AnnexDuplicateActiveRequestException("Received a WorkRequest with an already active requestId.")
+              throw new AnnexDuplicateActiveRequestException(
+                s"Received a WorkRequest with an already active request id: ${requestId}",
+              )
             } else {
               workTask.execute(ec)
             }

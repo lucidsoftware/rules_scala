@@ -365,8 +365,11 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         .sorted
 
     val pw = new PrintWriter(workRequest.mainManifest.toFile)
-    try mains.foreach(pw.println)
-    finally pw.close()
+    try {
+      mains.foreach(pw.println)
+    } finally {
+      pw.close()
+    }
 
     val jarCreator = new JarCreator(outputJar)
     jarCreator.addDirectory(classesOutputDir)
@@ -384,8 +387,9 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     // save persisted files
     if (workerConfig.usePersistence) {
-      try persistence.save()
-      catch {
+      try {
+        persistence.save()
+      } catch {
         case NonFatal(e) => logger.warn(() => s"Failed to save cached analysis: $e")
       }
     }

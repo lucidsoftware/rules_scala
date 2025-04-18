@@ -173,8 +173,10 @@ object DepsRunner extends WorkerMain[Unit] {
       (usedPaths -- (workRequest.directDepLabels :++ workRequest.unusedDepWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
           groupLabelToJarPaths.collectFirst { case (myLabel, paths) if paths(path) => myLabel }.orElse {
-            System.err
-              .println(s"Warning: There is a reference to $path, but no dependency of ${workRequest.label} provides it")
+            task.output
+              .println(
+                s"Warning: There is a reference to $path, but no dependency of ${workRequest.label} provides it",
+              )
             None
           }
         }

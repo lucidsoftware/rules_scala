@@ -68,11 +68,11 @@ object ScalafmtRunner extends WorkerMain[Unit] {
       } catch {
         case e @ (_: org.scalafmt.Error | _: scala.meta.parsers.ParseException) => {
           if (config.runner.fatalWarnings) {
-            System.err.println(Color.Error("Exception thrown by Scalafmt and fatalWarnings is enabled"))
+            task.output.println(Color.Error("Exception thrown by Scalafmt and fatalWarnings is enabled"))
             throw e
           } else {
-            System.err.println(Color.Warning("Unable to format file due to bug in scalafmt"))
-            System.err.println(Color.Warning(e.toString))
+            task.output.println(Color.Warning("Unable to format file due to bug in scalafmt"))
+            task.output.println(Color.Warning(e.toString))
             source
           }
         }

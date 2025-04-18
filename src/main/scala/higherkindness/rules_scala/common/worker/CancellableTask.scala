@@ -16,12 +16,12 @@ import scala.util.Try
  * Heavily inspired by the following: https://github.com/NthPortal/cancellable-task/tree/master
  * https://stackoverflow.com/a/39986418/6442597
  */
-class CancellableTask[S] private (fn: => S) {
+class CancellableTask[S] private (fn: Function1[Function0[Boolean], S]) {
   private val promise = Promise[S]()
   val future: Future[S] = promise.future
 
   private val fnCallable = new Callable[S]() {
-    def call(): S = fn
+    def call(): S = fn(isCancelled)
   }
 
   private val task = new FutureTaskWaitOnCancel[S](fnCallable) {
@@ -39,10 +39,16 @@ class CancellableTask[S] private (fn: => S) {
   def cancel(mayInterruptIfRunning: Boolean): Boolean = task.cancel(mayInterruptIfRunning)
 
   def execute(executionContext: ExecutionContext): Unit = executionContext.execute(task)
+
+  def isCancelled(): Boolean = task.isCancelled()
 }
 
 object CancellableTask {
   def apply[S](fn: => S): CancellableTask[S] = {
+    new CancellableTask((_: Function0[Boolean]) => fn)
+  }
+
+  def apply[S](fn: Function1[Function0[Boolean], S]): CancellableTask[S] = {
     new CancellableTask(fn)
   }
 }

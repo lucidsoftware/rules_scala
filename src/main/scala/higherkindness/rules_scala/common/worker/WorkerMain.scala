@@ -4,6 +4,7 @@ package common.worker
 import common.error.{AnnexDuplicateActiveRequestException, AnnexWorkerError}
 import com.google.devtools.build.lib.worker.WorkerProtocol
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream, PrintStream}
+import java.nio.channels.ClosedByInterruptException
 import java.nio.file.{Path, Paths}
 import java.util.concurrent.{Callable, CancellationException, ConcurrentHashMap, ForkJoinPool, FutureTask}
 import scala.annotation.tailrec
@@ -15,9 +16,26 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
 
   protected def init(args: Option[Array[String]]): S
 
-  protected def work(ctx: S, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit
+  /**
+   * isCancelled is used to determine whether the FutureTask that is executing this work request has been cancelled. If
+   * it is safe to Thread.interrupt a process, then that is done and can be checked. Not all workers can be
+   * Thread.interrupted safely.
+   *
+   * TODO(James): document the rest of this function
+   */
+  protected def work(workRequest: WorkTask[S]): Unit
 
+  /**
+   * Indicates whether this program is being executed as a worker or as a regular process. It is a var because we won't
+   * know until runtime which one it is.
+   */
   protected var isWorker = false
+
+  /**
+   * Used to determine whether to interrupt the FutureTasks being executed by this worker using Thread.interrupt or not.
+   * It's safe to interrupt many things with Thread.interrupt, but not all things.
+   */
+  protected val mayInterruptWorkerTasks = true
 
   final def main(args: Array[String]): Unit = {
     args.toList match {
@@ -113,7 +131,9 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
             Option(activeRequests.get(requestId)).foreach { activeRequest =>
               // Cancel will wait for the thread to complete or be interrupted, so we do it in a future
               // to prevent blocking the worker from processing more requests
-              Future(activeRequest.cancel(mayInterruptIfRunning = true))(scala.concurrent.ExecutionContext.global)
+              Future(activeRequest.cancel(mayInterruptIfRunning = mayInterruptWorkerTasks))(
+                scala.concurrent.ExecutionContext.global,
+              )
             }
           } else {
             val args = request.getArgumentsList.toArray(Array.empty[String])
@@ -131,13 +151,13 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
               maybeOut.map(_.flush())
             }
 
-            val workTask = CancellableTask {
+            def doWork(isCancelled: Function0[Boolean]) = {
               val outStream = new ByteArrayOutputStream()
               val out = new PrintStream(outStream)
               maybeOutStream = Some(outStream)
               maybeOut = Some(out)
               try {
-                work(ctx, args, out, sandboxDir, verbosity)
+                work(WorkTask(ctx, args, out, sandboxDir, verbosity, isCancelled))
                 0
               } catch {
                 case e @ AnnexWorkerError(code, _, _) =>
@@ -145,6 +165,8 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   code
               }
             }
+
+            val workTask = CancellableTask(doWork)
 
             workTask.future
               .andThen {
@@ -178,7 +200,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   }
 
                 // Task successfully cancelled
-                case Failure(e: CancellationException) =>
+                case Failure(e @ (_: CancellationException | _: ClosedByInterruptException)) =>
                   flushOut()
                   writeResponse(requestId, None, None, wasCancelled = true)
                   logVerbose(
@@ -235,11 +257,14 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           val returnCode =
             try {
               work(
-                init(args = None),
-                args.toArray,
-                out,
-                workDir = Path.of(""),
-                verbosity = 0,
+                WorkTask(
+                  init(args = None),
+                  args.toArray,
+                  out,
+                  workDir = Path.of(""),
+                  verbosity = 0,
+                  isCancelled = () => false,
+                ),
               )
 
               0

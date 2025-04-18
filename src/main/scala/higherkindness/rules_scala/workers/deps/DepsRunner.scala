@@ -7,7 +7,7 @@ import common.args.implicits.*
 import common.error.AnnexWorkerError
 import common.interrupt.InterruptUtil
 import common.sandbox.SandboxUtil
-import common.worker.WorkerMain
+import common.worker.{WorkTask, WorkerMain}
 import workers.common.AnnexMapper
 import workers.common.FileUtil
 import java.io.{File, PrintStream}
@@ -111,9 +111,12 @@ object DepsRunner extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
-    val workRequest = DepsRunnerRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
-    InterruptUtil.throwIfInterrupted()
+  override def work(task: WorkTask[Unit]): Unit = {
+    val workRequest = DepsRunnerRequest(
+      task.workDir,
+      ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
+    )
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     val groupLabelToJarPaths = workRequest.groups.map { group =>
       group.label -> group.jars
@@ -133,10 +136,10 @@ object DepsRunner extends WorkerMain[Unit] {
 
       potentialLabels.collect(groupLabelToJarPaths).flatten
     }
-    val readWriteMappers = AnnexMapper.mappers(workDir, isIncremental = false)
+    val readWriteMappers = AnnexMapper.mappers(task.workDir, isIncremental = false)
     val readMapper = readWriteMappers.getReadMapper()
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
     val usedPaths = Files
       .readAllLines(workRequest.usedDepsFile)
       .asScala
@@ -165,7 +168,7 @@ object DepsRunner extends WorkerMain[Unit] {
       Nil
     }
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
     val labelsToAdd = if (workRequest.checkDirect) {
       (usedPaths -- (workRequest.directDepLabels :++ workRequest.unusedDepWhitelist).flatMap(pathsForLabel))
         .flatMap { path =>
@@ -198,6 +201,6 @@ object DepsRunner extends WorkerMain[Unit] {
       throw new AnnexWorkerError(1, errorMessage.result())
     }
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 }

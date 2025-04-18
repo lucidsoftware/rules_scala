@@ -1,6 +1,6 @@
 package anx.cancellation
 
-import higherkindness.rules_scala.common.worker.WorkerMain
+import higherkindness.rules_scala.common.worker.{WorkerMain, WorkTask}
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
 
 import java.io.{InputStream, PrintStream}
@@ -11,7 +11,7 @@ class RunnerThatThrowsException(stdin: InputStream, stdout: PrintStream)
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
-      throw new Exception()
+  override def work(task: WorkTask[Unit]): Unit = {
+    throw new Exception()
   }
 }

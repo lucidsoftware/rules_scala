@@ -2,12 +2,13 @@ package higherkindness.rules_scala
 package workers.common
 
 import xsbti.compile.ScalaInstance
-import java.io.File
+import java.io.{File, IOException}
 import java.net.URLClassLoader
-import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
+import java.nio.file.{AtomicMoveNotSupportedException, FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.immutable.TreeMap
+import scala.util.control.NonFatal
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
@@ -15,10 +16,27 @@ object AnnexScalaInstance {
     new ConcurrentHashMap[Set[Path], AnnexScalaInstance]()
 
   /**
+   * The worker will use this directory to store temp files in order to better perform atomic file copies.
+   */
+  private val tmpWorkerJarDir = Paths.get("annex-tmp-worker-jars")
+  Files.createDirectories(tmpWorkerJarDir)
+
+  /**
+   * The worker will store compiler classpath jars in this directory to enable sharing of classloaders used by the Scala
+   * compiler across compilation requests.
+   */
+  private val workerJarDir = Paths.get("work-request-jars")
+  Files.createDirectories(workerJarDir)
+
+  /**
    * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
    * worker. Otherwise just create the AnnexScalaInstance and be done with it because the process won't be long lived.
    */
-  def getAnnexScalaInstance(allJars: Array[File], workDir: Path, isWorker: Boolean): AnnexScalaInstance = {
+  def getAnnexScalaInstance(
+    allJars: Array[File],
+    workDir: Path,
+    isWorker: Boolean,
+  ): AnnexScalaInstance = {
     if (isWorker) {
       getAnnexScalaInstance(allJars, workDir)
     } else {
@@ -81,7 +99,7 @@ object AnnexScalaInstance {
         absoluteWorkDir.relativize(absoluteJarPath),
         replaceExternal = false,
       )
-      mapBuilder.addOne(jar.toPath -> comparablePath)
+      mapBuilder.addOne(jar.toPath -> workerJarDir.resolve(comparablePath))
       keyBuilder.addOne(comparablePath)
     }
     val workRequestJarToWorkerJar = mapBuilder.result()
@@ -101,40 +119,80 @@ object AnnexScalaInstance {
     val key = keyBuilder.result()
 
     Option(instanceCache.get(key)).getOrElse {
-      // Copy all the jars to the worker's directory because in a sandboxed world the
-      // jars can go away after the work request, so we can't rely on them sticking around.
-      // This should only happen once per compiler version, so it shouldn't happen often.
-      workRequestJarToWorkerJar.foreach { case (workRequestJar, workerJar) =>
-        this.synchronized {
-          // Check for existence of the file just in case another request is also writing these jars
-          // Copying a file is not atomic, so we don't want to end up in a funky state where two
-          // copies of the same file happen at the same time and cause something bad to happen.
-          if (!Files.exists(workerJar)) {
-            try {
-              Files.createDirectories(workerJar.getParent())
-              Files.copy(workRequestJar, workerJar)
-            } catch {
-              // We do not care if the file already exists
-              case _: FileAlreadyExistsException => {}
-              case e: Throwable                  => throw new Exception("Error adding file to instance cache", e)
+      this.synchronized {
+        // Requests that need the same Scala instance will likely race to this point to create
+        // the same Scala instance. This is especially true as the worker is first starting up.
+        // Considering that, we first check if the desired instance now exists to avoid duplicate work.
+        Option(instanceCache.get(key)).getOrElse {
+          // Copy all the jars to the worker's directory because in a sandboxed world the
+          // jars can go away after the work request, so we can't rely on them sticking around.
+          // This should only happen once per compiler version, so it shouldn't happen often.
+          workRequestJarToWorkerJar.foreach { case (workRequestJar, workerJar) =>
+            // Do a more atomic copy of a file by creating a temp file and then moving
+            // the temp file to the destination. We can do a move atomically, but cannot do
+            // a copy atomically. Copying directly to the destination file risks the file existing
+            // at the destination in a partially completed state.
+            if (Files.notExists(workerJar)) {
+              var tmpWorkerJar: Option[Path] = None
+
+              try {
+                tmpWorkerJar = Some(Files.createTempFile(tmpWorkerJarDir, workerJar.getFileName.toString, "tmp"))
+
+                Files.copy(
+                  workRequestJar,
+                  tmpWorkerJar.get,
+                  StandardCopyOption.REPLACE_EXISTING,
+                  StandardCopyOption.COPY_ATTRIBUTES,
+                )
+                Files.createDirectories(workerJar.getParent())
+
+                try {
+                  Files.move(tmpWorkerJar.get, workerJar, StandardCopyOption.ATOMIC_MOVE)
+                } catch {
+                  case e: AtomicMoveNotSupportedException =>
+                    // Fall back to regular move when ATOMIC_MOVE isn't supported.
+                    // Because it's not atomic, there's a risk the file may already exist.
+                    try {
+                      Files.move(tmpWorkerJar.get, workerJar)
+                    } catch {
+                      case e: FileAlreadyExistsException => {}
+                    }
+                }
+              } catch {
+                case e @ (_: IOException | _: InterruptedException) =>
+                  // An error occurred which may have left a partially written file, so we delete the
+                  // file to be safe.
+                  // Note that this could be a ClosedByInterruptException, which is a subtype of
+                  // IOException and indicates the operation was interrupted (very likely because
+                  // the Bazel request was cancelled).
+                  Files.deleteIfExists(workerJar)
+                  throw e
+                case NonFatal(e) =>
+                  throw new Exception(s"Error copying worker jar: ${workerJar}", e)
+              } finally {
+                tmpWorkerJar.foreach { tmpWorkerJar =>
+                  Files.deleteIfExists(tmpWorkerJar)
+                }
+              }
+            } else if (!Files.exists(workerJar)) {
+              // Files.exists is not the complement of Files.notExists because both return false
+              // when the existence of the file cannot be determined.
+              throw new Exception(s"Cannot determine existence of worker jar: ${workerJar}")
             }
           }
+
+          val instance = new AnnexScalaInstance(Array.from(workRequestJarToWorkerJar.values.map(_.toFile())))
+          val instanceInsertedByOtherThreadOrNull = instanceCache.putIfAbsent(key, instance)
+
+          // putIfAbsent is atomic, but there could exist a time between the get and the putIfAbsent
+          // in which the AnnexScalaInstance is created and inserted by another thread. Depends on
+          // how things are synchronized.
+          if (instanceInsertedByOtherThreadOrNull == null) {
+            instance
+          } else {
+            instanceInsertedByOtherThreadOrNull
+          }
         }
-      }
-
-      val instance = new AnnexScalaInstance(Array.from(workRequestJarToWorkerJar.values.map(_.toFile())))
-      val instanceInsertedByOtherThreadOrNull = instanceCache.putIfAbsent(key, instance)
-
-      // putIfAbsent is atomic, but there exists time between the get and the putIfAbsent.
-      // This handles the scenario in which the AnnexScalaInstance is created and inserted
-      // by another thread after we ran our .get.
-      // We could also handle this by generating the AnnexScalaInstance every time and only
-      // using a putIfAbsent, but that's likely more expensive because of all the classloaders
-      // that get constructed when creating an AnnexScalaInstance.
-      if (instanceInsertedByOtherThreadOrNull == null) {
-        instance
-      } else {
-        instanceInsertedByOtherThreadOrNull
       }
     }
   }

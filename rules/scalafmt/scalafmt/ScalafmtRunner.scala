@@ -4,7 +4,7 @@ import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
-import higherkindness.rules_scala.common.worker.WorkerMain
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.Color
 import java.io.{File, PrintStream}
 import java.nio.file.{Files, Path}
@@ -45,16 +45,19 @@ object ScalafmtRunner extends WorkerMain[Unit] {
 
   protected def init(args: Option[Array[String]]): Unit = {}
 
-  protected def work(worker: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
-    val workRequest = ScalafmtRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
-    InterruptUtil.throwIfInterrupted()
+  protected def work(task: WorkTask[Unit]): Unit = {
+    val workRequest = ScalafmtRequest(
+      task.workDir,
+      ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
+    )
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     val source = FileOps.readFile(workRequest.inputFile)(Codec.UTF8)
 
     val config = ScalafmtConfig.fromHoconFile(workRequest.configFile).get
     @tailrec
     def format(code: String): String = {
-      InterruptUtil.throwIfInterrupted()
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
       val formatted = Scalafmt.format(code, config).get
       if (code == formatted) code else format(formatted)
     }
@@ -65,18 +68,18 @@ object ScalafmtRunner extends WorkerMain[Unit] {
       } catch {
         case e @ (_: org.scalafmt.Error | _: scala.meta.parsers.ParseException) => {
           if (config.runner.fatalWarnings) {
-            System.err.println(Color.Error("Exception thrown by Scalafmt and fatalWarnings is enabled"))
+            task.output.println(Color.Error("Exception thrown by Scalafmt and fatalWarnings is enabled"))
             throw e
           } else {
-            System.err.println(Color.Warning("Unable to format file due to bug in scalafmt"))
-            System.err.println(Color.Warning(e.toString))
+            task.output.println(Color.Warning("Unable to format file due to bug in scalafmt"))
+            task.output.println(Color.Warning(e.toString))
             source
           }
         }
       }
 
     Files.write(workRequest.outputFile, output.getBytes)
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 
 }

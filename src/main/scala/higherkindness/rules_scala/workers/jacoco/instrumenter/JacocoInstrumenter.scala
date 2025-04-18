@@ -5,7 +5,7 @@ import common.args.ArgsUtil
 import common.error.AnnexWorkerError
 import common.interrupt.InterruptUtil
 import common.sandbox.SandboxUtil
-import common.worker.WorkerMain
+import common.worker.{WorkTask, WorkerMain}
 import java.io.{BufferedInputStream, BufferedOutputStream, PrintStream}
 import java.net.URI
 import java.nio.file.Files
@@ -68,14 +68,17 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
-    val workRequest = JacocoRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
+  override def work(task: WorkTask[Unit]): Unit = {
+    val workRequest = JacocoRequest(
+      task.workDir,
+      ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
+    )
 
     val jacoco = new Instrumenter(new OfflineInstrumentationAccessGenerator)
 
     workRequest.jars.foreach { case (inPath, outPath) =>
       Using.Manager { use =>
-        InterruptUtil.throwIfInterrupted()
+        InterruptUtil.throwIfInterrupted(task.isCancelled)
 
         val inFS = use(FileSystems.newFileSystem(inPath, null: ClassLoader))
         val outFS =
@@ -107,6 +110,6 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
       }.get
     }
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 }

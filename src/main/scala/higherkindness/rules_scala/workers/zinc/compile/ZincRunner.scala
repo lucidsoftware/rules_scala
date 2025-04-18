@@ -4,7 +4,7 @@ package workers.zinc.compile
 import common.args.ArgsUtil
 import common.interrupt.InterruptUtil
 import common.error.AnnexWorkerError
-import common.worker.WorkerMain
+import common.worker.{WorkTask, WorkerMain}
 import workers.common.{AnalysisUtil, AnnexLogger, AnnexMapper, AnnexScalaInstance, CommonArguments, FileUtil, LoggedReporter}
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
 import java.io.{File, PrintStream, PrintWriter}
@@ -76,6 +76,14 @@ object ZincRunnerWorkerConfig {
  */
 object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
+  // Using Thread.interrupt to interrupt concurrent Zinc/Scala compilations that use a shared ScalaInstance (and thus
+  // shared classloaders) can cause strange concurrency errors. To avoid those strange concurrency errors we only
+  // cancel the FutureTask for the work task instead of cancel + Thread.interrupt. This makes cancellation more
+  // cooperative. The work task can still check its cancellation status using isCancelled.
+  // If you want to start using Thread.interrupt again, please make sure to test it very, very thoroughly using
+  // dynamic execution. The concurrency error happens very rarely, so it's hard to reproduce.
+  override protected val mayInterruptWorkerTasks = false
+
   private val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
 
   private val compilerCache = CompilerCache.fresh
@@ -101,25 +109,22 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     CommonArguments.add(parser)
   }
 
-  protected def work(
-    workerConfig: ZincRunnerWorkerConfig,
-    args: Array[String],
-    out: PrintStream,
-    workDir: Path,
-    verbosity: Int,
-  ): Unit = {
-    val workRequest = CommonArguments(ArgsUtil.parseArgsOrFailSafe(args, parser, out), workDir)
-    InterruptUtil.throwIfInterrupted()
+  protected def work(task: WorkTask[ZincRunnerWorkerConfig]): Unit = {
+    val workRequest = CommonArguments(
+      ArgsUtil.parseArgsOrFailSafe(task.args, parser, task.output),
+      task.workDir,
+    )
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     // These two paths must only be used when persistence is enabled because they escape the sandbox.
     // Sandboxing is disabled if persistence is enabled.
-    val (persistenceDir, extractedFileCache) = if (workerConfig.usePersistence) {
-      (workerConfig.persistenceDir, workerConfig.extractedFileCache)
+    val (persistenceDir, extractedFileCache) = if (task.context.usePersistence) {
+      (task.context.persistenceDir, task.context.extractedFileCache)
     } else {
       (None, None)
     }
 
-    val logger = new AnnexLogger(workRequest.logLevel, workDir, out)
+    val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)
 
     val tmpDir = workRequest.tmpDir
 
@@ -141,7 +146,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     val deps = {
       val analyses: Map[Path, (Path, Path)] = {
-        if (workerConfig.usePersistence) {
+        if (task.context.usePersistence) {
           workRequest.analyses.flatMap { analysis =>
             analysis.jars.map(jar =>
               jar -> (
@@ -156,11 +161,11 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       }
       Dep.create(extractedFileCache, workRequest.classpath, analyses)
     }
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     val debug = workRequest.debug
     val analysisStorePath = workRequest.outputAnalysisStore
-    val readWriteMappers = AnnexMapper.mappers(workDir, workerConfig.usePersistence)
+    val readWriteMappers = AnnexMapper.mappers(task.workDir, task.context.usePersistence)
     val analysisStore: AnalysisStore = AnalysisUtil.getAnalysisStore(analysisStorePath.toFile, debug, readWriteMappers)
 
     val persistence = persistenceDir.fold[ZincPersistence](NullPersistence) { rootDir =>
@@ -203,7 +208,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     val scalaInstance =
       AnnexScalaInstance.getAnnexScalaInstance(
         workRequest.compilerClasspath.view.map(_.toFile).toArray,
-        workDir,
+        task.workDir,
         isWorker,
       )
 
@@ -224,7 +229,15 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         .scalaCompiler(scalaInstance, workRequest.compilerBridge)
         .withClassLoaderCache(classloaderCache)
       lastCompiler = scalaCompiler
-      ZincUtil.compilers(scalaInstance, ClasspathOptionsUtil.boot, None, scalaCompiler)
+      ZincUtil.compilers(
+        scalaInstance,
+        // This doesn't use -bootclasspath for Scala 2.13 and 3.x. It does use it for older versions.
+        // The newer versions no longer need that option. See this commit for more info:
+        // https://github.com/sbt/zinc/commit/8e4186a55dbe63df57e72cc37a1e8e92aa3b4bcd
+        ClasspathOptionsUtil.noboot(scalaInstance.actualVersion),
+        None,
+        scalaCompiler,
+      )
     }
 
     val lookup = {
@@ -277,28 +290,37 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
     val inputs = Inputs.of(compilers, compileOptions, setup, previousResult)
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     // compile
     val incrementalCompiler = new IncrementalCompilerImpl()
     val compileResult =
-      try incrementalCompiler.compile(inputs, logger)
-      catch {
-        case _: CompileFailed => throw new AnnexWorkerError(-1)
+      try {
+        incrementalCompiler.compile(inputs, logger)
+      } catch {
+        // The thread running this may have been interrupted during compilation due to a cancel request.
+        // It's possible that the interruption contribute to the error. We should check if we were
+        // interrupted, so we can respond with a cancellation rather than erroring and failing the build.
+        case _: CompileFailed =>
+          InterruptUtil.throwIfInterrupted(task.isCancelled)
+          throw new AnnexWorkerError(-1)
         case e: ClassFormatError =>
-          throw new Exception("You may be missing a `macro = True` attribute.", e)
-          throw new AnnexWorkerError(1)
-        case e: StackOverflowError => {
+          InterruptUtil.throwIfInterrupted(task.isCancelled)
+          throw new AnnexWorkerError(1, "You may be missing a `macro = True` attribute.", e)
+        case e: StackOverflowError =>
           // Downgrade to NonFatal error.
           // The JVM is not guaranteed to free shared resources correctly when unwinding the stack to catch a StackOverflowError,
           // but since we don't share resources between work threads, this should be mostly safe for us for now.
           // If Bazel could better handle the worker shutting down suddenly, we could allow this to be caught by
           // the UncaughtExceptionHandler in WorkerMain, and exit the entire process to be safe.
-          throw new Error("StackOverflowError", e)
-        }
+          InterruptUtil.throwIfInterrupted(task.isCancelled)
+          throw new AnnexWorkerError(1, "StackOverflowError", e)
+        case NonFatal(e) =>
+          InterruptUtil.throwIfInterrupted(task.isCancelled)
+          throw e
       }
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     // create analyses
     val pathString = analysisStorePath.toAbsolutePath().normalize().toString()
@@ -314,7 +336,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     }
 
     // This will be true if the `--worker_verbose` Bazel flag is set
-    if (verbosity >= 10) {
+    if (task.verbosity >= 10) {
       val analysisStoreText = AnalysisUtil.getAnalysisStore(
         new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
         true,
@@ -357,8 +379,11 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
         .sorted
 
     val pw = new PrintWriter(workRequest.mainManifest.toFile)
-    try mains.foreach(pw.println)
-    finally pw.close()
+    try {
+      mains.foreach(pw.println)
+    } finally {
+      pw.close()
+    }
 
     val jarCreator = new JarCreator(outputJar)
     jarCreator.addDirectory(classesOutputDir)
@@ -375,9 +400,10 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     jarCreator.execute()
 
     // save persisted files
-    if (workerConfig.usePersistence) {
-      try persistence.save()
-      catch {
+    if (task.context.usePersistence) {
+      try {
+        persistence.save()
+      } catch {
         case NonFatal(e) => logger.warn(() => s"Failed to save cached analysis: $e")
       }
     }
@@ -386,7 +412,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     FileUtil.delete(tmpDir)
     Files.createDirectory(tmpDir)
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 }
 

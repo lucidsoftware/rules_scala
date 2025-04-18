@@ -5,7 +5,7 @@ import common.args.ArgsUtil
 import common.args.ArgsUtil.PathArgumentType
 import common.args.implicits.*
 import common.interrupt.InterruptUtil
-import common.worker.WorkerMain
+import common.worker.{WorkTask, WorkerMain}
 import common.sandbox.SandboxUtil
 import workers.common.{AnnexLogger, AnnexScalaInstance, FileUtil, LogLevel, LoggedReporter}
 import java.io.{File, PrintStream}
@@ -115,9 +115,12 @@ object DocRunner extends WorkerMain[Unit] {
 
   override def init(args: Option[Array[String]]): Unit = ()
 
-  override def work(ctx: Unit, args: Array[String], out: PrintStream, workDir: Path, verbosity: Int): Unit = {
-    val workRequest = DocRequest(workDir, ArgsUtil.parseArgsOrFailSafe(args, argParser, out))
-    InterruptUtil.throwIfInterrupted()
+  override def work(task: WorkTask[Unit]): Unit = {
+    val workRequest = DocRequest(
+      task.workDir,
+      ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
+    )
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     val tmpDir = workRequest.tmpDir
     try {
@@ -136,17 +139,17 @@ object DocRunner extends WorkerMain[Unit] {
 
     val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
       workRequest.compilerClasspath.view.map(_.toFile).toArray,
-      workDir,
+      task.workDir,
       isWorker,
     )
 
-    val logger = new AnnexLogger(workRequest.logLevel, workDir, out)
+    val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)
 
     val scalaCompiler = ZincUtil
       .scalaCompiler(scalaInstance, workRequest.compilerBridge)
       .withClassLoaderCache(classloaderCache)
 
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
 
     val outputDir = workRequest.outputDir
     Files.createDirectories(outputDir)
@@ -167,6 +170,6 @@ object DocRunner extends WorkerMain[Unit] {
       case _: NoSuchFileException => {}
     }
     Files.createDirectory(tmpDir)
-    InterruptUtil.throwIfInterrupted()
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 }

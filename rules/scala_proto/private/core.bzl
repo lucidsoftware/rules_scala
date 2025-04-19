@@ -53,7 +53,7 @@ def scala_proto_library_implementation(ctx):
         inputs = depset(direct = [], transitive = [transitive_sources]),
         mnemonic = "ScalaProtoCompile",
         outputs = [gendir],
-        progress_message = "Compiling %{label} protobuf into Scala source",
+        progress_message = "Compiling protobuf into Scala source %{label}",
         toolchain = "@rules_scala_annex//rules/scala_proto:compiler_toolchain_type",
         tools = [compiler.protoc],
     )
@@ -73,7 +73,7 @@ def scala_proto_library_implementation(ctx):
         inputs = [gendir],
         mnemonic = "SrcJar",
         outputs = [srcjar],
-        progress_message = "Bundling compiled Scala into srcjar for %{label}",
+        progress_message = "Bundling compiled Scala into srcjar %{label}",
         toolchain = None,
         tools = [ctx.executable._zipper],
     )

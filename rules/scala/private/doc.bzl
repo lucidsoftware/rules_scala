@@ -66,6 +66,7 @@ def scaladoc_implementation(ctx):
             transitive = [classpath, compiler_classpath],
         ),
         mnemonic = "ScalaDoc",
+        progress_message = "Generating Scaladoc %{label}",
         outputs = [html, tmp],
         toolchain = None,
     )

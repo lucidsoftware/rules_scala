@@ -52,6 +52,7 @@ def phase_zinc_depscheck(ctx, g):
             },
             inputs = [g.compile.used],
             mnemonic = "ScalaCheckDeps",
+            progress_message = "Checking Scala dependencies %{label}",
             outputs = [deps_check],
             toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
         )

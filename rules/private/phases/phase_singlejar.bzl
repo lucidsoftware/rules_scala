@@ -26,4 +26,9 @@ def phase_singlejar(ctx, g):
             jar = getattr(v, "jar")
             inputs.append(jar)
 
-    _action_singlejar(ctx, inputs, ctx.outputs.jar)
+    _action_singlejar(
+        ctx,
+        inputs = inputs,
+        output = ctx.outputs.jar,
+        progress_message = "Creating SingleJar %{label}",
+    )

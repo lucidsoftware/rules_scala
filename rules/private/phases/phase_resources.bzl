@@ -23,7 +23,7 @@ def phase_resources(ctx, g):
             ctx,
             inputs = [],
             output = resource_jar,
-            progress_message = "singlejar resources %s" % ctx.label.name,
+            progress_message = "Creating SingleJar for resources %{label}",
             resources = {
                 _resources_make_path(file, ctx.attr.resource_strip_prefix): file
                 for file in ctx.files.resources

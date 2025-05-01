@@ -61,7 +61,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
         val ec = ExecutionContext.fromExecutor(fjp)
 
         // Map of request id to the runnable responsible for executing that request id
-        val activeRequests = new ConcurrentHashMap[Int, CancellableTask[Int]](poolSize)
+        val activeRequests = new ConcurrentHashMap[Int, (WorkerProtocol.WorkRequest, CancellableTask[Int])](poolSize)
 
         def writeResponse(
           requestId: Int,
@@ -136,10 +136,10 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
 
             // From the Bazel doc: "The server may send cancel requests for requests that the worker
             // has already responded to, in which case the cancel request must be ignored."
-            Option(activeRequests.get(requestId)).foreach { activeRequest =>
+            Option(activeRequests.get(requestId)).foreach { case (_, workTask) =>
               // Cancel will wait for the thread to complete or be interrupted, so we do it in a future
               // to prevent blocking the worker from processing more requests
-              Future(activeRequest.cancel(mayInterruptIfRunning = mayInterruptWorkerTasks))(
+              Future(workTask.cancel(mayInterruptIfRunning = mayInterruptWorkerTasks))(
                 scala.concurrent.ExecutionContext.global,
               )
             }
@@ -235,9 +235,14 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
             // for this requestId. If that's the case, we have a book keeping error or there are
             // two active requests with the same ID. Either of which is not good and something we
             // should just crash on.
-            if (activeRequests.putIfAbsent(requestId, workTask) != null) {
+            val alreadyActiveRequest = activeRequests.putIfAbsent(requestId, (request, workTask))
+            if (alreadyActiveRequest != null) {
+              val (activeRequest, _) = alreadyActiveRequest
               throw new AnnexDuplicateActiveRequestException(
-                s"Received a WorkRequest with an already active request id: ${requestId}",
+                s"""Received a WorkRequest with an already active request id: ${requestId}.
+                Currently active request: ${activeRequest.toString}
+                New request with the same id: ${request.toString}
+                """,
               )
             } else {
               workTask.execute(ec)

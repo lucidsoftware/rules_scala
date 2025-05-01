@@ -69,6 +69,16 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
           maybeExitCode: Option[Int],
           wasCancelled: Boolean = false,
         ): Unit = {
+          // Remove the request from our book keeping right before we respond to Bazel. If
+          // we respond to Bazel about the request before removing it,then there is a race:
+          // Bazel could make a request with the same requestId to this worker before the
+          // requestId is removed from the worker's book keeping.
+          //
+          // Ideally Bazel will not send a request to this worker with the same requestId
+          // as another request before we've responded to the original request. If that
+          // happens, then there's a race regardless of what we do.
+          activeRequests.remove(requestId)
+
           // Defined here so all writes to stdout are synchronized
           stdout.synchronized {
             val builder = WorkerProtocol.WorkResponse.newBuilder
@@ -88,8 +98,6 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
               .build()
               .writeDelimitedTo(stdout)
           }
-
-          activeRequests.remove(requestId)
         }
 
         /**

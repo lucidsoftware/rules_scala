@@ -57,6 +57,7 @@ def build_format(ctx):
                 },
                 inputs = [config, src],
                 mnemonic = "ScalaFmt",
+                progress_message = "Formatting Scala %{label}",
                 outputs = [file],
                 toolchain = None,
             )
@@ -82,6 +83,7 @@ def format_runner(ctx, manifest, files):
         },
         inputs = [ctx.file._runner, manifest] + files,
         mnemonic = "CreateScalaFmtRunner",
+        progress_message = "Creating Scalafmt runner %{label}",
         outputs = [ctx.outputs.scalafmt_runner],
         toolchain = None,
     )
@@ -101,6 +103,7 @@ def format_tester(ctx, manifest, files):
         },
         inputs = [ctx.file._testrunner, manifest] + files,
         mnemonic = "CreateScalaFmtTester",
+        progress_message = "Creating Scalafmt tester %{label}",
         outputs = [ctx.outputs.scalafmt_testrunner],
         toolchain = None,
     )

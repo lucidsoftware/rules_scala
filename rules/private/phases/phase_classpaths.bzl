@@ -39,7 +39,7 @@ def phase_classpaths(ctx, g):
                 ctx,
                 inputs = deps,
                 output = plugin_singlejar,
-                progress_message = "singlejar scalac plugin %s" % plugin.label.name,
+                progress_message = "Creating SingleJar for Scalac plugin %{label}",
             )
             actual_plugins.append(plugin_singlejar)
 

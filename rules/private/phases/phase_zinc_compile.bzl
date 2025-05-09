@@ -106,6 +106,7 @@ def phase_zinc_compile(ctx, g):
         inputs = inputs,
         mnemonic = "ScalaCompile",
         outputs = outputs,
+        progress_message = "Compiling Scala %{label}",
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )
 

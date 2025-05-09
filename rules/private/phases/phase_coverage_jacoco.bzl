@@ -39,6 +39,7 @@ def phase_coverage_jacoco(ctx, g):
         },
         inputs = [in_out_pair[0] for in_out_pair in in_out_pairs],
         mnemonic = "JacocoInstrumenter",
+        progress_message = "Analyzing Scala code coverage with JaCoCo %{label}",
         outputs = [in_out_pair[1] for in_out_pair in in_out_pairs],
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
     )

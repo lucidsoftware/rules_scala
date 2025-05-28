@@ -18,6 +18,7 @@ load(
 def phase_zinc_compile(ctx, g):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     analysis_store = ctx.actions.declare_file("{}/analysis_store.gz".format(ctx.label.name))
+    analysis_store_text = ctx.actions.declare_file("{}/analysis_store.text.gz".format(ctx.label.name))
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
     tmp = ctx.actions.declare_directory("{}/tmp".format(ctx.label.name))
@@ -76,6 +77,7 @@ def phase_zinc_compile(ctx, g):
         g.classpaths.jar,
         mains_file,
         analysis_store,
+        analysis_store_text,
         used,
         tmp,
     ] + g.semanticdb.outputs

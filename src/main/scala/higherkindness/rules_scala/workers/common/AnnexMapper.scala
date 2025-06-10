@@ -41,7 +41,7 @@ object AnnexMapper {
       case farmHash: FarmHash         => farmHash
       case hash: Hash                 => hash
       case lastModified: LastModified => new LastModified(JarHelper.DEFAULT_TIMESTAMP)
-      case _                          => throw new Exception("Unexpected Stamp type encountered when writing.")
+      case _ => throw new Exception(s"Unexpected Stamp type encountered when writing. ${stamp.getClass} -- $stamp")
     }
   }
 
@@ -66,7 +66,7 @@ object AnnexMapper {
       case lastModified: LastModified => {
         Stamper.forLastModifiedP(PlainVirtualFileConverter.converter.toPath(file))
       }
-      case _ => throw new Exception("Unexpected Stamp type encountered when reading")
+      case _ => throw new Exception(s"Unexpected Stamp type encountered when reading ${stamp.getClass} -- $stamp")
     }
   }
 }

@@ -335,17 +335,13 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       )
     }
 
-    // This will be true if the `--worker_verbose` Bazel flag is set
-    if (task.verbosity >= 10) {
-      val analysisStoreText = AnalysisUtil.getAnalysisStore(
-        new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
-        true,
-        readWriteMappers,
-      )
+    val analysisStoreText = AnalysisUtil.getAnalysisStore(
+      new File(pathString.substring(0, pathString.length() - 3) + ".text.gz"),
+      true,
+      readWriteMappers,
+    )
 
-      analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
-    }
-
+    analysisStoreText.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
     analysisStore.set(AnalysisContents.create(resultAnalysis, compileResult.setup))
 
     // create used deps

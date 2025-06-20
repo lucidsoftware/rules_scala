@@ -8,6 +8,7 @@ load(":phases/phase_coverage_jacoco.bzl", _phase_coverage_jacoco = "phase_covera
 load(":phases/phase_ijinfo.bzl", _phase_ijinfo = "phase_ijinfo")
 load(":phases/phase_javainfo.bzl", _phase_javainfo = "phase_javainfo")
 load(":phases/phase_library_defaultinfo.bzl", _phase_library_defaultinfo = "phase_library_defaultinfo")
+load(":phases/phase_native_compile.bzl", _phase_native_compile = "phase_native_compile")
 load(":phases/phase_outputgroupinfo.bzl", _phase_outputgroupinfo = "phase_outputgroupinfo")
 load(":phases/phase_resources.bzl", _phase_resources = "phase_resources")
 load(":phases/phase_scalafmt_nondefault_outputs.bzl", _phase_scalafmt_nondefault_outputs = "phase_scalafmt_nondefault_outputs")
@@ -38,6 +39,8 @@ phase_ijinfo = _phase_ijinfo
 phase_javainfo = _phase_javainfo
 
 phase_library_defaultinfo = _phase_library_defaultinfo
+
+phase_native_compile = _phase_native_compile
 
 phase_outputgroupinfo = _phase_outputgroupinfo
 

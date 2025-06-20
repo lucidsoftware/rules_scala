@@ -196,3 +196,11 @@ ZincDepInfo = provider(
         "label": "The label for this dep",
     },
 )
+
+NativeConfiguration = provider(
+    doc = "Contains configuration specific to native toolchains.",
+    fields = {
+        "java_8": "A Java 8 runtime (Java 8 must be used for native compilation).",
+        "native_scalac": "The native image for scalac.",
+    },
+)

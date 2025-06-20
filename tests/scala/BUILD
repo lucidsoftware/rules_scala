@@ -1,6 +1,7 @@
 load(
     "@rules_scala_annex//rules:register_toolchain.bzl",
     "register_bootstrap_toolchain",
+    "register_native_toolchain",
     "register_zinc_toolchain",
 )
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
@@ -124,6 +125,14 @@ register_zinc_toolchain(
     compiler_bridge = "@annex_test//:org_scala_sbt_compiler_bridge_2_13",
     compiler_classpath = compiler_classpath_2_13,
     log_level = "debug",
+    runtime_classpath = runtime_classpath_2_13,
+    version = scala_2_13_version,
+    visibility = ["//visibility:public"],
+)
+
+register_native_toolchain(
+    name = "test_native_2_13",
+    compiler_classpath = compiler_classpath_2_13,
     runtime_classpath = runtime_classpath_2_13,
     version = scala_2_13_version,
     visibility = ["//visibility:public"],

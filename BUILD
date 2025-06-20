@@ -5,6 +5,8 @@ load(
 )
 load("//rules/scalafmt:register_toolchain.bzl", "register_scalafmt_toolchain")
 
+exports_files(["scalac"])
+
 default_java_toolchain(
     name = "repository_default_toolchain_21",
     configuration = DEFAULT_TOOLCHAIN_CONFIGURATION,

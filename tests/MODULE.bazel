@@ -20,6 +20,7 @@ register_toolchains(
     "//scala:test_bootstrap_2_12",
     "//scala:test_bootstrap_2_13",
     "//scala:test_bootstrap_3",
+    "//scala:test_native_2_13",
     "//scala:test_zinc_2_12",
     "//scala:test_zinc_2_13",
     "//scala:test_zinc_3",

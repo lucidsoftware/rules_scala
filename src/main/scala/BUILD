@@ -1,3 +1,4 @@
+load("//native:defs.bzl", "java_std_jars", "native_scalac")
 load("//rules:register_toolchain.bzl", "register_bootstrap_toolchain", "register_zinc_toolchain")
 load("//rules:scala.bzl", "scala_library")
 load("//rules/scala:versions.bzl", "scala_2_13_version", "scala_3_version")
@@ -108,5 +109,17 @@ config_setting(
     define_values = {
         "scala_deps_direct": "off",
     },
+    visibility = ["//visibility:public"],
+)
+
+java_std_jars(
+    name = "annex_java_std_jars",
+    modules = ["java.base"],
+    visibility = ["//visibility:public"],
+)
+
+native_scalac(
+    name = "annex_native_scalac",
+    compiler_classpath = compiler_classpath_2_13,
     visibility = ["//visibility:public"],
 )

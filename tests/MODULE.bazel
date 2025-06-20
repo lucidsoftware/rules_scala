@@ -2,6 +2,7 @@ module(name = "rules_scala_annex_tests")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "protobuf", version = "29.3")
+bazel_dep(name = "rules_graalvm", version = "0.11.1")
 bazel_dep(name = "rules_java", version = "8.11.0")
 bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_scala_annex")
@@ -9,6 +10,15 @@ local_path_override(
     module_name = "rules_scala_annex",
     path = "..",
 )
+
+graalvm = use_extension("@rules_graalvm//:extensions.bzl", "graalvm")
+graalvm.graalvm(
+    name = "graalvm",
+    distribution = "oracle",
+    java_version = "21",
+    version = "21.0.2",
+)
+use_repo(graalvm, "graalvm")
 
 register_toolchains(
     "//:repository_default_toolchain_21_definition",
@@ -20,11 +30,13 @@ register_toolchains(
     "//scala:test_bootstrap_2_12",
     "//scala:test_bootstrap_2_13",
     "//scala:test_bootstrap_3",
+    "//scala:test_native_2_13",
     "//scala:test_zinc_2_12",
     "//scala:test_zinc_2_13",
     "//scala:test_zinc_3",
     "//scala:test_zinc_2_13_fatal_deprecation_opt",
     "//scala:test_zinc_2_13_log_level_debug",
+    "@graalvm//:sdk",
 )
 
 # Please ensure these stay up-to-date with the versions in `/rules/scala/versions.bzl`,

@@ -30,7 +30,9 @@ common:tests --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_2_13
 # when upgrading to new major Bazel version.
 common --incompatible_modify_execution_info_additive
 common --incompatible_auto_exec_groups
-common --incompatible_autoload_externally=sh_binary # sh_binary is used by rules_jvm_external
+
+# Re-enable this once rules_graalvm uses the Starlark-ified `JavaInfo`
+# common --incompatible_autoload_externally=sh_binary # sh_binary is used by rules_jvm_external
 common --incompatible_config_setting_private_default_visibility
 common --incompatible_disable_native_repo_rules
 common --incompatible_disable_starlark_host_transitions
@@ -44,6 +46,10 @@ common --incompatible_strict_action_env
 # Error in label_list: Illegal argument: element in 'providers' is of unexpected type. Either all elements should be providers, or all elements should be lists of providers, but got an element of type com.google.devtools.build.lib.starlarkbuildapi.core.ContextAndFlagGuardedValue$1.
 #
 #common --incompatible_stop_exporting_language_modules
+
+# Remove this once this issue is resolved:
+# https://github.com/sgammon/rules_graalvm/issues/555
+common --noincompatible_disallow_ctx_resolve_tools
 
 # This is disabled because rules_python (and possibly other rulesets we depend on) rely on
 # deprecated `Label` APIs:

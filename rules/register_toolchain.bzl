@@ -1,8 +1,10 @@
+load("@rules_java//java/common:java_common.bzl", "java_common")
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//rules:providers.bzl",
     "CodeCoverageConfiguration",
     "DepsConfiguration",
+    "NativeConfiguration",
     "ScalaConfiguration",
     "ScalaRulePhase",
     "ZincConfiguration",
@@ -11,6 +13,7 @@ load(
     "//rules/private:phases.bzl",
     "phase_bootstrap_compile",
     "phase_coverage_jacoco",
+    "phase_native_compile",
     "phase_zinc_compile",
     "phase_zinc_depscheck",
 )
@@ -184,6 +187,84 @@ def _zinc_configuration(**kwargs):
 
     _zinc_configuration_underlying(**kwargs)
 
+def _native_configuration_impl(ctx):
+    if int(ctx.attr.version[0]) >= 3:
+        fail("The native toolchain doesn't yet support Scala 3. Please use the Zinc toolchain instead.")
+
+    return [
+        platform_common.ToolchainInfo(
+            native_configuration = NativeConfiguration(
+                pgo = ctx.attr.pgo,
+                java_std_classpath = ctx.attr.java_std_classpath,
+                native_scalac = ctx.attr.native_scalac,
+            ),
+            scala_configuration = ScalaConfiguration(
+                compiler_classpath = ctx.attr.compiler_classpath,
+                global_plugins = [],
+                global_scalacopts = ctx.attr.global_scalacopts,
+                runtime_classpath = ctx.attr.runtime_classpath,
+                semanticdb_bundle = ctx.attr.semanticdb_bundle,
+                use_ijar = ctx.attr.use_ijar,
+                version = ctx.attr.version,
+            ),
+            scala_rule_phases = ScalaRulePhase(
+                phases = [
+                    ("+", "semanticdb", "compile", phase_native_compile),
+                ],
+            ),
+        ),
+    ]
+
+_native_configuration = rule(
+    attrs = {
+        "compiler_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the compiler classpath. Usually, this is the compiler itself and the standard library.",
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "global_scalacopts": attr.string_list(
+            doc = "scalac options that will always be enabled.",
+        ),
+        "java_std_classpath": attr.label_list(
+            default = [Label("//src/main/scala:annex_java_std_jars")],
+            doc = """\
+JVM targets corresponding to the Java standard library that will always be on the compiler classpath.
+
+These can be generated with `//native:java_std_jars`.""",
+            providers = [JavaInfo],
+        ),
+        "native_scalac": attr.label(
+            cfg = "exec",
+            doc = "The native scalac image (generated with `//native:defs.bzl%native_scalac`) to use for this toolchain.",
+            executable = True,
+        ),
+        "pgo": attr.bool(
+            doc = """\
+Whether to output [Profile-Guided Optimization](https://www.graalvm.org/latest/reference-manual/native-image/optimizations-and-performance/PGO/) files.
+
+Note that for this to work, you must also enable the `--pgo-instrument` option on your `native_scalac` target via the `extra_args` attribute.""",
+        ),
+        "runtime_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the runtime classpath. Usually, this is the standard library.",
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "semanticdb_bundle": attr.bool(
+            default = True,
+            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
+        ),
+        "use_ijar": attr.bool(
+            doc = "Whether to use ijar for this compiler. See https://github.com/bazelbuild/bazel/blob/master/third_party/ijar/README.txt for more information.",
+            default = True,
+        ),
+        "version": attr.string(
+            doc = "The Scala version this compiler corresponds to.",
+            mandatory = True,
+        ),
+    },
+    implementation = _native_configuration_impl,
+)
+
 def _make_register_toolchain(configuration_rule):
     def result(name, visibility = ["//visibility:public"], **kwargs):
         configuration_rule(
@@ -211,6 +292,7 @@ def _make_register_toolchain(configuration_rule):
 
 register_bootstrap_toolchain = _make_register_toolchain(_bootstrap_configuration)
 register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
+register_native_toolchain = _make_register_toolchain(_native_configuration)
 
 def _scala_incoming_transition_impl(settings, attr):
     result = dict(settings)

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "scala.tools.nsc.Reporting$WarningCategory$",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "scala.tools.nsc.reporters.ConsoleReporter",
+    "methods": [
+      { "name": "<init>", "parameterTypes": ["scala.tools.nsc.Settings"] }
+    ]
+  },
+  {
+    "name": "scala.tools.nsc.util.DefaultJarFactory",
+    "methods": [{ "name": "<init>", "parameterTypes": [] }]
+  }
+]

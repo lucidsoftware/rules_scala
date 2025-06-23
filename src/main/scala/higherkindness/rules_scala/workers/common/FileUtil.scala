@@ -131,7 +131,7 @@ object FileUtil {
       @tailrec
       def next(files: List[Path]): List[Path] = {
         zipStream.getNextEntry match {
-          case null => files
+          case null                       => files
           case entry if entry.isDirectory =>
             zipStream.closeEntry()
             next(files)

@@ -97,8 +97,11 @@ def native_scalac(name, compiler_classpath, macros = None, reflection_configurat
     scala_binary(
         name = "{}-wrapper".format(name),
         srcs = ["@rules_scala_annex//src/main/scala/higherkindness/rules_scala/native:CompilerWrapper.scala"],
-        scala_toolchain_name = "annex_zinc_3",
-        deps = compiler_classpath,
+        scala_toolchain_name = "annex_zinc_2_13",
+        deps = compiler_classpath + [
+            "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/error",
+            "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
+        ],
     )
 
     native_image(

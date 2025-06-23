@@ -53,13 +53,15 @@ def phase_native_compile(ctx, g):
     arguments.add_all(ctx.attr.scalacopts)
     arguments.add_all(g.classpaths.srcs)
     arguments.set_param_file_format("multiline")
-    arguments.use_param_file("@%s")
+    arguments.use_param_file("@%s", use_always = True)
 
     ctx.actions.run(
         arguments = [system_properties, arguments],
         executable = native_configuration.native_scalac.files_to_run,
         execution_requirements = {
-            "supports-path-mapping": "1",
+            "supports-multiplex-workers": "1",
+            "supports-worker-cancellation": "1",
+            "supports-workers": "1",
         },
         inputs = inputs,
         mnemonic = "NativeScalaCompile",

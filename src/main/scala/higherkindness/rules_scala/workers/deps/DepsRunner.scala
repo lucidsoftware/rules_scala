@@ -1,16 +1,14 @@
-package higherkindness.rules_scala
-package workers.deps
+package higherkindness.rules_scala.workers.deps
 
-import common.args.ArgsUtil
-import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits.*
-import common.error.AnnexWorkerError
-import common.interrupt.InterruptUtil
-import common.sandbox.SandboxUtil
-import common.worker.{WorkTask, WorkerMain}
-import workers.common.AnnexMapper
-import workers.common.FileUtil
-import java.io.{File, PrintStream}
+import higherkindness.rules_scala.common.args.ArgsUtil
+import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.args.implicits.*
+import higherkindness.rules_scala.common.error.AnnexWorkerError
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
+import higherkindness.rules_scala.workers.common.AnnexMapper
+import higherkindness.rules_scala.workers.common.FileUtil
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers

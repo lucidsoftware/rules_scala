@@ -1,22 +1,18 @@
-package higherkindness.rules_scala
-package workers.zinc.repl
+package higherkindness.rules_scala.workers.zinc.repl
 
-import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits.*
-import common.sandbox.SandboxUtil
-import workers.common.LogLevel
-import workers.common.AnnexLogger
-import workers.common.AnnexScalaInstance
-import workers.common.FileUtil
-import java.io.File
+import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.args.implicits.*
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.workers.common.AnnexLogger
+import higherkindness.rules_scala.workers.common.AnnexScalaInstance
+import higherkindness.rules_scala.workers.common.LogLevel
 import java.nio.file.{Files, Path, Paths}
 import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
-import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
+import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.{PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import scala.jdk.CollectionConverters.*
-import xsbti.Logger
 
 object ReplRunner {
 

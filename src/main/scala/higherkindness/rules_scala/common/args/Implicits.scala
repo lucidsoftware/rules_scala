@@ -1,8 +1,7 @@
-package higherkindness.rules_scala
-package common.args
+package higherkindness.rules_scala.common.args
 
-import scala.reflect.Selectable.reflectiveSelectable
 import net.sourceforge.argparse4j.inf.Argument
+import scala.reflect.Selectable.reflectiveSelectable
 
 object implicits {
   implicit final class SetArgumentDefault(val argument: Argument) extends AnyVal {

@@ -1,16 +1,13 @@
-package higherkindness.rules_scala
-package workers.zinc.test
+package higherkindness.rules_scala.workers.zinc.test
 
-import common.classloaders.ClassLoaders
-import common.sbt_testing.JUnitXmlReporter
-import common.sbt_testing.TestDefinition
-import common.sbt_testing.TestFrameworkLoader
-import common.sbt_testing.TestHelper
-import common.sbt_testing.TestReporter
-import common.sbt_testing.TestRequest
-import common.sbt_testing.TestTaskExecutor
-
-import java.io.PrintWriter
+import higherkindness.rules_scala.common.classloaders.ClassLoaders
+import higherkindness.rules_scala.common.sbt_testing.JUnitXmlReporter
+import higherkindness.rules_scala.common.sbt_testing.TestDefinition
+import higherkindness.rules_scala.common.sbt_testing.TestFrameworkLoader
+import higherkindness.rules_scala.common.sbt_testing.TestHelper
+import higherkindness.rules_scala.common.sbt_testing.TestReporter
+import higherkindness.rules_scala.common.sbt_testing.TestRequest
+import higherkindness.rules_scala.common.sbt_testing.TestTaskExecutor
 import java.io.ObjectOutputStream
 import java.nio.file.Path
 import sbt.testing.{Event, Framework, Logger}

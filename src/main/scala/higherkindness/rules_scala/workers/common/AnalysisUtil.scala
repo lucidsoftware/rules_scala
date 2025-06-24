@@ -1,8 +1,7 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
 import java.io.File
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
 import sbt.internal.inc
 import sbt.internal.inc.consistent.ConsistentFileAnalysisStore
 import xsbti.compile.AnalysisStore

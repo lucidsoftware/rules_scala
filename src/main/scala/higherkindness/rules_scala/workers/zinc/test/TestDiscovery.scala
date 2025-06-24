@@ -1,11 +1,9 @@
-package higherkindness.rules_scala
-package workers.zinc.test
+package higherkindness.rules_scala.workers.zinc.test
 
-import common.sbt_testing.TestAnnotatedFingerprint
-import common.sbt_testing.TestDefinition
-import common.sbt_testing.TestSubclassFingerprint
-
-import sbt.testing.{AnnotatedFingerprint, Fingerprint, Framework, SubclassFingerprint, SuiteSelector}
+import higherkindness.rules_scala.common.sbt_testing.TestAnnotatedFingerprint
+import higherkindness.rules_scala.common.sbt_testing.TestDefinition
+import higherkindness.rules_scala.common.sbt_testing.TestSubclassFingerprint
+import sbt.testing.{AnnotatedFingerprint, Framework, SubclassFingerprint}
 import scala.collection.mutable
 import xsbt.api.Discovery
 import xsbti.api.{AnalyzedClass, ClassLike, Definition}

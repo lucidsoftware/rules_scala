@@ -1,29 +1,27 @@
-package higherkindness.rules_scala
-package workers.zinc.compile
+package higherkindness.rules_scala.workers.zinc.compile
 
-import common.args.ArgsUtil
-import common.interrupt.InterruptUtil
-import common.error.AnnexWorkerError
-import common.worker.{WorkTask, WorkerMain}
-import workers.common.{AnalysisUtil, AnnexLogger, AnnexMapper, AnnexScalaInstance, CommonArguments, FileUtil, LoggedReporter}
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
-import java.io.{File, PrintStream, PrintWriter}
+import higherkindness.rules_scala.common.args.ArgsUtil
+import higherkindness.rules_scala.common.error.AnnexWorkerError
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
+import higherkindness.rules_scala.workers.common.{AnalysisUtil, AnnexLogger, AnnexMapper, AnnexScalaInstance, CommonArguments, FileUtil, LoggedReporter}
+import java.io.{File, PrintWriter}
 import java.net.URLClassLoader
 import java.nio.file.{Files, Path, Paths}
 import java.util
-import java.util.{List as JList, Optional}
+import java.util.Optional
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.helper.HelpScreenException
 import net.sourceforge.argparse4j.impl.Arguments as Arg
-import net.sourceforge.argparse4j.inf.{ArgumentParserException, Namespace}
-import sbt.internal.inc.classpath.ClassLoaderCache
+import net.sourceforge.argparse4j.inf.Namespace
 import sbt.internal.inc.caching.ClasspathCache
-import sbt.internal.inc.{Analysis, AnalyzingCompiler, CompileFailed, FilteredInfos, FilteredRelations, FilteredSetup, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
+import sbt.internal.inc.classpath.ClassLoaderCache
+import sbt.internal.inc.{Analysis, CompileFailed, FilteredInfos, FilteredRelations, FilteredSetup, IncrementalCompilerImpl, Locate, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import scala.util.control.NonFatal
-import xsbti.{T2, VirtualFile, VirtualFileRef}
 import xsbti.compile.{AnalysisContents, AnalysisStore, Changes, ClasspathOptionsUtil, CompileAnalysis, CompileOptions, CompileProgress, CompilerCache, DefaultExternalHooks, DefinesClass, ExternalHooks, FileHash, IncOptions, Inputs, MiniSetup, PerClasspathEntryLookup, PreviousResult, Setup, TastyFiles}
+import xsbti.{T2, VirtualFile, VirtualFileRef}
 
 class ZincRunnerWorkerConfig private (
   val persistenceDir: Option[Path],

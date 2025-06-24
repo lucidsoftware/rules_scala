@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.interrupt
+package higherkindness.rules_scala.common.interrupt
 
 import java.util.concurrent.CancellationException
 

@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.worker
+package higherkindness.rules_scala.common.worker
 
 import java.util.concurrent.{Callable, CancellationException, FutureTask, TimeUnit}
 import java.util.concurrent.locks.ReentrantLock

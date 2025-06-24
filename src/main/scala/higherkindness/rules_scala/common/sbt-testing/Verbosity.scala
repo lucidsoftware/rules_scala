@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.sbt_testing
+package higherkindness.rules_scala.common.sbt_testing
 
 sealed abstract class Verbosity(val level: String)
 object Verbosity {

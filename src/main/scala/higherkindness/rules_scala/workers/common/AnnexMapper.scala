@@ -1,28 +1,11 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
 import com.google.devtools.build.buildjar.jarhelper.JarHelper
-import java.io.{File, InputStream, OutputStream, OutputStreamWriter}
-import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, NoSuchFileException, Path, Paths}
-import java.nio.file.attribute.FileTime
-import java.util
-import java.util.concurrent.ConcurrentHashMap
-import java.util.LinkedHashMap
-import java.util.zip.{GZIPInputStream, GZIPOutputStream}
-import java.util.Optional
-import sbt.internal.inc.binary.converters.{ProtobufReaders, ProtobufWriters}
-import sbt.internal.inc.Schema.Type.{Projection, Structure}
-import sbt.internal.inc.{APIs, Analysis, FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter, Relations, Schema, SourceInfos, Stamp as StampImpl, Stamper, Stamps}
-import sbt.internal.inc.Schema.{Access, AnalyzedClass, Annotation, AnnotationArgument, ClassDefinition, ClassDependencies, ClassLike, Companions, MethodParameter, NameHash, ParameterList, Path as SchemaPath, Qualifier, Type, TypeParameter, UsedName, UsedNames, Values}
-import sbt.internal.shaded.com.google.protobuf.GeneratedMessageV3
-import sbt.io.IO
-import scala.collection.immutable.TreeMap
-import xsbti.compile.analysis.{GenericMapper, ReadMapper, ReadWriteMappers, Stamp, WriteMapper}
-import xsbti.compile.{AnalysisContents, AnalysisStore, MiniSetup}
-import scala.jdk.CollectionConverters.*
+import java.nio.file.{Path, Paths}
+import sbt.internal.inc.{FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter, Stamper}
 import xsbti.VirtualFileRef
-import java.util.Objects
+import xsbti.compile.MiniSetup
+import xsbti.compile.analysis.{ReadMapper, ReadWriteMappers, Stamp, WriteMapper}
 
 object AnnexMapper {
   val rootPlaceholder = Paths.get("_ROOT_")

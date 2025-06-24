@@ -1,8 +1,6 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import xsbti.Problem
-import Console.{GREEN as CG, RED as CR, RESET as CRESET, YELLOW as CY}
+import scala.Console.{GREEN as CG, RED as CR, RESET as CRESET, YELLOW as CY}
 
 object Color {
   def Info(message: String): String = colorString(message, CG, "Info")

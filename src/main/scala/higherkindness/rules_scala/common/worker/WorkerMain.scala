@@ -1,12 +1,11 @@
-package higherkindness.rules_scala
-package common.worker
+package higherkindness.rules_scala.common.worker
 
-import common.error.{AnnexDuplicateActiveRequestException, AnnexWorkerError}
+import higherkindness.rules_scala.common.error.{AnnexDuplicateActiveRequestException, AnnexWorkerError}
 import com.google.devtools.build.lib.worker.WorkerProtocol
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream, PrintStream}
 import java.nio.channels.ClosedByInterruptException
-import java.nio.file.{Path, Paths}
-import java.util.concurrent.{Callable, CancellationException, ConcurrentHashMap, ForkJoinPool, FutureTask}
+import java.nio.file.Path
+import java.util.concurrent.{CancellationException, ConcurrentHashMap, ForkJoinPool}
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, ExecutionException, Future}
 import scala.util.{Failure, Success, Using}

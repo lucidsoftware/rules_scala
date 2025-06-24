@@ -1,7 +1,6 @@
-package higherkindness.rules_scala
-package common.args
+package higherkindness.rules_scala.common.args
 
-import common.error.AnnexWorkerError
+import higherkindness.rules_scala.common.error.AnnexWorkerError
 import java.io.{PrintStream, PrintWriter}
 import java.nio.file.{Path, Paths}
 import net.sourceforge.argparse4j.helper.HelpScreenException

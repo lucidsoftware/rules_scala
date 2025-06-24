@@ -1,17 +1,13 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits.*
-import common.sandbox.SandboxUtil
-import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
-import net.sourceforge.argparse4j.inf.{Argument, ArgumentParser, ArgumentType, Namespace}
-import java.util.{Collections, List as JList}
-import scala.annotation.nowarn
-import scala.collection.mutable.Buffer
-import scala.jdk.CollectionConverters.*
-import java.io.File
+import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.args.implicits.*
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import java.nio.file.{Path, Paths}
+import java.util.{Collections, List as JList}
+import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
+import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
+import scala.jdk.CollectionConverters.*
 
 class CommonArguments private (
   val analyses: List[Analysis],

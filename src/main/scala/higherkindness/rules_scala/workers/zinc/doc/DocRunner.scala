@@ -1,24 +1,21 @@
-package higherkindness.rules_scala
-package workers.zinc.doc
+package higherkindness.rules_scala.workers.zinc.doc
 
-import common.args.ArgsUtil
-import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits.*
-import common.interrupt.InterruptUtil
-import common.worker.{WorkTask, WorkerMain}
-import common.sandbox.SandboxUtil
-import workers.common.{AnnexLogger, AnnexScalaInstance, FileUtil, LogLevel, LoggedReporter}
-import java.io.{File, PrintStream}
+import higherkindness.rules_scala.common.args.ArgsUtil
+import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.args.implicits.*
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
+import higherkindness.rules_scala.workers.common.{AnnexLogger, AnnexScalaInstance, FileUtil, LogLevel, LoggedReporter}
 import java.net.URLClassLoader
 import java.nio.file.{Files, NoSuchFileException, Path}
-import java.util.{Collections, Optional, Properties}
+import java.util.Collections
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.{PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import scala.jdk.CollectionConverters.*
-import xsbti.Logger
 
 object DocRunner extends WorkerMain[Unit] {
 

@@ -1,11 +1,7 @@
-package higherkindness.rules_scala
-package workers.bloop.compile
-
-import common.worker.{WorkTask, WorkerMain}
+package higherkindness.rules_scala.workers.bloop.compile
 
 import bloop.Bloop
-import java.io.PrintStream
-import java.nio.file.Path
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 
 object BloopRunner extends WorkerMain[Unit] {
   override def init(args: Option[Array[String]]): Unit = ()

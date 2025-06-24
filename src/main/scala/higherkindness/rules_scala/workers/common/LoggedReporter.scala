@@ -1,8 +1,7 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import xsbti.{Logger, Problem}
 import sbt.internal.inc.{LoggedReporter as SbtLoggedReporter, ProblemStringFormats}
+import xsbti.{Logger, Problem}
 
 class LoggedReporter(logger: Logger, versionString: String) extends SbtLoggedReporter(0, logger) {
   private val problemStringFormats = new ProblemStringFormats {}

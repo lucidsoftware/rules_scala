@@ -1,12 +1,11 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import scala.annotation.tailrec
 import java.io.{File, IOException}
 import java.nio.channels.FileChannel
-import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, Paths, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileAlreadyExistsException, FileVisitResult, Files, Path, Paths, SimpleFileVisitor, StandardCopyOption, StandardOpenOption}
 import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
+import scala.annotation.tailrec
 
 class CopyFileVisitor(source: Path, target: Path) extends SimpleFileVisitor[Path] {
   override def preVisitDirectory(directory: Path, attributes: BasicFileAttributes) = {

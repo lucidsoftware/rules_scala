@@ -1,7 +1,6 @@
-package higherkindness.rules_scala
-package common.sbt_testing
+package higherkindness.rules_scala.common.sbt_testing
 
-import common.classloaders.ClassLoaders
+import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import java.io.ObjectInputStream
 import java.nio.file.Paths
 import scala.collection.mutable

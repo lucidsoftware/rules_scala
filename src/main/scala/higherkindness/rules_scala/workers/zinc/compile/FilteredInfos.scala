@@ -1,6 +1,5 @@
 package sbt.internal.inc
 
-import sbt.internal.inc.SourceInfos
 import xsbti.compile.analysis.SourceInfo
 import xsbti.{Problem, VirtualFileRef}
 

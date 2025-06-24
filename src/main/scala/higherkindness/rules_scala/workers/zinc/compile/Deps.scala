@@ -1,10 +1,9 @@
-package higherkindness.rules_scala
-package workers.zinc.compile
+package higherkindness.rules_scala.workers.zinc.compile
 
-import workers.common.FileUtil
 import java.math.BigInteger
 import java.nio.file.{Files, Path}
 import java.security.MessageDigest
+import higherkindness.rules_scala.workers.common.FileUtil
 import sbt.internal.inc.{PlainVirtualFile, Relations}
 import xsbti.compile.PerClasspathEntryLookup
 

@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.worker
+package higherkindness.rules_scala.common.worker
 
 import java.io.PrintStream
 import java.nio.file.Path

@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.classloaders
+package higherkindness.rules_scala.common.classloaders
 
 import java.net.{URL, URLClassLoader}
 

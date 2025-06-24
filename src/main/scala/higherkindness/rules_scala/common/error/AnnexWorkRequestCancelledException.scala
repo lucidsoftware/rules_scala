@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.error
+package higherkindness.rules_scala.common.error
 
 class AnnexDuplicateActiveRequestException(
   val message: String = "",

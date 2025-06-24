@@ -96,7 +96,7 @@ annex_scalafmt.install(
     artifacts = [
         "org.scalameta:parsers_2.13:4.9.7",
         "org.scalameta:metaconfig-core_2.13:0.13.0",
-        "org.scalameta:scalafmt-core_2.13:3.8.2",
+        "org.scalameta:scalafmt-core_2.13:3.9.7",
     ],
     fetch_sources = True,
     lock_file = "//:annex_scalafmt_install.json",

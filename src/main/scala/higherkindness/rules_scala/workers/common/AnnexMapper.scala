@@ -61,8 +61,8 @@ object AnnexMapper {
    */
   final def getIncrementalModeReadStamp(file: VirtualFileRef, stamp: Stamp): Stamp = {
     stamp match {
-      case farmHash: FarmHash => farmHash
-      case hash: Hash         => hash
+      case farmHash: FarmHash         => farmHash
+      case hash: Hash                 => hash
       case lastModified: LastModified => {
         Stamper.forLastModifiedP(PlainVirtualFileConverter.converter.toPath(file))
       }

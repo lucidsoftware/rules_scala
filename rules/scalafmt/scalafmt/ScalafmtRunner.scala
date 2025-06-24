@@ -13,7 +13,7 @@ import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import org.scalafmt.Scalafmt
 import org.scalafmt.config.ScalafmtConfig
-import org.scalafmt.sysops.FileOps
+import org.scalafmt.sysops.PlatformFileOps
 import scala.annotation.tailrec
 import scala.io.Codec
 
@@ -52,7 +52,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 
-    val source = FileOps.readFile(workRequest.inputFile)(Codec.UTF8)
+    val source = PlatformFileOps.readFile(workRequest.inputFile)(Codec.UTF8)
 
     val config = ScalafmtConfig.fromHoconFile(workRequest.configFile).get
     @tailrec

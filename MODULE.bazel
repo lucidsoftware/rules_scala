@@ -41,6 +41,7 @@ annex.install(
         "com.thesamet.scalapb:scalapb-runtime_2.13:{}".format(scalapb_version),
         "net.sourceforge.argparse4j:argparse4j:0.8.1",
         "org.jacoco:org.jacoco.core:0.7.5.201505241946",
+        "org.playframework:play-json_3:3.0.4",
         "org.scala-lang:scala-compiler:{}".format(scala_2_13_version),
         "org.scala-lang:scala-library:{}".format(scala_2_13_version),
         "org.scala-lang:scala-reflect:{}".format(scala_2_13_version),

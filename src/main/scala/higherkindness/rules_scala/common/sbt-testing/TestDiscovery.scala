@@ -1,12 +1,9 @@
-package higherkindness.rules_scala.workers.zinc.test
+package higherkindness.rules_scala.common.sbt_testing
 
-import higherkindness.rules_scala.common.sbt_testing.TestAnnotatedFingerprint
-import higherkindness.rules_scala.common.sbt_testing.TestDefinition
-import higherkindness.rules_scala.common.sbt_testing.TestSubclassFingerprint
 import sbt.testing.{AnnotatedFingerprint, Framework, SubclassFingerprint}
 import scala.collection.mutable
 import xsbt.api.Discovery
-import xsbti.api.{AnalyzedClass, ClassLike, Definition}
+import xsbti.api.{ClassLike, Definition}
 
 class TestDiscovery(framework: Framework) {
   private val (annotatedPrints, subclassPrints) = {
@@ -20,9 +17,8 @@ class TestDiscovery(framework: Framework) {
     (annotatedPrints.toSet, subclassPrints.toSet)
   }
 
-  private def definitions(classes: Set[AnalyzedClass]) = {
+  private def definitions(classes: Set[ClassLike]) = {
     classes.toSeq
-      .flatMap(`class` => Seq(`class`.api.classApi, `class`.api.objectApi))
       .flatMap(api => Seq(api, api.structure.declared, api.structure.inherited))
       .collect { case cl: ClassLike if cl.topLevel => cl }
   }
@@ -32,7 +28,7 @@ class TestDiscovery(framework: Framework) {
       definitions,
     )
 
-  def apply(classes: Set[AnalyzedClass]) =
+  def apply(classes: Set[ClassLike]) =
     for {
       (definition, discovered) <- discover(definitions(classes))
       fingerprint <- subclassPrints.collect {

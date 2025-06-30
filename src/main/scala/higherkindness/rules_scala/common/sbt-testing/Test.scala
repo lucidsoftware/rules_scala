@@ -1,12 +1,17 @@
 package higherkindness.rules_scala.common.sbt_testing
 
-import sbt.testing.{Event, Fingerprint, Framework, Logger, Runner, Status, Task, TaskDef, TestWildcardSelector}
+import play.api.libs.json.{Format, Json}
+import sbt.testing.{Event, Framework, Logger, Runner, Status, Task, TaskDef, TestWildcardSelector}
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
-class TestDefinition(val name: String, val fingerprint: Fingerprint with Serializable) extends Serializable
+case class TestDefinition(name: String, fingerprint: TestFingerprint)
 
-class TestFrameworkLoader(loader: ClassLoader, logger: Logger) {
+object TestDefinition {
+  implicit val format: Format[TestDefinition] = Json.format[TestDefinition]
+}
+
+class TestFrameworkLoader(loader: ClassLoader) {
   def load(className: String) = {
     val framework =
       try {

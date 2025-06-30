@@ -8,8 +8,10 @@ scala_binary(
     scala_toolchain_name = "annex_bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
+        "//src/main/scala/higherkindness/rules_scala/common/classloaders",
         "//src/main/scala/higherkindness/rules_scala/common/error",
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",
+        "//src/main/scala/higherkindness/rules_scala/common/sbt-testing:common",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "//src/main/scala/higherkindness/rules_scala/workers/common",
         "//src/main/scala/sbt/internal/inc/classfile",

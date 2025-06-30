@@ -4,11 +4,9 @@ import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
-import higherkindness.rules_scala.common.sbt_testing.AnnexTestingLogger
-import higherkindness.rules_scala.common.sbt_testing.TestDefinition
-import higherkindness.rules_scala.common.sbt_testing.TestFrameworkLoader
-import higherkindness.rules_scala.common.sbt_testing.Verbosity
+import higherkindness.rules_scala.common.sbt_testing.{AnnexTestingLogger, TestDefinition, TestFrameworkLoader, TestsFileData, Verbosity}
 import higherkindness.rules_scala.workers.common.AnalysisUtil
+import java.io.FileInputStream
 import java.net.URLClassLoader
 import java.nio.file.attribute.FileTime
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
@@ -18,7 +16,9 @@ import java.util.regex.Pattern
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
+import play.api.libs.json.Json
 import scala.jdk.CollectionConverters.*
+import scala.util.Using
 import scala.util.control.NonFatal
 
 object TestRunner {
@@ -88,9 +88,9 @@ object TestRunner {
     val analysisStore: Path,
     val subprocessExecutable: Option[Path],
     val isolation: Isolation,
-    val frameworks: List[String],
     val sharedClasspath: List[Path],
     val testClasspath: List[Path],
+    val testsFile: Path,
   )
 
   private object TestRunnerRequest {
@@ -100,9 +100,9 @@ object TestRunner {
         subprocessExecutable =
           Option(namespace.get[Path]("subprocess_exec")).map(SandboxUtil.getSandboxPath(runPath, _)),
         isolation = Isolation(namespace.getString("isolation")),
-        frameworks = namespace.getList[String]("frameworks").asScala.toList,
         sharedClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("shared_classpath")),
         testClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("classpath")),
+        testsFile = namespace.get[Path]("tests_file"),
       )
     }
   }
@@ -125,18 +125,17 @@ object TestRunner {
       .help("Test isolation")
       .setDefault_(Isolation.None.level)
     parser
-      .addArgument("--frameworks")
-      .help("Class names of sbt.testing.Framework implementations")
-      .metavar("class")
-      .nargs("*")
-      .setDefault_(Collections.emptyList)
-    parser
       .addArgument("--shared_classpath")
       .help("Classpath to share between tests")
       .metavar("path")
       .nargs("*")
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--tests_file")
+      .help("File containing discovered tests.")
+      .metavar("file")
+      .`type`(PathArgumentType.apply())
     parser
       .addArgument("classpath")
       .help("Testing classpath")
@@ -192,8 +191,10 @@ object TestRunner {
           throw new Exception(s"Failed to load APIs from analysis store: ${testRunnerRequest.analysisStore}", e)
       }
 
-    val loader = new TestFrameworkLoader(classLoader, logger)
-    val frameworks = testRunnerRequest.frameworks.flatMap(loader.load)
+    val loader = new TestFrameworkLoader(classLoader)
+    val testsFileData = Using(new FileInputStream(testRunnerRequest.testsFile.toString)) { stream =>
+      Json.fromJson[TestsFileData](Json.parse(stream)).get
+    }.get
 
     val testFilter = sys.env.get("TESTBRIDGE_TEST_ONLY").map(_.split("#", 2))
     val testClass = testFilter
@@ -203,46 +204,47 @@ object TestRunner {
     val testScopeAndName = testFilter.flatMap(_.lift(1))
 
     var count = 0
-    val passed = frameworks.forall { framework =>
-      val tests = new TestDiscovery(framework)(apis.internal.values.toSet).sortBy(_.name)
-      val filter = for {
-        index <- sys.env.get("TEST_SHARD_INDEX").map(_.toInt)
-        total <- sys.env.get("TEST_TOTAL_SHARDS").map(_.toInt)
-      } yield (test: TestDefinition, i: Int) => i % total == index
-      val filteredTests = tests.filter { test =>
-        testClass.forall(_.matcher(test.name).matches) && {
-          count += 1
-          filter.fold(true)(_(test, count))
+    val passed = testsFileData.testsByFramework.view
+      .flatMap { case (frameworkName, tests) => loader.load(frameworkName).map((frameworkName, _, tests)) }
+      .forall { case (frameworkName, framework, tests) =>
+        val filter = for {
+          index <- sys.env.get("TEST_SHARD_INDEX").map(_.toInt)
+          total <- sys.env.get("TEST_TOTAL_SHARDS").map(_.toInt)
+        } yield (test: TestDefinition, i: Int) => i % total == index
+        val filteredTests = tests.filter { test =>
+          testClass.forall(_.matcher(test.name).matches) && {
+            count += 1
+            filter.fold(true)(_(test, count))
+          }
         }
-      }
-      filteredTests.isEmpty || {
-        val runner = testRunnerRequest.isolation match {
-          case Isolation.ClassLoader =>
-            val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
-            def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
-            new ClassLoaderTestRunner(framework, classLoaderProvider _, logger)
-          case Isolation.Process =>
-            val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
-              throw new Exception("Subprocess executable missing for test ran in process isolation mode.")
-            }
-            new ProcessTestRunner(
-              framework,
-              testClasspath.toSeq,
-              new ProcessCommand(executable, testRunnerArgs.subprocessArgs),
-              logger,
-            )
-          case Isolation.None => new BasicTestRunner(framework, classLoader, logger)
-        }
+        filteredTests.isEmpty || {
+          val runner = testRunnerRequest.isolation match {
+            case Isolation.ClassLoader =>
+              val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
+              def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
+              new ClassLoaderTestRunner(framework, classLoaderProvider _, logger)
+            case Isolation.Process =>
+              val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
+                throw new Exception("Subprocess executable missing for test ran in process isolation mode.")
+              }
+              new ProcessTestRunner(
+                framework,
+                testClasspath.toSeq,
+                new ProcessCommand(executable, testRunnerArgs.subprocessArgs),
+                logger,
+              )
+            case Isolation.None => new BasicTestRunner(framework, classLoader, logger)
+          }
 
-        try {
-          runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs)
-        } catch {
-          case e: Throwable =>
-            e.printStackTrace()
-            false
+          try {
+            runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs)
+          } catch {
+            case e: Throwable =>
+              e.printStackTrace()
+              false
+          }
         }
       }
-    }
     sys.exit(if (passed) 0 else 1)
   }
 }

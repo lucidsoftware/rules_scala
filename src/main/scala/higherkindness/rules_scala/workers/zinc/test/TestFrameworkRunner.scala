@@ -56,7 +56,7 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
     val failures = mutable.Set[String]()
     tests.foreach { test =>
       val classLoader = classLoaderProvider()
-      val isolatedFramework = new TestFrameworkLoader(classLoader, logger).load(framework.getClass.getName).get
+      val isolatedFramework = new TestFrameworkLoader(classLoader).load(framework.getClass.getName).get
       TestHelper.withRunner(isolatedFramework, scopeAndTestName, classLoader, arguments) { runner =>
         ClassLoaders.withContextClassLoader(classLoader) {
           val tasks = runner.tasks(Array(TestHelper.taskDef(test, scopeAndTestName)))

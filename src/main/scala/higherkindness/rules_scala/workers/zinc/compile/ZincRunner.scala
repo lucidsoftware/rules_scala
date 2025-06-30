@@ -2,18 +2,22 @@ package higherkindness.rules_scala.workers.zinc.compile
 
 import com.google.devtools.build.buildjar.jarhelper.JarCreator
 import higherkindness.rules_scala.common.args.ArgsUtil
+import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.sbt_testing.{TestDiscovery, TestFrameworkLoader, TestsFileData}
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.*
 import java.io.{File, PrintWriter}
 import java.net.URLClassLoader
+import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import java.util.Optional
 import javax.tools.{StandardLocation, ToolProvider}
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments as Arg
 import net.sourceforge.argparse4j.inf.Namespace
+import play.api.libs.json.Json
 import sbt.internal.inc.classfile.analyzeJavaClasses
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.javac.DiagnosticsReporter
@@ -237,6 +241,20 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     }
   }
 
+  private def maybeWriteTestsFile(parsedArguments: CommonArguments, analysis: AnnexAnalysis): Unit =
+    parsedArguments.testsFile.foreach { path =>
+      val classloader = ClassLoaders.sbtTestClassLoader(parsedArguments.classpath.map(_.toUri.toURL))
+      val frameworkLoader = new TestFrameworkLoader(classloader)
+      val testsFileData = TestsFileData(
+        parsedArguments.testFrameworks
+          .flatMap(frameworkName => frameworkLoader.load(frameworkName).map((frameworkName, _)))
+          .map { case (frameworkName, framework) => frameworkName -> new TestDiscovery(framework)(analysis.apis.toSet) }
+          .toMap,
+      )
+
+      Files.write(path, Json.stringify(Json.toJson(testsFileData)).getBytes(StandardCharsets.UTF_8))
+    }
+
   protected def init(args: Option[Array[String]]): ZincRunnerWorkerConfig = {
     val parser = ArgumentParsers.newFor("zinc-worker").addHelp(true).build
     parser.addArgument("--persistence_dir", /* deprecated */ "--persistenceDir").metavar("path")
@@ -324,6 +342,10 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       reporter,
       logger,
     )
+
+    InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+    maybeWriteTestsFile(workRequest, analysis)
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 

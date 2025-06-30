@@ -3,15 +3,17 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_test")
 scala_test(
     name = "mixed_2_13",
     srcs = glob(["*.scala"]),
+    deps_used_whitelist = [
+        "@annex_test//:org_hamcrest_hamcrest_core",
+        "@annex_test//:com_novocode_junit_interface",
+    ],
     scala_toolchain_name = "test_zinc_2_13",
     shard_count = 2,
     tags = ["manual"],
-    runtime_deps = [
-        "@annex_test//:com_novocode_junit_interface",
-        "@annex_test//:org_hamcrest_hamcrest_core",
-    ],
     deps = [
+        "@annex_test//:com_novocode_junit_interface",
         "@annex_test//:junit_junit",
+        "@annex_test//:org_hamcrest_hamcrest_core",
         "@annex_test//:org_scalacheck_scalacheck_2_13",
         "@annex_test//:org_scalactic_scalactic_2_13",
         "@annex_test//:org_scalatest_scalatest_compatible",

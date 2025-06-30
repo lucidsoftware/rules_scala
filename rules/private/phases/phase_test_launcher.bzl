@@ -22,7 +22,10 @@ def phase_test_launcher(ctx, g):
     # "When attaching a transition to an outgoing edge (regardless of whether the transition is a
     # 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it isn't already. The order of
     # elements in this list is unspecified."
-    files = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo].files.to_list() + [g.compile.zinc_info.analysis_store]
+    files = ctx.attr._target_jdk[0][java_common.JavaRuntimeInfo].files.to_list() + [
+        g.compile.zinc_info.analysis_store,
+        g.compile.tests_file,
+    ]
 
     coverage_replacements = {}
     coverage_runner_jars = depset(direct = [])
@@ -42,7 +45,7 @@ def phase_test_launcher(ctx, g):
 
     args = ctx.actions.args()
     args.add("--analysis_store", g.compile.zinc_info.analysis_store.short_path)
-    args.add_all("--frameworks", ctx.attr.frameworks)
+    args.add("--tests_file", g.compile.tests_file.short_path)
     if ctx.attr.isolation == "classloader":
         shared_deps = java_common.merge(_collect(JavaInfo, ctx.attr.shared_deps))
         args.add("--isolation", "classloader")

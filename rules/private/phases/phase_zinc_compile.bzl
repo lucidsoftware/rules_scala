@@ -82,6 +82,16 @@ def phase_zinc_compile(ctx, g):
         tmp,
     ] + g.semanticdb.outputs
 
+    if hasattr(ctx.attr, "frameworks"):
+        tests_file = ctx.actions.declare_file("{}/tests.json".format(ctx.label.name))
+
+        args.add_all("--test_frameworks", ctx.attr.frameworks)
+        args.add("--tests_file", tests_file)
+
+        outputs.append(tests_file)
+    else:
+        tests_file = None
+
     execution_requirements_tags = {
         "supports-multiplex-workers": "1",
         "supports-workers": "1",
@@ -133,6 +143,7 @@ def phase_zinc_compile(ctx, g):
     g.out.providers.append(zinc_info)
     return _ZincCompilationInfo(
         mains_file = mains_file,
+        tests_file = tests_file,
         used = used,
         # todo: see about cleaning up & generalizing fields below
         zinc_info = zinc_info,

@@ -37,6 +37,8 @@ class CommonArguments private (
   val outputUsed: Path,
   val plugins: List[Path],
   val sourceJars: List[Path],
+  val testFrameworks: List[String],
+  val testsFile: Option[Path],
   val tmpDir: Path,
   val sources: List[Path],
 )
@@ -122,6 +124,18 @@ object CommonArguments {
       .metavar("debug")
       .`type`(ArgumentsImpl.booleanType)
       .setDefault_(false)
+    parser
+      .addArgument("--test_frameworks")
+      .help("Class names of sbt.testing.Framework implementations")
+      .metavar("class")
+      .nargs("*")
+      .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--tests_file")
+      .help("File to output discovered tests in, for use by the test runner.")
+      .metavar("file")
+      .required(false)
+      .`type`(PathArgumentType.apply())
     parser
       .addArgument("--java_compiler_option")
       .help("Java compiler option")
@@ -230,6 +244,8 @@ object CommonArguments {
       outputUsed = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_used")),
       plugins = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("plugins")),
       sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
+      testFrameworks = namespace.getList[String]("test_frameworks").asScala.toList,
+      testsFile = Option(namespace.get[Path]("tests_file")).map(SandboxUtil.getSandboxPath(workDir, _)),
       tmpDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("tmp")),
       sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
     )

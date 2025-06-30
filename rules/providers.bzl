@@ -183,6 +183,7 @@ ZincCompilationInfo = provider(
     doc = "Outputs from the Zinc compilation phase.",
     fields = {
         "mains_file": "File containing the main methods of this compilation.",
+        "tests_file": "File containing discovered tests for use by the test runner. Will be `None` if this isn't a test target.",
         "used": "File containing the used deps for this compilation.",
         "zinc_info": "a ZincInfo provider for this compilation.",
     },

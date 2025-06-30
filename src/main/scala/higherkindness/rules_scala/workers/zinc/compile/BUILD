@@ -12,6 +12,7 @@ scala_binary(
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "//src/main/scala/higherkindness/rules_scala/workers/common",
+        "//src/main/scala/sbt/internal/inc/classfile",
         "//third_party/bazel/src/java_tools/buildjar/java/com/google/devtools/build/buildjar/jarhelper",
     ],
 )

@@ -4,13 +4,12 @@ import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import java.nio.file.{Path, Paths}
-import java.util.{Collections, List as JList}
+import java.util.Collections
 import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import scala.jdk.CollectionConverters.*
 
 class CommonArguments private (
-  val analyses: List[Analysis],
   val compilerBridge: Path,
   val compilerClasspath: List[Path],
   val compilerOptions: Array[String],
@@ -32,7 +31,6 @@ class CommonArguments private (
   val label: String,
   val logLevel: LogLevel,
   val mainManifest: Path,
-  val outputAnalysisStore: Path,
   val outputJar: Path,
   val outputUsed: Path,
   val plugins: List[Path],
@@ -83,12 +81,6 @@ object CommonArguments {
    * Adds argument parsers for CommonArguments to the given ArgumentParser and then returns the mutated ArgumentParser.
    */
   def add(parser: ArgumentParser): ArgumentParser = {
-    parser
-      .addArgument("--analysis")
-      .action(ArgumentsImpl.append)
-      .help("Analysis, given as: _label analysis_store [jar ...]")
-      .metavar("args")
-      .nargs("*")
     parser
       .addArgument("--compiler_bridge")
       .help("Compiler bridge")
@@ -157,12 +149,6 @@ object CommonArguments {
       .required(true)
       .`type`(PathArgumentType.apply())
     parser
-      .addArgument("--output_analysis_store")
-      .help("Output Analysis Store")
-      .metavar("path")
-      .required(true)
-      .`type`(PathArgumentType.apply())
-    parser
       .addArgument("--output_jar")
       .help("Output jar")
       .metavar("path")
@@ -206,22 +192,7 @@ object CommonArguments {
   }
 
   def apply(namespace: Namespace, workDir: Path): CommonArguments = {
-    val analysisArgs = Option(namespace.getList[JList[String]]("analysis")).map(_.asScala).getOrElse(List.empty)
-
-    val analyses: List[Analysis] = analysisArgs.view
-      .map(_.asScala)
-      .map { analysisArg =>
-        // Analysis strings are of the format: _label analysis_store [jar ...]
-        val label = analysisArg(0)
-        val analysisStore = analysisArg(1)
-        val jars = analysisArg.drop(2).toList
-        // Drop the leading _ on the label, which was added to avoid triggering argparse's arg file detection
-        Analysis(workDir, label.tail, analysisStore, jars)
-      }
-      .toList
-
     new CommonArguments(
-      analyses = analyses,
       compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
       compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
       compilerOptions = Option(namespace.getList[String]("compiler_option"))
@@ -239,7 +210,6 @@ object CommonArguments {
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("main_manifest")),
-      outputAnalysisStore = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_analysis_store")),
       outputJar = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_jar")),
       outputUsed = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_used")),
       plugins = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("plugins")),

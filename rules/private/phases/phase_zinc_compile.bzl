@@ -4,9 +4,6 @@ load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
     _ZincCompilationInfo = "ZincCompilationInfo",
-    _ZincConfiguration = "ZincConfiguration",
-    _ZincDepInfo = "ZincDepInfo",
-    _ZincInfo = "ZincInfo",
 )
 
 #
@@ -17,8 +14,6 @@ load(
 
 def phase_zinc_compile(ctx, g):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
-    analysis_store = ctx.actions.declare_file("{}/analysis_store.gz".format(ctx.label.name))
-    analysis_store_text = ctx.actions.declare_file("{}/analysis_store.text.gz".format(ctx.label.name))
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
     tmp = ctx.actions.declare_directory("{}/tmp".format(ctx.label.name))
@@ -34,13 +29,9 @@ def phase_zinc_compile(ctx, g):
         )
     ]
 
-    zincs = [dep[_ZincInfo] for dep in ctx.attr.deps if _ZincInfo in dep]
     common_scalacopts = toolchain.scala_configuration.global_scalacopts + ctx.attr.scalacopts
 
     args = ctx.actions.args()
-    if toolchain.zinc_configuration.incremental:
-        args.add_all(depset(transitive = [zinc.deps for zinc in zincs]), map_each = _compile_analysis)
-
     args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
     args.add_all("--classpath", g.classpaths.compile)
@@ -48,7 +39,6 @@ def phase_zinc_compile(ctx, g):
     args.add_all(javacopts, format_each = "--java_compiler_option=%s")
     args.add(ctx.label, format = "--label=%s")
     args.add("--main_manifest", mains_file)
-    args.add("--output_analysis_store", analysis_store)
     args.add("--output_jar", g.classpaths.jar)
     args.add("--output_used", used)
     args.add_all("--plugins", g.classpaths.plugin)
@@ -58,29 +48,16 @@ def phase_zinc_compile(ctx, g):
 
     g.semanticdb.arguments_modifier(args)
 
-    args.add_all("--", g.classpaths.srcs)
-    args.set_param_file_format("multiline")
-    args.use_param_file("@%s", use_always = True)
-
-    worker = toolchain.zinc_configuration.compile_worker
-
     inputs = depset(
         [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs,
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
             g.classpaths.compiler,
-        ] + ([zinc.deps_files for zinc in zincs] if toolchain.zinc_configuration.incremental else []),
+        ],
     )
 
-    outputs = [
-        g.classpaths.jar,
-        mains_file,
-        analysis_store,
-        analysis_store_text,
-        used,
-        tmp,
-    ] + g.semanticdb.outputs
+    outputs = [g.classpaths.jar, mains_file, used, tmp] + g.semanticdb.outputs
 
     if hasattr(ctx.attr, "frameworks"):
         tests_file = ctx.actions.declare_file("{}/tests.json".format(ctx.label.name))
@@ -92,6 +69,12 @@ def phase_zinc_compile(ctx, g):
     else:
         tests_file = None
 
+    args.add_all("--", g.classpaths.srcs)
+    args.set_param_file_format("multiline")
+    args.use_param_file("@%s", use_always = True)
+
+    worker = toolchain.zinc_configuration.compile_worker
+
     execution_requirements_tags = {
         "supports-multiplex-workers": "1",
         "supports-workers": "1",
@@ -99,16 +82,6 @@ def phase_zinc_compile(ctx, g):
         "supports-worker-cancellation": "1",
         "supports-path-mapping": "1",
     }
-
-    # Disable several things if incremental compilation features are going to be used
-    # because incremental compilation require stashing files outside the sandbox that
-    # Bazel isn't aware of and is less deterministic than ideal.
-    if toolchain.zinc_configuration.incremental:
-        execution_requirements_tags["no-sandbox"] = "1"
-        execution_requirements_tags["no-cache"] = "1"
-        execution_requirements_tags["no-remote"] = "1"
-        execution_requirements_tags["supports-multiplex-sandboxing"] = "0"
-        execution_requirements_tags["supports-path-mapping"] = "0"
 
     # todo: different execution path for nosrc jar?
     ctx.actions.run(
@@ -126,32 +99,9 @@ def phase_zinc_compile(ctx, g):
     for jar in g.javainfo.java_info.outputs.jars:
         jars.append(jar.class_jar)
         jars.append(jar.ijar)
-    zinc_info = _ZincInfo(
-        analysis_store = analysis_store,
-        deps_files = depset([analysis_store], transitive = [zinc.deps_files for zinc in zincs]),
-        label = ctx.label,
-        deps = depset(
-            [_ZincDepInfo(
-                analysis_store = analysis_store,
-                jars = tuple(jars),
-                label = ctx.label,
-            )],
-            transitive = [zinc.deps for zinc in zincs],
-        ),
-    )
 
-    g.out.providers.append(zinc_info)
     return _ZincCompilationInfo(
         mains_file = mains_file,
         tests_file = tests_file,
         used = used,
-        # todo: see about cleaning up & generalizing fields below
-        zinc_info = zinc_info,
     )
-
-def _compile_analysis(analysis):
-    return [
-        "--analysis",
-        "_{}".format(analysis.label),
-        analysis.analysis_store.path,
-    ] + [jar.path for jar in analysis.jars]

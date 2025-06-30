@@ -90,7 +90,6 @@ def _zinc_configuration_impl(ctx):
             zinc_configuration = ZincConfiguration(
                 compile_worker = ctx.attr._compile_worker,
                 compiler_bridge = ctx.file.compiler_bridge,
-                incremental = ctx.attr.incremental,
                 log_level = ctx.attr.log_level,
             ),
             deps_configuration = DepsConfiguration(
@@ -135,7 +134,6 @@ off: Don't perform unused dependency checking.""",
         ),
         "global_plugins": attr.label_list(providers = [JavaInfo]),
         "global_scalacopts": attr.string_list(),
-        "incremental": attr.bool(default = False),
         "log_level": attr.string(
             default = "warn",
             values = ["error", "warn", "info", "debug", "none"],

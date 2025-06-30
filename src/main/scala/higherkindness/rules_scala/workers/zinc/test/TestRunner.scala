@@ -5,7 +5,6 @@ import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import higherkindness.rules_scala.common.sbt_testing.{AnnexTestingLogger, TestDefinition, TestFrameworkLoader, TestsFileData, Verbosity}
-import higherkindness.rules_scala.workers.common.AnalysisUtil
 import java.io.FileInputStream
 import java.net.URLClassLoader
 import java.nio.file.attribute.FileTime
@@ -19,7 +18,6 @@ import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import play.api.libs.json.Json
 import scala.jdk.CollectionConverters.*
 import scala.util.Using
-import scala.util.control.NonFatal
 
 object TestRunner {
   private sealed abstract class Isolation(val level: String)
@@ -85,7 +83,6 @@ object TestRunner {
   }
 
   private class TestRunnerRequest private (
-    val analysisStore: Path,
     val subprocessExecutable: Option[Path],
     val isolation: Isolation,
     val sharedClasspath: List[Path],
@@ -96,7 +93,6 @@ object TestRunner {
   private object TestRunnerRequest {
     def apply(runPath: Path, namespace: Namespace): TestRunnerRequest = {
       new TestRunnerRequest(
-        analysisStore = SandboxUtil.getSandboxPath(runPath, namespace.get[Path]("analysis_store")),
         subprocessExecutable =
           Option(namespace.get[Path]("subprocess_exec")).map(SandboxUtil.getSandboxPath(runPath, _)),
         isolation = Isolation(namespace.getString("isolation")),
@@ -109,12 +105,6 @@ object TestRunner {
 
   private val testArgParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("test").addHelp(true).build()
-    parser
-      .addArgument("--analysis_store")
-      .help("Analysis Store file")
-      .metavar("class")
-      .`type`(PathArgumentType.apply())
-      .required(true)
     parser
       .addArgument("--subprocess_exec")
       .help("Executable for SubprocessTestRunner")
@@ -171,26 +161,6 @@ object TestRunner {
 
     val classLoader = ClassLoaders.sbtTestClassLoader(testClasspath.map(_.toUri.toURL).toSeq)
     val sharedClassLoader = ClassLoaders.sbtTestClassLoader(sharedUrls)
-
-    val apis =
-      try {
-        AnalysisUtil
-          .getAnalysis(
-            AnalysisUtil.getAnalysisStore(
-              testRunnerRequest.analysisStore.toFile,
-              debug = false,
-              isIncremental = false,
-              // There's no sandboxing here because this isn't a worker, so just use an empty path
-              // for the sandbox prefix.
-              workDir = Paths.get(""),
-            ),
-          )
-          .apis
-      } catch {
-        case NonFatal(e) =>
-          throw new Exception(s"Failed to load APIs from analysis store: ${testRunnerRequest.analysisStore}", e)
-      }
-
     val loader = new TestFrameworkLoader(classLoader)
     val testsFileData = Using(new FileInputStream(testRunnerRequest.testsFile.toString)) { stream =>
       Json.fromJson[TestsFileData](Json.parse(stream)).get

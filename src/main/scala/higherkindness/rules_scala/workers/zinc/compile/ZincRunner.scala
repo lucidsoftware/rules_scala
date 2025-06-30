@@ -15,8 +15,6 @@ import java.nio.file.{Files, Path, Paths}
 import java.util.Optional
 import javax.tools.{StandardLocation, ToolProvider}
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.impl.Arguments as Arg
-import net.sourceforge.argparse4j.inf.Namespace
 import play.api.libs.json.Json
 import sbt.internal.inc.classfile.analyzeJavaClasses
 import sbt.internal.inc.classpath.ClassLoaderCache
@@ -27,34 +25,6 @@ import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 import xsbti.compile.{DependencyChanges, ScalaInstance}
 import xsbti.{AnalysisCallback, AnalysisCallback3, CompileFailed, Logger, Reporter, VirtualFile, VirtualFileRef}
-
-class ZincRunnerWorkerConfig private (
-  val persistenceDir: Option[Path],
-  val usePersistence: Boolean,
-  val extractedFileCache: Option[Path],
-)
-
-object ZincRunnerWorkerConfig {
-  def apply(namespace: Namespace): ZincRunnerWorkerConfig = {
-    new ZincRunnerWorkerConfig(
-      pathFrom("persistence_dir", namespace),
-      Option(namespace.getBoolean("use_persistence")).map(Boolean.unbox).getOrElse(false),
-      pathFrom("extracted_file_cache", namespace),
-    )
-  }
-
-  private def pathFrom(arg: String, namespace: Namespace): Option[Path] = {
-    Option(namespace.getString(arg)).map { pathString =>
-      if (pathString.startsWith("~" + File.separator)) {
-        Paths.get(pathString.replace("~", sys.props.getOrElse("user.home", "")))
-      } else if (pathString.startsWith("~")) {
-        throw new Exception("Unsupported home directory expansion")
-      } else {
-        Paths.get(pathString)
-      }
-    }
-  }
-}
 
 /**
  * <strong>Caching</strong>
@@ -77,7 +47,7 @@ object ZincRunnerWorkerConfig {
  * that Zinc caches. We do so to prevent non-determinism in Zinc's analysis store files. Check the comments in
  * AnnexScalaInstance for more info.
  */
-object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
+object ZincRunner extends WorkerMain[Unit] {
 
   // Using Thread.interrupt to interrupt concurrent Zinc/Scala compilations that use a shared ScalaInstance (and thus
   // shared classloaders) can cause strange concurrency errors. To avoid those strange concurrency errors we only
@@ -92,7 +62,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
   // prevents GC of the soft reference in classloaderCache
   private var lastCompiler: AnyRef = null
   private def compileScala(
-    task: WorkTask[ZincRunnerWorkerConfig],
+    task: WorkTask[Unit],
     parsedArguments: CommonArguments,
     scalaInstance: ScalaInstance,
     normalizedSources: Iterable[Path],
@@ -182,7 +152,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
 
   private def labelToPath(label: String) = Paths.get(label.replaceAll("^/+", "").replaceAll(raw"[^\w/]", "_"))
   private def maybeCompileJava(
-    task: WorkTask[ZincRunnerWorkerConfig],
+    task: WorkTask[Unit],
     parsedArguments: CommonArguments,
     normalizedSources: Iterable[Path],
     classesOutputDirectory: Path,
@@ -255,36 +225,19 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
       Files.write(path, Json.stringify(Json.toJson(testsFileData)).getBytes(StandardCharsets.UTF_8))
     }
 
-  protected def init(args: Option[Array[String]]): ZincRunnerWorkerConfig = {
-    val parser = ArgumentParsers.newFor("zinc-worker").addHelp(true).build
-    parser.addArgument("--persistence_dir", /* deprecated */ "--persistenceDir").metavar("path")
-    parser.addArgument("--use_persistence").`type`(Arg.booleanType)
-    parser.addArgument("--extracted_file_cache").metavar("path")
-    // deprecated
-    parser.addArgument("--max_errors")
-    val namespace = parser.parseArgsOrFail(args.getOrElse(Array.empty))
-    ZincRunnerWorkerConfig(namespace)
-  }
+  protected def init(args: Option[Array[String]]): Unit = ()
 
   private val parser = {
     val parser = ArgumentParsers.newFor("zinc").addHelp(true).defaultFormatWidth(80).fromFilePrefix("@").build()
     CommonArguments.add(parser)
   }
 
-  protected def work(task: WorkTask[ZincRunnerWorkerConfig]): Unit = {
+  protected def work(task: WorkTask[Unit]): Unit = {
     val workRequest = CommonArguments(
       ArgsUtil.parseArgsOrFailSafe(task.args, parser, task.output),
       task.workDir,
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-    // These two paths must only be used when persistence is enabled because they escape the sandbox.
-    // Sandboxing is disabled if persistence is enabled.
-    val (persistenceDir, extractedFileCache) = if (task.context.usePersistence) {
-      (task.context.persistenceDir, task.context.extractedFileCache)
-    } else {
-      (None, None)
-    }
 
     val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)
 
@@ -305,7 +258,7 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     // extract upstream classes
     val classesDir = tmpDir.resolve("classes")
     val outputJar = workRequest.outputJar
-    val readWriteMappers = AnnexMapper.mappers(task.workDir, task.context.usePersistence)
+    val readWriteMappers = AnnexMapper.mappers(task.workDir)
     val classesOutputDir = classesDir.resolve(labelToPath(workRequest.label))
     Files.createDirectories(classesOutputDir)
 
@@ -401,14 +354,6 @@ object ZincRunner extends WorkerMain[ZincRunnerWorkerConfig] {
     }
 
     jarCreator.execute()
-
-    // TODO: Do this properly
-    val analysisStorePathString = workRequest.outputAnalysisStore.toString
-    val analysisStoreTextPath =
-      Paths.get(s"${analysisStorePathString.slice(0, analysisStorePathString.length - 3)}.text.gz")
-
-    Files.createFile(workRequest.outputAnalysisStore)
-    Files.createFile(analysisStoreTextPath)
 
     // clear temporary files
     FileUtil.delete(tmpDir)

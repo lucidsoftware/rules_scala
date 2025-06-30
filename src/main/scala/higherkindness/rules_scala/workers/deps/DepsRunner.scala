@@ -134,7 +134,7 @@ object DepsRunner extends WorkerMain[Unit] {
 
       potentialLabels.collect(groupLabelToJarPaths).flatten
     }
-    val readWriteMappers = AnnexMapper.mappers(task.workDir, isIncremental = false)
+    val readWriteMappers = AnnexMapper.mappers(task.workDir)
     val readMapper = readWriteMappers.getReadMapper()
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)

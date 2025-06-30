@@ -2,15 +2,15 @@ package higherkindness.rules_scala.workers.common
 
 import com.google.devtools.build.buildjar.jarhelper.JarHelper
 import java.nio.file.{Path, Paths}
-import sbt.internal.inc.{FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter, Stamper}
+import sbt.internal.inc.{FarmHash, Hash, LastModified, PlainVirtualFile, PlainVirtualFileConverter}
 import xsbti.VirtualFileRef
 import xsbti.compile.MiniSetup
 import xsbti.compile.analysis.{ReadMapper, ReadWriteMappers, Stamp, WriteMapper}
 
 object AnnexMapper {
   val rootPlaceholder = Paths.get("_ROOT_")
-  def mappers(root: Path, isIncremental: Boolean) = {
-    new ReadWriteMappers(new AnxReadMapper(root, isIncremental), new AnxWriteMapper(root))
+  def mappers(root: Path) = {
+    new ReadWriteMappers(new AnxReadMapper(root), new AnxWriteMapper(root))
   }
 
   /**
@@ -25,31 +25,6 @@ object AnnexMapper {
       case hash: Hash                 => hash
       case lastModified: LastModified => new LastModified(JarHelper.DEFAULT_TIMESTAMP)
       case _ => throw new Exception(s"Unexpected Stamp type encountered when writing. ${stamp.getClass} -- $stamp")
-    }
-  }
-
-  final def getReadStamp(file: VirtualFileRef, stamp: Stamp, isIncremental: Boolean): Stamp = {
-    if (isIncremental) {
-      getIncrementalModeReadStamp(file, stamp)
-    } else {
-      stamp
-    }
-  }
-
-  /**
-   * When in incremental mode we do not want to rely on the timestamp from the AnalysisStore because we're assuming it
-   * was set to a constant value when written to the AnalysisStore.
-   *
-   * Instead, for any LastModified stamps, we read the file's time stamp from disk.
-   */
-  final def getIncrementalModeReadStamp(file: VirtualFileRef, stamp: Stamp): Stamp = {
-    stamp match {
-      case farmHash: FarmHash         => farmHash
-      case hash: Hash                 => hash
-      case lastModified: LastModified => {
-        Stamper.forLastModifiedP(PlainVirtualFileConverter.converter.toPath(file))
-      }
-      case _ => throw new Exception(s"Unexpected Stamp type encountered when reading ${stamp.getClass} -- $stamp")
     }
   }
 }
@@ -93,7 +68,7 @@ final class AnxWriteMapper(root: Path) extends WriteMapper {
   override def mapMiniSetup(miniSetup: MiniSetup): MiniSetup = miniSetup
 }
 
-final class AnxReadMapper(root: Path, isIncremental: Boolean) extends ReadMapper {
+final class AnxReadMapper(root: Path) extends ReadMapper {
   private val rootAbs = root.toAbsolutePath().normalize()
 
   private def mapFile(virtualFileRef: VirtualFileRef): Path = {
@@ -119,15 +94,9 @@ final class AnxReadMapper(root: Path, isIncremental: Boolean) extends ReadMapper
   override def mapOutputDir(outputDir: Path): Path = mapFile(outputDir)
   override def mapSourceDir(sourceDir: Path): Path = mapFile(sourceDir)
 
-  override def mapSourceStamp(file: VirtualFileRef, sourceStamp: Stamp): Stamp = {
-    AnnexMapper.getReadStamp(file, sourceStamp, isIncremental)
-  }
-  override def mapBinaryStamp(file: VirtualFileRef, binaryStamp: Stamp): Stamp = {
-    AnnexMapper.getReadStamp(file, binaryStamp, isIncremental)
-  }
-  override def mapProductStamp(file: VirtualFileRef, productStamp: Stamp): Stamp = {
-    AnnexMapper.getReadStamp(file, productStamp, isIncremental)
-  }
+  override def mapSourceStamp(file: VirtualFileRef, sourceStamp: Stamp): Stamp = sourceStamp
+  override def mapBinaryStamp(file: VirtualFileRef, binaryStamp: Stamp): Stamp = binaryStamp
+  override def mapProductStamp(file: VirtualFileRef, productStamp: Stamp): Stamp = productStamp
 
   override def mapMiniSetup(miniSetup: MiniSetup): MiniSetup = miniSetup
 }

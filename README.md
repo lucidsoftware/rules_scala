@@ -9,10 +9,12 @@ vastly improve build times. However, to see these benefits, a project must first
 tiny packages and make use of fine-grained dependencies. This is not always a realistic short-term
 goal for large, monorepo Scala projects.
 
-`lucidsoftware/rules_scala` allows for the optional use of Zinc incremental compilation to provide a
-stepping stone for these projects as they migrate to Bazel. Although we've verified it to be correct
-and determinisitc, we recommend leaving this disabled, as fine-grained and isolated targets are
-more in-line with the [Bazel philosophy](https://bazel.build/basics/hermeticity).
+`lucidsoftware/rules_scala` used to allow for the optional use of Zinc incremental compilation to
+provide a stepping stone for these projects as they migrate to Bazel. Although we still reuse code
+from Zinc and the compiler bridge, this ruleset no longer supports incremental compilation.
+Mitigating nondeterminism issues required introducing an enormous amount of complexity to the
+compilation worker, and we eventually discovered that supporting incremental compilation added
+substantial overhead to compilation times.
 
 `lucidsoftware/rules_scala` is written with maintainability and accessibility in mind. It aims to
 facilitate the transition to Bazel, and to satisfy use cases throughout the Scala ecosystem.
@@ -40,7 +42,6 @@ straightforward.
   * Errors on indirect and unused dependencies
   * Buildozer suggestions for dependency errors
 * [Optional Worker strategy](docs/scala.md#workers)
-* [Optional Zinc-based stateful incremental compilation](docs/stateful.md#stateful-compilation)
 * [Scalafmt](docs/scalafmt.md#scalafmt) integration
 * Protobuf support with ScalaPB
   * [scala_proto_library](docs/stardoc/scala_proto.md#scala_proto_library)
@@ -49,7 +50,6 @@ straightforward.
 * [Customizable rules](docs/newdocs/phases.md#customizing-the-core-rules)
 * [Multiple Scala versions in one build](docs/newdocs/scala_versions.md#specifying-the-scala-version-to-use), including Scala 3 (Dotty).
 * [Optimal handling of macros and ijars](docs/newdocs/macros.md#macros-and-ijars)
-* [Pass flags to Zinc compiler](docs/newdocs/zinc_flags.md)
 * Modern implementation using Bazel's most idiomatic APIs
 
 ## Usage

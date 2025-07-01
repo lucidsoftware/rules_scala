@@ -221,7 +221,7 @@ Generates Scaladoc.
 <pre>
 load("@rules_scala_annex//rules:scala.bzl", "make_scala_binary")
 
-make_scala_binary(<a href="#make_scala_binary-extras">extras</a>)
+make_scala_binary(<a href="#make_scala_binary-extras">*extras</a>)
 </pre>
 
 
@@ -241,7 +241,7 @@ make_scala_binary(<a href="#make_scala_binary-extras">extras</a>)
 <pre>
 load("@rules_scala_annex//rules:scala.bzl", "make_scala_library")
 
-make_scala_library(<a href="#make_scala_library-extras">extras</a>)
+make_scala_library(<a href="#make_scala_library-extras">*extras</a>)
 </pre>
 
 
@@ -261,7 +261,7 @@ make_scala_library(<a href="#make_scala_library-extras">extras</a>)
 <pre>
 load("@rules_scala_annex//rules:scala.bzl", "make_scala_test")
 
-make_scala_test(<a href="#make_scala_test-extras">extras</a>)
+make_scala_test(<a href="#make_scala_test-extras">*extras</a>)
 </pre>
 
 

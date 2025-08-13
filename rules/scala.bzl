@@ -87,6 +87,7 @@ _compile_attributes = {
             "-src.jar",
         ],
         flags = ["DIRECT_COMPILE_TIME_INPUT"],
+        mandatory = True,
     ),
     "data": attr.label_list(
         cfg = _scala_outgoing_transition,

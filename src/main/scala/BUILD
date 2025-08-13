@@ -51,6 +51,7 @@ register_zinc_toolchain(
 # IntelliJ libraries, so we can get a Scala SDK on sync.
 scala_library(
     name = "scala-sdk",
+    srcs = [],
     deps_used_whitelist = compiler_classpath_2_13,
     scala_toolchain_name = "annex_zinc_3",
     deps = compiler_classpath_2_13,
@@ -69,6 +70,7 @@ runtime_classpath_3 = [
 
 scala_library(
     name = "scala-sdk-3",
+    srcs = [],
     deps_used_whitelist = compiler_classpath_3,
     scala_toolchain_name = "annex_zinc_3",
     deps = compiler_classpath_3,

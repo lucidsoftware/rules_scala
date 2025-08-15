@@ -73,7 +73,7 @@ toolchain(
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="scala_proto_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="scala_proto_toolchain-compiler"></a>compiler |  The compiler to use to generate Scala form proto sources   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="scala_proto_toolchain-compiler"></a>compiler |  The compiler to use to generate Scala from proto sources   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="scala_proto_toolchain-compiler_supports_workers"></a>compiler_supports_workers |  -   | Boolean | optional |  `False`  |
 | <a id="scala_proto_toolchain-protoc"></a>protoc |  The protoc binary to use   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@protobuf//:protoc"`  |
 

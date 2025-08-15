@@ -42,7 +42,7 @@ scala_proto_toolchain = rule(
         "compiler": attr.label(
             allow_files = True,
             cfg = "exec",
-            doc = "The compiler to use to generate Scala form proto sources",
+            doc = "The compiler to use to generate Scala from proto sources",
             executable = True,
             mandatory = True,
         ),

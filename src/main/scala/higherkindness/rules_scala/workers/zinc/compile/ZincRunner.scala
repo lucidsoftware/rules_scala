@@ -211,19 +211,33 @@ object ZincRunner extends WorkerMain[Unit] {
     }
   }
 
-  private def maybeWriteTestsFile(parsedArguments: CommonArguments, analysis: AnnexAnalysis): Unit =
-    parsedArguments.testsFile.foreach { path =>
-      val classloader = ClassLoaders.sbtTestClassLoader(parsedArguments.classpath.map(_.toUri.toURL))
-      val frameworkLoader = new TestFrameworkLoader(classloader)
-      val testsFileData = TestsFileData(
-        parsedArguments.testFrameworks
-          .flatMap(frameworkName => frameworkLoader.load(frameworkName).map((frameworkName, _)))
-          .map { case (frameworkName, framework) => frameworkName -> new TestDiscovery(framework)(analysis.apis.toSet) }
-          .toMap,
-      )
+  private def maybeWriteTestsFile(parsedArguments: CommonArguments, analysis: AnnexAnalysis): Array[Path] =
+    parsedArguments.testsFile
+      .map { path =>
+        val classloader = ClassLoaders.sbtTestClassLoader(parsedArguments.classpath.map(_.toUri.toURL))
+        val frameworkLoader = new TestFrameworkLoader(classloader)
+        val testsFileData = TestsFileData(
+          parsedArguments.testFrameworks
+            .flatMap(frameworkName => frameworkLoader.load(frameworkName).map((frameworkName, _)))
+            .map { case (frameworkName, framework) =>
+              frameworkName -> new TestDiscovery(framework)(analysis.apis.toSet)
+            }
+            .toMap,
+        )
 
-      Files.write(path, Json.stringify(Json.toJson(testsFileData)).getBytes(StandardCharsets.UTF_8))
-    }
+        val loadedJarsByFramework = frameworkLoader.getLoadedJarsByFramework()
+        val loadedJars = testsFileData.testsByFramework.view
+          .filter { case (_, tests) => tests.nonEmpty }
+          .keys
+          .flatMap(loadedJarsByFramework.get)
+          .flatten
+          .toArray
+
+        Files.write(path, Json.stringify(Json.toJson(testsFileData)).getBytes(StandardCharsets.UTF_8))
+
+        loadedJars
+      }
+      .getOrElse(Array.empty)
 
   protected def init(args: Option[Array[String]]): Unit = ()
 
@@ -298,7 +312,16 @@ object ZincRunner extends WorkerMain[Unit] {
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 
-    maybeWriteTestsFile(workRequest, analysis)
+    /*
+     * JARs on the classpath used during test discovery, but not used by compiler won't show up in `analysis.usedJars`, so
+     * we need to consider them in addition to those used by the compiler.
+     *
+     * Test discovery works by iterating through the list of test frameworks provided via `workRequest.testFrameworks`,
+     * attempting to classload each framework, and then using that framework to discover tests. If a given framework
+     * successfully loads and we found a test with it we take note of the JAR it was loaded from and consider that JAR
+     * (and therefore the target to which it belongs) used.
+     */
+    val usedDepsDuringTestDiscovery = maybeWriteTestsFile(workRequest, analysis)
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 
@@ -310,7 +333,7 @@ object ZincRunner extends WorkerMain[Unit] {
     val usedDeps = workRequest.classpath.view
       .map(_.normalize().toAbsolutePath)
       .toSet
-      .intersect(analysis.usedJars.toSet)
+      .intersect((analysis.usedJars.view ++ usedDepsDuringTestDiscovery.view).toSet)
       // Filter out the Scala standard library as they should always be implicitly available we shouldn't be
       // bookkeeping them
       .view

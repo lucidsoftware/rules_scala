@@ -3,6 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 
 scala_library(
     name = "plain",
+    srcs = [],
     resource_strip_prefix = "resources/reference_conf",
     resources = ["reference.conf"],
     scala_toolchain_name = "test_zinc_2_13",

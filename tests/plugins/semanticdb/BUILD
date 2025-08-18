@@ -60,6 +60,7 @@ read_semanticdb_info(
 
 scala_library(
     name = "semanticdb-empty",
+    srcs = [],
     scala_toolchain_name = "scala_2_13_with_semanticdb",
 )
 

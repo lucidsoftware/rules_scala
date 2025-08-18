@@ -1,14 +1,12 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import xsbti.compile.ScalaInstance
 import java.io.{File, IOException}
 import java.net.URLClassLoader
 import java.nio.file.{AtomicMoveNotSupportedException, FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.immutable.TreeMap
 import scala.util.control.NonFatal
+import xsbti.compile.ScalaInstance
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary

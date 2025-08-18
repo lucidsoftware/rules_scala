@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package common.sandbox
+package higherkindness.rules_scala.common.sandbox
 
 import java.io.File
 import java.nio.file.Path

@@ -1,7 +1,6 @@
-package higherkindness.rules_scala
-package common.worker
+package higherkindness.rules_scala.common.worker
 
-import java.util.concurrent.{Callable, FutureTask}
+import java.util.concurrent.Callable
 import scala.concurrent.{ExecutionContext, ExecutionException, Future, Promise}
 import scala.util.Try
 

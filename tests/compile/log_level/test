@@ -6,4 +6,4 @@
 # warning we want printed, printed. The alternative is to bazel clean, which
 # takes much longer.
 bazel shutdown
-bazel build :lib --nouse_action_cache |& grep "compiling 1 Scala source"
+bazel build :lib --nouse_action_cache |& grep "The Scala compiler is invoked with:"

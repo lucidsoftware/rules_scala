@@ -25,7 +25,6 @@ ZincConfiguration = provider(
         "compiler_bridge": "compiled Zinc compiler bridge",
         "compile_worker": "the worker label for compilation with Zinc",
         "log_level": "log level for the Zinc compiler",
-        "incremental": "whether incremental compilation will be available for this Zinc compiler",
     },
 )
 
@@ -49,16 +48,6 @@ ScalaRulePhase = provider(
     doc = "A Scala compiler plugin",
     fields = {
         "phases": "the phases to add",
-    },
-)
-
-ZincInfo = provider(
-    doc = "Zinc-specific outputs.",
-    fields = {
-        "analysis_store": "The analysis store file.",
-        "deps": "The depset of library dependency outputs.",
-        "deps_files": "The depset of all Zinc files.",
-        "label": "The label for this output.",
     },
 )
 
@@ -183,16 +172,7 @@ ZincCompilationInfo = provider(
     doc = "Outputs from the Zinc compilation phase.",
     fields = {
         "mains_file": "File containing the main methods of this compilation.",
+        "tests_file": "File containing discovered tests for use by the test runner. Will be `None` if this isn't a test target.",
         "used": "File containing the used deps for this compilation.",
-        "zinc_info": "a ZincInfo provider for this compilation.",
-    },
-)
-
-ZincDepInfo = provider(
-    doc = "Information for a dep in a ZincInfo",
-    fields = {
-        "analysis_store": "Analysis store for this label",
-        "jars": "Jars for this label",
-        "label": "The label for this dep",
     },
 )

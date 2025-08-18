@@ -1,24 +1,51 @@
-package higherkindness.rules_scala
-package common.sbt_testing
+package higherkindness.rules_scala.common.sbt_testing
 
-import sbt.testing.{Event, Fingerprint, Framework, Logger, Runner, Status, Task, TaskDef, TestWildcardSelector}
+import java.nio.file.{Path, Paths}
+import play.api.libs.json.{Format, Json}
+import sbt.testing.{Event, Framework, Logger, Runner, Status, Task, TaskDef, TestWildcardSelector}
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
-class TestDefinition(val name: String, val fingerprint: Fingerprint with Serializable) extends Serializable
+case class TestDefinition(name: String, fingerprint: TestFingerprint)
 
-class TestFrameworkLoader(loader: ClassLoader, logger: Logger) {
-  def load(className: String) = {
-    val framework =
+object TestDefinition {
+  implicit val format: Format[TestDefinition] = Json.format[TestDefinition]
+}
+
+class TestFrameworkLoader(loader: ClassLoader) {
+  private val loadedJarsByFramework = mutable.Map.empty[String, mutable.ArrayBuffer[Path]]
+  private def getClassJar(`class`: Class[?]): Option[Path] = for {
+    codeSource <- Option(`class`.getProtectionDomain().getCodeSource())
+    codeSourceUri = codeSource.getLocation().toURI()
+    path <-
       try {
-        Some(Class.forName(className, true, loader).getDeclaredConstructor().newInstance())
+        Some(Paths.get(codeSourceUri))
       } catch {
-        case _: ClassNotFoundException => None
+        case _: IllegalArgumentException => None
+      }
+  } yield path
+
+  def getLoadedJarsByFramework(): Map[String, Array[Path]] =
+    loadedJarsByFramework.view.map { case (frameworkName, loadedJars) => frameworkName -> loadedJars.toArray }.toMap
+
+  def load(className: String) = {
+    val (framework, loadedJar) =
+      try {
+        val `class` = Class.forName(className, true, loader)
+        val loadedJar = getClassJar(`class`)
+
+        (Some(`class`.getDeclaredConstructor().newInstance()), loadedJar)
+      } catch {
+        case _: ClassNotFoundException => (None, None)
         case NonFatal(e)               => throw new Exception(s"Failed to load framework $className", e)
       }
     framework.map {
-      case framework: Framework => framework
-      case _                    => throw new Exception(s"$className does not implement ${classOf[Framework].getName}")
+      case framework: Framework =>
+        loadedJar.foreach(loadedJarsByFramework.getOrElseUpdate(className, mutable.ArrayBuffer.empty) += _)
+
+        framework
+
+      case _ => throw new Exception(s"$className does not implement ${classOf[Framework].getName}")
     }
 
   }

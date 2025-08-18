@@ -1,7 +1,6 @@
-package higherkindness.rules_scala
-package common.sbt_testing
+package higherkindness.rules_scala.common.sbt_testing
 
-import common.classloaders.ClassLoaders
+import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import java.io.ObjectInputStream
 import java.nio.file.Paths
 import scala.collection.mutable
@@ -13,7 +12,7 @@ object SubprocessTestRunner {
     val request = input.readObject().asInstanceOf[TestRequest]
     val classLoader = ClassLoaders.sbtTestClassLoader(request.classpath.map(path => Paths.get(path).toUri.toURL))
 
-    val loader = new TestFrameworkLoader(classLoader, request.logger)
+    val loader = new TestFrameworkLoader(classLoader)
     val framework = loader.load(request.framework).get
 
     val passed = ClassLoaders.withContextClassLoader(classLoader) {

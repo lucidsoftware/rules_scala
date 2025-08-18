@@ -1,5 +1,4 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
 sealed abstract class LogLevel(val level: String)
 object LogLevel {

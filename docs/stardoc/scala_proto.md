@@ -33,7 +33,7 @@ See example use in [/tests/proto/BUILD](/tests/proto/BUILD)
 <pre>
 load("@rules_scala_annex//rules:scala_proto.bzl", "scala_proto_toolchain")
 
-scala_proto_toolchain(<a href="#scala_proto_toolchain-name">name</a>, <a href="#scala_proto_toolchain-compiler">compiler</a>, <a href="#scala_proto_toolchain-compiler_supports_workers">compiler_supports_workers</a>)
+scala_proto_toolchain(<a href="#scala_proto_toolchain-name">name</a>, <a href="#scala_proto_toolchain-compiler">compiler</a>, <a href="#scala_proto_toolchain-compiler_supports_workers">compiler_supports_workers</a>, <a href="#scala_proto_toolchain-protoc">protoc</a>)
 </pre>
 
 Specifies a toolchain of the `@rules_scala_annex//rules/scala_proto:compiler_toolchain_type` toolchain type.
@@ -73,7 +73,8 @@ toolchain(
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="scala_proto_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="scala_proto_toolchain-compiler"></a>compiler |  The compiler to use to generate Scala form proto sources   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="scala_proto_toolchain-compiler"></a>compiler |  The compiler to use to generate Scala from proto sources   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="scala_proto_toolchain-compiler_supports_workers"></a>compiler_supports_workers |  -   | Boolean | optional |  `False`  |
+| <a id="scala_proto_toolchain-protoc"></a>protoc |  The protoc binary to use   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@protobuf//:protoc"`  |
 
 

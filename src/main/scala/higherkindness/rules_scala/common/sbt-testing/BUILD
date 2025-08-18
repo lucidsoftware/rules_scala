@@ -24,11 +24,14 @@ scala_library(
 scala_library(
     name = "common",
     srcs = _common_srcs,
-    scala_toolchain_name = "annex_zinc_3",
+    scala_toolchain_name = "annex_bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
+        "@annex//:org_playframework_play_json_3",
         "@annex//:org_scala_lang_modules_scala_xml_2_13",
+        "@annex//:org_scala_sbt_compiler_interface",
         "@annex//:org_scala_sbt_test_interface",
+        "@annex//:org_scala_sbt_zinc_core_2_13",
     ],
 )
 

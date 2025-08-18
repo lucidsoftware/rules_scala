@@ -1,16 +1,15 @@
-package higherkindness.rules_scala
-package workers.jacoco.instrumenter
+package higherkindness.rules_scala.workers.jacoco.instrumenter
 
-import common.args.ArgsUtil
-import common.error.AnnexWorkerError
-import common.interrupt.InterruptUtil
-import common.sandbox.SandboxUtil
-import common.worker.{WorkTask, WorkerMain}
-import java.io.{BufferedInputStream, BufferedOutputStream, PrintStream}
+import higherkindness.rules_scala.common.args.ArgsUtil
+import higherkindness.rules_scala.common.error.AnnexWorkerError
+import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
+import java.io.{BufferedInputStream, BufferedOutputStream}
 import java.net.URI
-import java.nio.file.Files
 import java.nio.file.FileSystems
 import java.nio.file.FileVisitResult
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
@@ -19,8 +18,8 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.Collections
 import java.util.List as JList
 import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import net.sourceforge.argparse4j.impl.Arguments
+import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import org.jacoco.core.instr.Instrumenter
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator
 import scala.jdk.CollectionConverters.*

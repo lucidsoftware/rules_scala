@@ -1,9 +1,8 @@
-package higherkindness.rules_scala
-package common.sbt_testing
+package higherkindness.rules_scala.common.sbt_testing
 
 import java.io.{PrintWriter, StringWriter}
+import sbt.testing.Status.{Canceled, Error, Failure, Ignored, Pending, Skipped}
 import sbt.testing.{Event, Status, TestSelector}
-import Status.{Canceled, Error, Failure, Ignored, Pending, Skipped}
 import scala.collection.mutable.ListBuffer
 import scala.xml.{Elem, Utility, XML}
 

@@ -20,7 +20,6 @@ common --modify_execution_info=CppArchive=+supports-path-mapping
 common --modify_execution_info=CppCompile=+supports-path-mapping
 common --modify_execution_info=CppModuleMap=+supports-path-mapping
 
-common --announce_rc
 common --color=yes
 common:rules --disk_cache=.bazel_cache
 common:tests --disk_cache=../.bazel_cache
@@ -51,3 +50,5 @@ common --incompatible_strict_action_env
 #common --noincompatible_enable_deprecated_label_apis
 
 test --test_output=all
+
+try-import %workspace%/user.bazelrc

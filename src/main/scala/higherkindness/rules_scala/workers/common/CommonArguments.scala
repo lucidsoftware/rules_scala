@@ -1,20 +1,15 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import common.args.ArgsUtil.PathArgumentType
-import common.args.implicits.*
-import common.sandbox.SandboxUtil
-import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
-import net.sourceforge.argparse4j.inf.{Argument, ArgumentParser, ArgumentType, Namespace}
-import java.util.{Collections, List as JList}
-import scala.annotation.nowarn
-import scala.collection.mutable.Buffer
-import scala.jdk.CollectionConverters.*
-import java.io.File
+import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
+import higherkindness.rules_scala.common.args.implicits.*
+import higherkindness.rules_scala.common.sandbox.SandboxUtil
 import java.nio.file.{Path, Paths}
+import java.util.Collections
+import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
+import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
+import scala.jdk.CollectionConverters.*
 
 class CommonArguments private (
-  val analyses: List[Analysis],
   val compilerBridge: Path,
   val compilerClasspath: List[Path],
   val compilerOptions: Array[String],
@@ -36,11 +31,12 @@ class CommonArguments private (
   val label: String,
   val logLevel: LogLevel,
   val mainManifest: Path,
-  val outputAnalysisStore: Path,
   val outputJar: Path,
   val outputUsed: Path,
   val plugins: List[Path],
   val sourceJars: List[Path],
+  val testFrameworks: List[String],
+  val testsFile: Option[Path],
   val tmpDir: Path,
   val sources: List[Path],
 )
@@ -86,12 +82,6 @@ object CommonArguments {
    */
   def add(parser: ArgumentParser): ArgumentParser = {
     parser
-      .addArgument("--analysis")
-      .action(ArgumentsImpl.append)
-      .help("Analysis, given as: _label analysis_store [jar ...]")
-      .metavar("args")
-      .nargs("*")
-    parser
       .addArgument("--compiler_bridge")
       .help("Compiler bridge")
       .metavar("path")
@@ -127,6 +117,18 @@ object CommonArguments {
       .`type`(ArgumentsImpl.booleanType)
       .setDefault_(false)
     parser
+      .addArgument("--test_frameworks")
+      .help("Class names of sbt.testing.Framework implementations")
+      .metavar("class")
+      .nargs("*")
+      .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--tests_file")
+      .help("File to output discovered tests in, for use by the test runner.")
+      .metavar("file")
+      .required(false)
+      .`type`(PathArgumentType.apply())
+    parser
       .addArgument("--java_compiler_option")
       .help("Java compiler option")
       .action(ArgumentsImpl.append)
@@ -144,12 +146,6 @@ object CommonArguments {
       .addArgument("--main_manifest")
       .help("List of main entry points")
       .metavar("file")
-      .required(true)
-      .`type`(PathArgumentType.apply())
-    parser
-      .addArgument("--output_analysis_store")
-      .help("Output Analysis Store")
-      .metavar("path")
       .required(true)
       .`type`(PathArgumentType.apply())
     parser
@@ -196,22 +192,7 @@ object CommonArguments {
   }
 
   def apply(namespace: Namespace, workDir: Path): CommonArguments = {
-    val analysisArgs = Option(namespace.getList[JList[String]]("analysis")).map(_.asScala).getOrElse(List.empty)
-
-    val analyses: List[Analysis] = analysisArgs.view
-      .map(_.asScala)
-      .map { analysisArg =>
-        // Analysis strings are of the format: _label analysis_store [jar ...]
-        val label = analysisArg(0)
-        val analysisStore = analysisArg(1)
-        val jars = analysisArg.drop(2).toList
-        // Drop the leading _ on the label, which was added to avoid triggering argparse's arg file detection
-        Analysis(workDir, label.tail, analysisStore, jars)
-      }
-      .toList
-
     new CommonArguments(
-      analyses = analyses,
       compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
       compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
       compilerOptions = Option(namespace.getList[String]("compiler_option"))
@@ -229,11 +210,12 @@ object CommonArguments {
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("main_manifest")),
-      outputAnalysisStore = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_analysis_store")),
       outputJar = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_jar")),
       outputUsed = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_used")),
       plugins = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("plugins")),
       sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
+      testFrameworks = namespace.getList[String]("test_frameworks").asScala.toList,
+      testsFile = Option(namespace.get[Path]("tests_file")).map(SandboxUtil.getSandboxPath(workDir, _)),
       tmpDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("tmp")),
       sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
     )

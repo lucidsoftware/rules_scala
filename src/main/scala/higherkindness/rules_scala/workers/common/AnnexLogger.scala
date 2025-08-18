@@ -1,10 +1,9 @@
-package higherkindness.rules_scala
-package workers.common
+package higherkindness.rules_scala.workers.common
 
-import xsbti.Logger
 import java.io.{PrintStream, PrintWriter, StringWriter}
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
 import java.util.function.Supplier
+import xsbti.Logger
 
 final class AnnexLogger(level: LogLevel, workDir: Path, out: PrintStream) extends Logger {
 

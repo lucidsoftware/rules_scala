@@ -9,6 +9,7 @@ scala_library(
 
 scala_binary(
     name = "bin",
+    srcs = [],
     main_class = "Example",
     resource_strip_prefix = package_name(),
     resources = ["example.txt"],

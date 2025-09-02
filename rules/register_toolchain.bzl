@@ -1,20 +1,84 @@
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//rules:providers.bzl",
+    "BareConfiguration",
     "CodeCoverageConfiguration",
     "DepsConfiguration",
     "ScalaConfiguration",
     "ScalaRulePhase",
     "ZincConfiguration",
 )
+load("//rules:scala.bzl", "scala_binary")
 load(
     "//rules/private:phases.bzl",
+    "phase_bare_compile",
     "phase_bootstrap_compile",
     "phase_coverage_jacoco",
     "phase_zinc_compile",
     "phase_zinc_depscheck",
 )
 load("//rules/private:transitions.bzl", "scala_toolchain_setting")
+
+def _bare_configuration_impl(ctx):
+    if int(ctx.attr.version[0]) >= 3:
+        fail("The native toolchain doesn't yet support Scala 3. Please use the Zinc toolchain instead.")
+
+    return [
+        platform_common.ToolchainInfo(
+            bare_configuration = BareConfiguration(worker = ctx.attr.worker),
+            scala_configuration = ScalaConfiguration(
+                compiler_classpath = ctx.attr.compiler_classpath,
+                global_plugins = [],
+                global_scalacopts = ctx.attr.global_scalacopts,
+                runtime_classpath = ctx.attr.runtime_classpath,
+                semanticdb_bundle = ctx.attr.semanticdb_bundle,
+                use_ijar = ctx.attr.use_ijar,
+                version = ctx.attr.version,
+            ),
+            scala_rule_phases = ScalaRulePhase(
+                phases = [
+                    ("+", "semanticdb", "compile", phase_bare_compile),
+                ],
+            ),
+        ),
+    ]
+
+_bare_configuration = rule(
+    attrs = {
+        "compiler_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the compiler classpath. Usually, this is the compiler itself and the standard library.",
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "global_scalacopts": attr.string_list(
+            doc = "scalac options that will always be enabled.",
+        ),
+        "runtime_classpath": attr.label_list(
+            doc = "JVM targets that will always be on the runtime classpath. Usually, this is the standard library.",
+            mandatory = True,
+            providers = [JavaInfo],
+        ),
+        "semanticdb_bundle": attr.bool(
+            default = True,
+            doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
+        ),
+        "use_ijar": attr.bool(
+            doc = "Whether to use ijar for this compiler. See https://github.com/bazelbuild/bazel/blob/master/third_party/ijar/README.txt for more information.",
+            default = True,
+        ),
+        "worker": attr.label(
+            cfg = "exec",
+            doc = "The compilation worker.",
+            executable = True,
+            mandatory = True,
+        ),
+        "version": attr.string(
+            doc = "The Scala version this compiler corresponds to.",
+            mandatory = True,
+        ),
+    },
+    implementation = _bare_configuration_impl,
+)
 
 def _bootstrap_configuration_impl(ctx):
     return [
@@ -208,6 +272,8 @@ def register_bare_toolchain(name, compiler_classpath, **kwargs):
         name = "{}-worker".format(name),
         srcs = ["@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/bare:bare-srcs"],
         scala_toolchain_name = "annex_zinc_2_13",
+        # The compiler classpath may include targets other than the compiler itself, which is all the worker depends on
+        deps_used_whitelist = compiler_classpath,
         deps = [
             "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/error",
             "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",

@@ -1,4 +1,5 @@
 load(":phases/api.bzl", _adjust_phases = "adjust_phases", _run_phases = "run_phases")
+load(":phases/phase_bare_compile.bzl", _phase_bare_compile = "phase_bare_compile")
 load(":phases/phase_binary_deployjar.bzl", _phase_binary_deployjar = "phase_binary_deployjar")
 load(":phases/phase_binary_launcher.bzl", _phase_binary_launcher = "phase_binary_launcher")
 load(":phases/phase_bootstrap_compile.bzl", _phase_bootstrap_compile = "phase_bootstrap_compile")
@@ -20,6 +21,8 @@ load(":phases/phase_zinc_depscheck.bzl", _phase_zinc_depscheck = "phase_zinc_dep
 adjust_phases = _adjust_phases
 
 run_phases = _run_phases
+
+phase_bare_compile = _phase_bare_compile
 
 phase_binary_deployjar = _phase_binary_deployjar
 

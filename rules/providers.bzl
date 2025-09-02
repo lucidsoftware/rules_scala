@@ -176,3 +176,10 @@ ZincCompilationInfo = provider(
         "used": "File containing the used deps for this compilation.",
     },
 )
+
+BareConfiguration = provider(
+    doc = "Configuration for the bare Scala toolchain.",
+    fields = {
+        "worker": "The compilation worker target.",
+    },
+)

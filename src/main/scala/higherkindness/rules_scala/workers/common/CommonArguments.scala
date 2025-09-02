@@ -31,7 +31,7 @@ class CommonArguments private (
   val label: String,
   val logLevel: LogLevel,
   val mainManifest: Path,
-  val outputJar: Path,
+  val outputJar: Option[Path],
   val outputUsed: Path,
   val plugins: List[Path],
   val sourceJars: List[Path],
@@ -152,7 +152,6 @@ object CommonArguments {
       .addArgument("--output_jar")
       .help("Output jar")
       .metavar("path")
-      .required(true)
       .`type`(PathArgumentType.apply())
     parser
       .addArgument("--output_used")
@@ -210,7 +209,7 @@ object CommonArguments {
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("main_manifest")),
-      outputJar = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_jar")),
+      outputJar = Option(namespace.get[Path]("output_jar")).map(SandboxUtil.getSandboxPath(workDir, _)),
       outputUsed = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_used")),
       plugins = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("plugins")),
       sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),

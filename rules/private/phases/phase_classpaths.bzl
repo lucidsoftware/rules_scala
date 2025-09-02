@@ -63,7 +63,10 @@ def phase_classpaths(ctx, g):
 
     src_jars, srcs, _ = _separate_src_jars_srcs_and_other(ctx.files.srcs)
 
-    jar = ctx.actions.declare_file("{}/classes.jar".format(ctx.label.name))
+    if len(ctx.attr.srcs) > 0:
+        jar = ctx.actions.declare_file("{}/classes.jar".format(ctx.label.name))
+    else:
+        jar = None
 
     return _ClasspathInfo(
         srcs = srcs,

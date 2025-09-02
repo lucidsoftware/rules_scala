@@ -19,6 +19,9 @@ def phase_bare_compile(ctx, g):
     if g.classpaths.src_jars:
         fail("source JARs aren't yet supported by the bare toolchain.")
 
+    if g.classpaths.jar == None:
+        return struct(mains_file = None)
+
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     bare_configuration = toolchain.bare_configuration
     inputs = depset(ctx.files.srcs, transitive = [g.classpaths.compile, g.classpaths.compiler])

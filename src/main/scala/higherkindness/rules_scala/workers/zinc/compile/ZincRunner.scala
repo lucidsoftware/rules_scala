@@ -364,19 +364,21 @@ object ZincRunner extends WorkerMain[Unit] {
       pw.close()
     }
 
-    val jarCreator = new JarCreator(outputJar)
-    jarCreator.addDirectory(classesOutputDir)
-    jarCreator.setCompression(true)
-    jarCreator.setNormalize(true)
-    jarCreator.setVerbose(false)
+    outputJar.foreach { outputJar =>
+      val jarCreator = new JarCreator(outputJar)
+      jarCreator.addDirectory(classesOutputDir)
+      jarCreator.setCompression(true)
+      jarCreator.setNormalize(true)
+      jarCreator.setVerbose(false)
 
-    mains match {
-      case Array(main) =>
-        jarCreator.setMainClass(main)
-      case _ =>
+      mains match {
+        case Array(main) =>
+          jarCreator.setMainClass(main)
+        case _ =>
+      }
+
+      jarCreator.execute()
     }
-
-    jarCreator.execute()
 
     // clear temporary files
     FileUtil.delete(tmpDir)

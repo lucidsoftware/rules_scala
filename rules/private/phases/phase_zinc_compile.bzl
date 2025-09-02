@@ -39,7 +39,6 @@ def phase_zinc_compile(ctx, g):
     args.add_all(javacopts, format_each = "--java_compiler_option=%s")
     args.add(ctx.label, format = "--label=%s")
     args.add("--main_manifest", mains_file)
-    args.add("--output_jar", g.classpaths.jar)
     args.add("--output_used", used)
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
@@ -57,7 +56,11 @@ def phase_zinc_compile(ctx, g):
         ],
     )
 
-    outputs = [g.classpaths.jar, mains_file, used, tmp] + g.semanticdb.outputs
+    outputs = [mains_file, used, tmp] + g.semanticdb.outputs
+
+    if g.classpaths.jar != None:
+        args.add("--output_jar", g.classpaths.jar)
+        outputs.append(g.classpaths.jar)
 
     if hasattr(ctx.attr, "frameworks"):
         tests_file = ctx.actions.declare_file("{}/tests.json".format(ctx.label.name))

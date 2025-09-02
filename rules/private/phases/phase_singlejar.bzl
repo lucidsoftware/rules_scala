@@ -22,9 +22,15 @@ def phase_singlejar(ctx, g):
     # missing from previous phases.
     inputs = [f for f in ctx.files.resource_jars if f.extension.lower() in ["jar"]]
     for v in [getattr(g, k) for k in dir(g) if k not in ["to_json", "to_proto"]]:
-        if hasattr(v, "jar"):
-            jar = getattr(v, "jar")
-            inputs.append(jar)
+        if not hasattr(v, "jar"):
+            continue
+
+        jar = getattr(v, "jar")
+
+        if jar == None:
+            continue
+
+        inputs.append(jar)
 
     _action_singlejar(
         ctx,

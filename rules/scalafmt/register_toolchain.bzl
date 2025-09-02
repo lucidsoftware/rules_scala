@@ -1,4 +1,4 @@
-load("//rules:register_toolchain.bzl", "scalafmt_toolchain_setting")
+load("//rules/private:transitions.bzl", "scalafmt_toolchain_setting")
 
 _ScalafmtConfig = provider(
     fields = {

@@ -28,6 +28,12 @@ load(
     _run_phases = "run_phases",
 )
 load(
+    "//rules/private:transitions.bzl",
+    _scala_incoming_transition = "scala_incoming_transition",
+    _scala_outgoing_transition = "scala_outgoing_transition",
+    _scala_toolchain_attributes = "scala_toolchain_attributes",
+)
+load(
     "//rules/scala:private/doc.bzl",
     _scaladoc_implementation = "scaladoc_implementation",
     _scaladoc_private_attributes = "scaladoc_private_attributes",
@@ -43,12 +49,6 @@ load(
 )
 load(":jvm.bzl", _labeled_jars = "labeled_jars")
 load(":providers.bzl", _ScalaRulePhase = "ScalaRulePhase")
-load(
-    ":register_toolchain.bzl",
-    _scala_incoming_transition = "scala_incoming_transition",
-    _scala_outgoing_transition = "scala_outgoing_transition",
-    _scala_toolchain_attributes = "scala_toolchain_attributes",
-)
 
 _compile_private_attributes = {
     "_java_toolchain": attr.label(

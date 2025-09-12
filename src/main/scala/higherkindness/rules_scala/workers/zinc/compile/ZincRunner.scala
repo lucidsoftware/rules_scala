@@ -57,10 +57,8 @@ object ZincRunner extends WorkerMain[Unit] {
   // dynamic execution. The concurrency error happens very rarely, so it's hard to reproduce.
   override protected val mayInterruptWorkerTasks = false
 
-  private val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
+  private val classloaderCache = new ClassLoaderCache(new AnnexClassLoaderCacheImpl(new URLClassLoader(Array.empty)))
 
-  // prevents GC of the soft reference in classloaderCache
-  private var lastCompiler: AnyRef = null
   private def compileScala(
     task: WorkTask[Unit],
     parsedArguments: CommonArguments,
@@ -98,8 +96,6 @@ object ZincRunner extends WorkerMain[Unit] {
     val scalaCompiler = ZincUtil
       .scalaCompiler(scalaInstance, parsedArguments.compilerBridge)
       .withClassLoaderCache(classloaderCache)
-
-    lastCompiler = scalaCompiler
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 

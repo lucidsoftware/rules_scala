@@ -14,6 +14,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala_library",
     ],
     global_plugins = ["@annex_test//:org_scalameta_semanticdb_scalac_2_13_14"],
+    global_scalacopts = ["-Wconf:any:error"],
     runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     semanticdb_bundle = False,
     version = scala_2_13_version,
@@ -26,6 +27,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala3_compiler_3",
         "@annex_test//:org_scala_lang_scala3_library_3",
     ],
+    global_scalacopts = ["-Wconf:any:error"],
     runtime_classpath = [
         "@annex_test//:org_scala_lang_scala3_library_3",
         "@annex_test//:org_scala_lang_scala3_interfaces",

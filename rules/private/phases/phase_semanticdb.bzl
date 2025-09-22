@@ -66,7 +66,8 @@ def phase_semanticdb(ctx, g):
                 map_each = _semanticdb_directory_from_output_jar,
             )
 
-            arguments.add("--compiler_option_referencing_path=-sourceroot:${workDir}")
+            # We don't need to change `-sourceroot` in the Scala 3 case because `ZincRunner` already takes care of
+            # setting it to the work directory (so the generated TASTy files are deterministic)
             arguments.add("--compiler_option=-Ysemanticdb")
 
     g.out.providers.append(

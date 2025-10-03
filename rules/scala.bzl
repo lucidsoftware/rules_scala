@@ -19,6 +19,7 @@ load(
     _phase_coverage_jacoco = "phase_coverage_jacoco",
     _phase_ijinfo = "phase_ijinfo",
     _phase_javainfo = "phase_javainfo",
+    _phase_labeledjars = "phase_labeledjars",
     _phase_library_defaultinfo = "phase_library_defaultinfo",
     _phase_outputgroupinfo = "phase_outputgroupinfo",
     _phase_resources = "phase_resources",
@@ -75,7 +76,19 @@ _compile_private_attributes = {
     ),
 }
 
-_compile_attributes = {
+_deps_checker_label_attributes = {
+    "deps_checker_label": attr.string(
+        doc = """\
+The label to identify this target in the output of the dependency checker.
+
+By default, this is just the label of the target. But sometimes—for example, when overriding an artifact with
+`rules_jvm_external` to point to your own, or defining an alias to target—you want the dependency checker to suggest
+you add or remove a different label as a dependency. In that case, you can set this attribute to that label.
+""",
+    ),
+}
+
+_compile_attributes = _deps_checker_label_attributes | {
     "srcs": attr.label_list(
         cfg = _scala_outgoing_transition,
         doc = "The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).",
@@ -213,6 +226,7 @@ def _scala_library_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("labeledjars", _phase_labeledjars),
         ("semanticdb", _phase_semanticdb),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
@@ -227,6 +241,7 @@ def _scala_binary_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("labeledjars", _phase_labeledjars),
         ("semanticdb", _phase_semanticdb),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
@@ -242,6 +257,7 @@ def _scala_test_implementation(ctx):
         ("resources", _phase_resources),
         ("classpaths", _phase_classpaths),
         ("javainfo", _phase_javainfo),
+        ("labeledjars", _phase_labeledjars),
         ("semanticdb", _phase_semanticdb),
         ("singlejar", _phase_singlejar),
         ("coverage", _phase_coverage_jacoco),
@@ -458,6 +474,7 @@ To run: `bazel run <target>`
 scala_import = rule(
     attrs = _dicts.add(
         _scala_import_private_attributes,
+        _deps_checker_label_attributes,
         {
             "deps": attr.label_list(
                 doc = "Libraries used by this one.",

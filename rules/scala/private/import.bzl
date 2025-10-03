@@ -6,6 +6,7 @@ load(
     "//rules/common:private/utils.bzl",
     _separate_src_jars_srcs_and_other = "separate_src_jars_srcs_and_other",
 )
+load("//rules/jvm:private/label.bzl", "get_labeled_jars")
 
 scala_import_private_attributes = {
     "_java_toolchain": attr.label(
@@ -14,10 +15,6 @@ scala_import_private_attributes = {
 }
 
 def scala_import_implementation(ctx):
-    default_info = DefaultInfo(
-        files = depset(ctx.files.jars + ctx.files.srcjar),
-    )
-
     if ctx.files.jars:
         _src_jar, _, _jar = _separate_src_jars_srcs_and_other(ctx.files.jars)
         _src_jar += ctx.files.srcjar
@@ -66,9 +63,12 @@ def scala_import_implementation(ctx):
     else:
         java_info = java_common.merge([dep[JavaInfo] for dep in ctx.attr.deps])
 
-    intellij_info = create_intellij_info(ctx.label, ctx.attr.deps, java_info)
+    providers = [java_info, create_intellij_info(ctx.label, ctx.attr.deps, java_info)]
 
-    return [intellij_info, java_info]
+    if ctx.attr.deps_checker_label != "":
+        providers.append(get_labeled_jars(ctx.attr.deps_checker_label, java_info, ctx.attr.deps))
+
+    return providers
 
 def create_intellij_info(label, deps, java_info):
     # note: tried using transitive_exports from a JavaInfo that was given non-empty exports, but it was always empty

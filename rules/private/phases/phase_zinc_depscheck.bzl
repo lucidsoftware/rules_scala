@@ -25,7 +25,16 @@ def phase_zinc_depscheck(ctx, g):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
         deps_args = ctx.actions.args()
         deps_args.add(name, format = "--check_%s=true")
-        deps_args.add_all("--direct", [dep.label for dep in ctx.attr.deps], format_each = "_%s")
+
+        direct_dependency_labels = []
+
+        for dependency in ctx.attr.deps:
+            if _LabeledJars in dependency:
+                direct_dependency_labels.append(dependency[_LabeledJars].label)
+            else:
+                direct_dependency_labels.append(dependency.label)
+
+        deps_args.add_all("--direct", direct_dependency_labels, format_each = "_%s")
 
         # Check the comment on the function we're calling here to understand why
         # we're not using map_each

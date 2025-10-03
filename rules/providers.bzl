@@ -66,6 +66,7 @@ IntellijInfo = provider(
 LabeledJars = provider(
     doc = "Exported jars and their labels.",
     fields = {
+        "label": "The label of the target providing this provider.",
         "values": "The preorder depset of label and jars.",
     },
 )

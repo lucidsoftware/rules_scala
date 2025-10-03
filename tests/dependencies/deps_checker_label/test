@@ -1,0 +1,8 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+! bazel build :depends-on-library-alias || false
+bazel build :depends-on-library-alias |& grep "buildozer 'remove deps //dependencies/deps_checker_label:library-alias' //dependencies/deps_checker_label:depends-on-library-alias"
+
+! bazel build :depends-on-import-alias || false
+bazel build :depends-on-import-alias |& grep "buildozer 'remove deps //dependencies/deps_checker_label:import-alias' //dependencies/deps_checker_label:depends-on-import-alias"

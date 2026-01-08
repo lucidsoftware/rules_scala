@@ -14,7 +14,12 @@ load(
 # Dependencies are checked to see if they are used/unused.
 # Success files are outputted if dependency checking was "successful"
 # according to the configuration/options.
-#
+
+def _label_for_dependency_checker(target):
+    if _LabeledJars in target:
+        return target[_LabeledJars].label
+
+    return target.label
 
 def phase_zinc_depscheck(ctx, g):
     deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
@@ -25,16 +30,11 @@ def phase_zinc_depscheck(ctx, g):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
         deps_args = ctx.actions.args()
         deps_args.add(name, format = "--check_%s=true")
-
-        direct_dependency_labels = []
-
-        for dependency in ctx.attr.deps:
-            if _LabeledJars in dependency:
-                direct_dependency_labels.append(dependency[_LabeledJars].label)
-            else:
-                direct_dependency_labels.append(dependency.label)
-
-        deps_args.add_all("--direct", direct_dependency_labels, format_each = "_%s")
+        deps_args.add_all(
+            "--direct",
+            [_label_for_dependency_checker(dependency) for dependency in ctx.attr.deps],
+            format_each = "_%s",
+        )
 
         # Check the comment on the function we're calling here to understand why
         # we're not using map_each
@@ -42,8 +42,18 @@ def phase_zinc_depscheck(ctx, g):
             _add_args_for_depscheck_labeled_group(labeled_jar_group, deps_args)
 
         deps_args.add("--label", ctx.label, format = "_%s")
-        deps_args.add_all("--used_whitelist", [dep.label for dep in ctx.attr.deps_used_whitelist], format_each = "_%s")
-        deps_args.add_all("--unused_whitelist", [dep.label for dep in ctx.attr.deps_unused_whitelist], format_each = "_%s")
+        deps_args.add_all(
+            "--used_whitelist",
+            [_label_for_dependency_checker(dep) for dep in ctx.attr.deps_used_whitelist],
+            format_each = "_%s",
+        )
+
+        deps_args.add_all(
+            "--unused_whitelist",
+            [_label_for_dependency_checker(dep) for dep in ctx.attr.deps_unused_whitelist],
+            format_each = "_%s",
+        )
+
         deps_args.add("--")
         deps_args.add(g.compile.used)
         deps_args.add(deps_check)

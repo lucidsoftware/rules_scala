@@ -38,3 +38,12 @@ scala_library(
     tags = ["manual"],
     deps = [":import-alias"],
 )
+
+scala_library(
+    name = "depends-on-whitelisted-library-alias",
+    srcs = [],
+    deps_used_whitelist = [":library-alias"],
+    scala_toolchain_name = "test_zinc_2_13",
+    tags = ["manual"],
+    deps = [":library-alias"],
+)

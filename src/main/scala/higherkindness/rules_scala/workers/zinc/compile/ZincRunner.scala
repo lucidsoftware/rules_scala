@@ -18,7 +18,7 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import play.api.libs.json.Json
 import sbt.internal.inc.classfile.analyzeJavaClasses
 import sbt.internal.inc.classpath.ClassLoaderCache
-import sbt.internal.inc.javac.DiagnosticsReporter
+import sbt.internal.inc.javac.{DiagnosticsReporter, DirectoryClassFinder}
 import sbt.internal.inc.{CompileOutput, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import sbt.internal.util.LoggerWriter
 import scala.jdk.CollectionConverters.*
@@ -160,9 +160,20 @@ object ZincRunner extends WorkerMain[Unit] {
     reporter: Reporter,
     logger: Logger,
   ): Unit = {
+    def findClassesInOutputDirectory(): Set[Path] = {
+      val classes = DirectoryClassFinder(classesOutputDirectory).classes
+
+      try {
+        classes.paths.toSet
+      } finally {
+        classes.close()
+      }
+    }
+
     val javaSources = normalizedSources.view.map(_.toString).filter(_.endsWith(".java")).toList
 
     if (javaSources.nonEmpty) {
+      val classesBeforeJavaCompilation = findClassesInOutputDirectory()
       val javaCompiler = ToolProvider.getSystemJavaCompiler
       val writer = new LoggerWriter(logger)
       val diagnosticListener = new DiagnosticsReporter(reporter)
@@ -201,7 +212,11 @@ object ZincRunner extends WorkerMain[Unit] {
 
       InterruptUtil.throwIfInterrupted(task.isCancelled)
 
+      val classesAfterJavaCompilation = findClassesInOutputDirectory()
+
       analyzeJavaClasses(
+        // Only provide the classes produced by the Java compiler, as those are the only ones we want to analyze
+        (classesAfterJavaCompilation -- classesBeforeJavaCompilation).toSeq,
         normalizedSources.view.map(PlainVirtualFile(_)).toList,
         parsedArguments.classpath,
         classesOutputDirectory,

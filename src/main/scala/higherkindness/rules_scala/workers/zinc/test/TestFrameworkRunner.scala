@@ -39,7 +39,7 @@ class BasicTestRunner(
 
               !result.failures.nonEmpty
             }
-          }(ExecutionContext.global)
+          }(using ExecutionContext.global)
       }
     }
   }
@@ -85,7 +85,7 @@ class ClassLoaderTestRunner(
 
           !result.failures.nonEmpty
         }
-      }(ExecutionContext.global)
+      }(using ExecutionContext.global)
   }
 }
 
@@ -98,7 +98,7 @@ class ProcessTestRunner(
   framework: Framework,
   classpath: List[Path],
   command: ProcessCommand,
-  logger: Logger with Serializable,
+  logger: Logger & Serializable,
 ) extends TestFrameworkRunner {
   def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Future[Boolean] = {
     val reporter = new TestReporter(logger)
@@ -113,7 +113,7 @@ class ProcessTestRunner(
 
     val failures = mutable.Set[String]()
     tests.foreach { test =>
-      val process = new ProcessBuilder((command.executable +: command.arguments): _*)
+      val process = new ProcessBuilder((command.executable +: command.arguments)*)
         .redirectError(ProcessBuilder.Redirect.INHERIT)
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)
         .start()

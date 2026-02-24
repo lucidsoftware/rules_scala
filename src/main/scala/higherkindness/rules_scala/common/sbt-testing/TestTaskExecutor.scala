@@ -70,7 +70,7 @@ class ConcurrentTestTaskExecutor(logger: Logger) extends TestTaskExecutor {
           bufferedLogger.flush()
         }
       }
-    }(ExecutionContext.global),
+    }(using ExecutionContext.global),
   )
 
   override def waitForTasks(): Future[TaskExecutorResult] = {
@@ -81,7 +81,7 @@ class ConcurrentTestTaskExecutor(logger: Logger) extends TestTaskExecutor {
       .map { _ =>
         activeTasks.clear()
         currentResult.toTaskExecutorResult
-      }(ExecutionContext.global)
+      }(using ExecutionContext.global)
   }
 }
 

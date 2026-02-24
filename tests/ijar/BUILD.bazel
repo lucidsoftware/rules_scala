@@ -6,7 +6,7 @@ scala_library(
         "Dependency.scala",
         "DependencyCacheInvalidation.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 scala_library(
@@ -15,6 +15,6 @@ scala_library(
         "Dependent.scala",
         "DependentCacheInvalidation.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [":dependency"],
 )

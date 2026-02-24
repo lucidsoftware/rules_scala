@@ -5,6 +5,14 @@ load(
     _ScalaConfiguration = "ScalaConfiguration",
     _ZincCompilationInfo = "ZincCompilationInfo",
 )
+load(
+    "@rules_scala_annex//rules/common:private/javac_options.bzl",
+    "replace_source_target_with_release",
+)
+load(
+    "@rules_scala_annex//rules/common:private/utils.bzl",
+    _make_jvm_flag_args = "make_jvm_flag_args",
+)
 
 #
 # PHASE: compile
@@ -17,7 +25,7 @@ def phase_zinc_compile(ctx, g):
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
 
-    javacopts = [
+    javacopts = replace_source_target_with_release([
         ctx.expand_location(option, ctx.attr.data)
         for option in ctx.attr.javacopts + java_common.default_javac_opts(
             # See https://bazel.build/extending/config#accessing-attributes-with-transitions:
@@ -26,7 +34,7 @@ def phase_zinc_compile(ctx, g):
             # The order of elements in this list is unspecified."
             java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
         )
-    ]
+    ])
 
     common_scalacopts = toolchain.scala_configuration.global_scalacopts + ctx.attr.scalacopts
 
@@ -81,9 +89,11 @@ def phase_zinc_compile(ctx, g):
         "supports-path-mapping": "1",
     }
 
+    jvm_flag_args = _make_jvm_flag_args(ctx, toolchain.scala_configuration.jvm_flags)
+
     # todo: different execution path for nosrc jar?
     ctx.actions.run(
-        arguments = [args],
+        arguments = [jvm_flag_args, args],
         executable = worker.files_to_run,
         execution_requirements = execution_requirements_tags,
         inputs = inputs,

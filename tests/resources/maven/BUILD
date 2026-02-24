@@ -4,5 +4,5 @@ scala_library(
     name = "maven",
     srcs = [],
     resources = glob(["src/main/resources/*"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )

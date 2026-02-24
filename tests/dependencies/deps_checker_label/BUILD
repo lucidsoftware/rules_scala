@@ -4,7 +4,7 @@ scala_library(
     name = "library",
     srcs = [],
     deps_checker_label = "//dependencies/deps_checker_label:library-alias",
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 alias(
@@ -15,7 +15,7 @@ alias(
 scala_library(
     name = "depends-on-library-alias",
     srcs = [],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"],
     deps = [":library-alias"],
 )
@@ -34,7 +34,7 @@ alias(
 scala_library(
     name = "depends-on-import-alias",
     srcs = [],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"],
     deps = [":import-alias"],
 )
@@ -43,7 +43,7 @@ scala_library(
     name = "depends-on-whitelisted-library-alias",
     srcs = [],
     deps_used_whitelist = [":library-alias"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"],
     deps = [":library-alias"],
 )

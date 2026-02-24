@@ -48,6 +48,9 @@ def phase_bootstrap_compile(ctx, g):
     if compile_classpath:
         args.add_joined("--compile_classpath", compile_classpath, join_with = ":")
 
+    if scala_configuration.jvm_flags:
+        args.add_joined("--jvm_flags", scala_configuration.jvm_flags, join_with = " ")
+
     if scala_configuration.global_scalacopts:
         args.add_joined("--global_scalacopts", scala_configuration.global_scalacopts, join_with = " ")
 
@@ -64,6 +67,9 @@ def phase_bootstrap_compile(ctx, g):
             |  case "${1}" in
             |    --java)
             |      java="${2}"
+            |      ;;
+            |    --jvm_flags)
+            |      jvm_flags="${2}"
             |      ;;
             |    --compiler_classpath)
             |      compiler_classpath="${2}"
@@ -102,6 +108,7 @@ def phase_bootstrap_compile(ctx, g):
             |trap 'rm -rf -- "${class_directory}"' EXIT
             |
             |"${java}" \\
+            |  ${jvm_flags} \\
             |  -cp "${compiler_classpath}" \\
             |  "${main_class}" \\
             |  -cp "${compile_classpath}" \\

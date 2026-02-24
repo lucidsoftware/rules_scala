@@ -5,6 +5,7 @@ ScalaConfiguration = provider(
         "global_plugins": "Globally enabled compiler plugins",
         "global_scalacopts": "Globally enabled compiler options",
         "runtime_classpath": "The runtime classpath.",
+        "jvm_flags": "JVM options to pass when invoking Scala-related actions.",
         "semanticdb_bundle": "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
         "use_ijar": "Whether to use ijars for this Scala compiler",
         "version": "The Scala full version.",

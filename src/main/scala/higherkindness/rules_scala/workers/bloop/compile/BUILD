@@ -4,7 +4,7 @@ load("//rules:scalafmt.bzl", "scala_format_test")
 scala_binary(
     name = "compile",
     srcs = glob(["**/*.scala"]),
-    scala_toolchain_name = "annex_zinc_2_13",
+    scala_version = "2.13",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/worker",

@@ -5,17 +5,28 @@ powered by Scalafmt. See [the Stardoc on these rules](./stardoc/scala_with_scala
 information.
 
 [Toolchains](https://bazel.build/extending/toolchains) are used to set the Scalafmt
-configuration file that's used by those targets that have formatting enabled. The default toolchain
-uses the [`.scalafmt.conf`](../.scalafmt.conf) file at the root of this repository—the same
-configuration file that's used to format this repository's code. All you need to do to use the
-formatting rules is register the default toolchain with Bazel in your `MODULE.bazel` file:
+configuration file that's used by those targets that have formatting enabled. Scalafmt toolchains
+are matched to targets based on the `scala_version` setting, so you need to associate a Scalafmt
+toolchain with each version of Scala you want formatting to occur for.
+
+## Quick start
+
+The default toolchain, `@rules_scala_annex//:annex_scalafmt`, uses the
+[`.scalafmt.conf`](../.scalafmt.conf) that ships with Annex itself at the root of the
+`rules_scala_annex` repository. You can register it in
+your `MODULE.bazel` file:
 
 ```starlark
 register_toolchains("@rules_scala_annex//:annex_scalafmt")
 ```
 
-That should be sufficient to get you started, but if you'd like to use your own `.scalafmt.conf`
-file, you'll need to declare your own toolchain and register it with Bazel:
+To format your code with your own Scalafmt configuration, define a [custom
+toolchain](#custom-toolchains) instead.
+
+## Custom toolchains
+
+To use your own `.scalafmt.conf` file, declare your own toolchain with the `scala_versions` it
+should apply to:
 
 */BUILD*
 
@@ -25,6 +36,7 @@ load("@rules_scala_annex//rules/scalafmt:register_toolchain.bzl", "register_scal
 register_scalafmt_toolchain(
     name = "custom_scalafmt",
     config = ".scalafmt.conf",
+    scala_versions = ["2.13.16"],
 )
 ```
 
@@ -34,20 +46,57 @@ register_scalafmt_toolchain(
 register_toolchains(":custom_scalafmt")
 ```
 
-Then, you can either:
-- Use it for every target by default by adding the
-  `--@rules_scala_annex//rules/scalafmt:scalafmt-toolchain=custom_scalafmt` flag to your `.bazelrc`
-  file
-- Use it for a specific target by setting the `scalafmt_toolchain_name` attribute:
-    ```starlark
-    load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_binary")
+### The `scala_versions` parameter
 
-    scala_binary(
-        ...,
-        scalafmt_toolchain_name = "custom_scalafmt",
-        ...,
-    )
-    ```
+When registering a custom scalafmt toolchain, you will need to list Scala versions the toolchain is
+compatible with using the `scala_versions` parameter. These versions should match the versions you
+used for  your Zinc toolchains. For example, use `"3.3.5"`, not `"3"` or `"3.3"`.
+
+Each version you list is matched hierarchically, so you only need the full version: listing
+`"3.3.5"` covers targets whose `scala_version` is `"3"`, `"3.3"`, or `"3.3.5"`.
+
+For prefixed toolchains (such as `semanticdb` or `bootstrap`), add the prefix to the version. For
+example, `"semanticdb_3.3.5"`:
+
+```starlark
+register_scalafmt_toolchain(
+    name = "custom_scalafmt",
+    config = ".scalafmt.conf",
+    scala_versions = [
+        "2.13.16",
+        "semanticdb_2.13.16",
+    ],
+)
+
+register_scalafmt_toolchain(
+    name = "custom_scalafmt_3",
+    config = ".scalafmt-scala3.conf",
+    scala_versions = [
+        "3.3.5",
+        "bootstrap_3.3.5",
+        "semanticdb_3.3.5",
+    ],
+)
+```
+
+All `scala_version` values used in the build (including prefixed ones) must be covered by a
+registered scalafmt toolchain.
+
+### The `jvm_flags` parameter
+
+If you need to pass JVM options to the JVM which runs Scalafmt, you can use the `jvm_flags`
+parameter on the toolchain. For example:
+
+```starlark
+register_scalafmt_toolchain(
+    name = "custom_scalafmt",
+    config = ".scalafmt.conf",
+    scala_versions = ["2.13.16"],
+    jvm_flags = ["--sun-misc-unsafe-memory-access=allow"],
+)
+```
+
+## Standalone formatting
 
 If you'd like to format all of the Scala files in your repository via a single target, you can use
 `scala_format_test`:
@@ -72,5 +121,13 @@ $ bazel test :format
 $ bazel run :format
 ```
 
-Note that like the Scala rules, `scala_format_test` too uses toolchains and accepts a
-`scalafmt_toolchain_name` attribute.
+Note that like the Scala rules, `scala_format_test` accepts a `scala_version` attribute to select
+the correct scalafmt toolchain for non-default Scala versions:
+
+```starlark
+scala_format_test(
+    name = "format-scala3",
+    srcs = glob(["**/*.scala"]),
+    scala_version = "3",
+)
+```

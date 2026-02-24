@@ -74,7 +74,7 @@ object TestRunner {
     parser
       .addArgument("--verbosity")
       .help("Verbosity")
-      .choices(Verbosity.values.keys.toSeq: _*)
+      .choices(Verbosity.values.keys.toSeq*)
       .setDefault_(Verbosity.Medium.level)
     parser
       .addArgument("--framework_args")
@@ -111,7 +111,7 @@ object TestRunner {
     val parser = ArgumentParsers.newFor("test").addHelp(true).build()
     parser
       .addArgument("--isolation")
-      .choices(Isolation.values.keys.toSeq: _*)
+      .choices(Isolation.values.keys.toSeq*)
       .help("Test isolation")
       .setDefault_(Isolation.None.level)
     parser
@@ -212,7 +212,7 @@ object TestRunner {
           case Isolation.ClassLoader =>
             val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
             def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
-            new ClassLoaderTestRunner(framework, classLoaderProvider _, logger, testTaskExecutor)
+            new ClassLoaderTestRunner(framework, () => classLoaderProvider(), logger, testTaskExecutor)
           case Isolation.Process =>
             val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
               throw new Exception("Subprocess executable missing for test ran in process isolation mode.")

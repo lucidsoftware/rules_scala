@@ -1,19 +1,20 @@
 module(name = "rules_scala_annex")
 
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "protobuf", version = "29.3")
-bazel_dep(name = "rules_java", version = "8.11.0")
-bazel_dep(name = "rules_jvm_external", version = "6.5")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "protobuf", version = "35.0")
+bazel_dep(name = "rules_java", version = "9.6.1")
+bazel_dep(name = "rules_jvm_external", version = "6.9")
 
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
 bazel_dep(name = "rules_pkg", version = "1.0.1", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.7.2", dev_dependency = True)
 
+bazel_dep(name = "bazel_features", version = "1.42.0")
+
 register_toolchains(
     "//:annex_scalafmt",
     "//:repository_default_toolchain_21_definition",
     "//rules/scala_proto:scalapb_scala_proto_toolchain",
-    "//src/main/scala:annex_bootstrap_2_13",
     "//src/main/scala:annex_bootstrap_3",
     "//src/main/scala:annex_zinc_2_13",
     "//src/main/scala:annex_zinc_3",
@@ -31,6 +32,12 @@ scala_3_version = "3.3.5"
 scalapb_version = "0.11.17"
 
 zinc_version = "1.10.8"
+
+scala = use_extension("//:extensions.bzl", "scala")
+scala.defaults(
+    scala_version = scala_2_13_version,
+)
+use_repo(scala, "rules_scala_annex_config")
 
 annex = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex.install(

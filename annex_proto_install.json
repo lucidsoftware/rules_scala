@@ -136,22 +136,6 @@
     ]
   },
   "repositories": {
-    "https://repo.maven.apache.org/maven2/": [
-      "com.google.protobuf:protobuf-java",
-      "com.google.protobuf:protobuf-java:jar:sources",
-      "com.thesamet.scalapb:compilerplugin_2.13",
-      "com.thesamet.scalapb:compilerplugin_2.13:jar:sources",
-      "com.thesamet.scalapb:protoc-bridge_2.13",
-      "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources",
-      "com.thesamet.scalapb:protoc-gen_2.13",
-      "com.thesamet.scalapb:protoc-gen_2.13:jar:sources",
-      "dev.dirs:directories",
-      "dev.dirs:directories:jar:sources",
-      "org.scala-lang.modules:scala-collection-compat_2.13",
-      "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources",
-      "org.scala-lang:scala-library",
-      "org.scala-lang:scala-library:jar:sources"
-    ],
     "https://maven-central.storage-download.googleapis.com/maven2/": [
       "com.google.protobuf:protobuf-java",
       "com.google.protobuf:protobuf-java:jar:sources",
@@ -169,6 +153,22 @@
       "org.scala-lang:scala-library:jar:sources"
     ],
     "https://mirror.bazel.build/repo1.maven.org/maven2/": [
+      "com.google.protobuf:protobuf-java",
+      "com.google.protobuf:protobuf-java:jar:sources",
+      "com.thesamet.scalapb:compilerplugin_2.13",
+      "com.thesamet.scalapb:compilerplugin_2.13:jar:sources",
+      "com.thesamet.scalapb:protoc-bridge_2.13",
+      "com.thesamet.scalapb:protoc-bridge_2.13:jar:sources",
+      "com.thesamet.scalapb:protoc-gen_2.13",
+      "com.thesamet.scalapb:protoc-gen_2.13:jar:sources",
+      "dev.dirs:directories",
+      "dev.dirs:directories:jar:sources",
+      "org.scala-lang.modules:scala-collection-compat_2.13",
+      "org.scala-lang.modules:scala-collection-compat_2.13:jar:sources",
+      "org.scala-lang:scala-library",
+      "org.scala-lang:scala-library:jar:sources"
+    ],
+    "https://repo.maven.apache.org/maven2/": [
       "com.google.protobuf:protobuf-java",
       "com.google.protobuf:protobuf-java:jar:sources",
       "com.thesamet.scalapb:compilerplugin_2.13",

@@ -1,12 +1,10 @@
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
+    _make_jvm_flag_args = "make_jvm_flag_args",
     _short_path = "short_path",
 )
 
 scala_format_attributes = {
-    "scalafmt_toolchain_name": attr.string(
-        doc = "The name of the Scalafmt configuration toolchain.",
-    ),
     "_fmt": attr.label(
         cfg = "exec",
         default = "@rules_scala_annex//rules/scalafmt",
@@ -32,7 +30,13 @@ scala_non_default_format_attributes = {
 def build_format(ctx):
     files = []
     manifest_content = []
-    config = ctx.toolchains["//rules/scalafmt:toolchain_type"].scalafmt_config.config
+    scalafmt_config = ctx.toolchains["//rules/scalafmt:toolchain_type"].scalafmt_config
+    config = scalafmt_config.config
+
+    jvm_flag_args = _make_jvm_flag_args(
+        ctx,
+        ["-Dfile.encoding=UTF-8"] + scalafmt_config.jvm_flags,
+    )
 
     for src in ctx.files.srcs:
         if src.short_path.endswith(".scala") and src.is_source:
@@ -46,7 +50,7 @@ def build_format(ctx):
             args.set_param_file_format("multiline")
             args.use_param_file("@%s", use_always = True)
             ctx.actions.run(
-                arguments = ["--jvm_flag=-Dfile.encoding=UTF-8", args],
+                arguments = [jvm_flag_args, args],
                 executable = ctx.executable._fmt,
                 execution_requirements = {
                     "supports-multiplex-workers": "1",

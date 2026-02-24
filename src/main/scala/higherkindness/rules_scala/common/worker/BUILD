@@ -4,7 +4,7 @@ load("//rules:scalafmt.bzl", "scala_format_test")
 scala_library(
     name = "worker",
     srcs = glob(["**/*.scala"]),
-    scala_toolchain_name = "annex_bootstrap_3",
+    scala_version = "bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/error",

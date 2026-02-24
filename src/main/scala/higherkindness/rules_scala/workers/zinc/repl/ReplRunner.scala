@@ -33,7 +33,7 @@ object ReplRunner {
     parser
       .addArgument("--log_level")
       .help("Log level")
-      .choices(LogLevel.values.keys.toSeq: _*)
+      .choices(LogLevel.values.keys.toSeq*)
       .setDefault_(LogLevel.Warn.level)
     parser
   }

@@ -6,7 +6,7 @@ scala_test(
     srcs = [
         "TestAll.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     runtime_deps = [
         "@annex_test//:com_novocode_junit_interface",
         "@annex_test//:org_hamcrest_hamcrest_core",
@@ -36,7 +36,7 @@ scala_library(
     srcs = [
         "A1.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [
         ":b1",
     ],
@@ -47,7 +47,7 @@ scala_library(
     srcs = [
         "B1.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 scala_library(
@@ -55,7 +55,7 @@ scala_library(
     srcs = [
         "A2.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [
         ":b2",
     ],
@@ -85,5 +85,5 @@ scala_library(
     srcs = [
         "C2.scala",
     ],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )

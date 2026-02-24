@@ -6,6 +6,7 @@ load(
 )
 load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
+    _make_jvm_flag_args = "make_jvm_flag_args",
     _short_path = "short_path",
 )
 
@@ -22,9 +23,12 @@ def _label_for_dependency_checker(target):
     return target.label
 
 def phase_zinc_depscheck(ctx, g):
-    deps_configuration = ctx.toolchains["//rules/scala:toolchain_type"].deps_configuration
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
+    deps_configuration = toolchain.deps_configuration
     labeled_jar_groups = depset(transitive = [dep[_LabeledJars].values for dep in ctx.attr.deps])
     outputs = []
+
+    jvm_flag_args = _make_jvm_flag_args(ctx, toolchain.scala_configuration.jvm_flags)
 
     for name in ("direct", "used"):
         deps_check = ctx.actions.declare_file("{}/depscheck_{}.success".format(ctx.label.name, name))
@@ -60,7 +64,7 @@ def phase_zinc_depscheck(ctx, g):
         deps_args.set_param_file_format("multiline")
         deps_args.use_param_file("@%s", use_always = True)
         ctx.actions.run(
-            arguments = [deps_args],
+            arguments = [jvm_flag_args, deps_args],
             executable = deps_configuration.worker.files_to_run,
             execution_requirements = {
                 "supports-multiplex-workers": "1",

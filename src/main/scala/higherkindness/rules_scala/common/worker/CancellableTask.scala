@@ -1,7 +1,7 @@
 package higherkindness.rules_scala.common.worker
 
 import java.util.concurrent.Callable
-import scala.concurrent.{ExecutionContext, ExecutionException, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
 
 /**
@@ -14,6 +14,9 @@ import scala.util.Try
  *
  * Heavily inspired by the following: https://github.com/NthPortal/cancellable-task/tree/master
  * https://stackoverflow.com/a/39986418/6442597
+ *
+ * Note that for complicated reasons explained in its implementation, `CancellableTask` wraps all exceptions thrown
+ * within the task in an `ExecutionException`, so be sure to unwrap them.
  */
 class CancellableTask[S] private (fn: Function1[Function0[Boolean], S]) {
   private val promise = Promise[S]()
@@ -25,13 +28,12 @@ class CancellableTask[S] private (fn: Function1[Function0[Boolean], S]) {
 
   private val task = new FutureTaskWaitOnCancel[S](fnCallable) {
     override def done() = promise.complete {
-      Try(get()).recover {
-        // FutureTask wraps exceptions in an ExecutionException. We want to re-throw the underlying
-        // error because Scala's Future handles things like fatal exception in a special way that
-        // we miss out on if they're wrapped in that ExecutionException. Put another way: leaving
-        // them wrapped in the ExecutionException breaks the contract that Scala Future users expect.
-        case e: ExecutionException => throw e.getCause()
-      }
+      // `FutureTask` wraps exceptions in an `ExecutionException`. Although we'd like `FutureTask` to function exactly
+      // like a `Future` (which doesn't wrap exceptions like this), we can't unwrap fatal exceptions. That's because
+      // `promise.complete` will just re-wrap fatal exceptions in an `ExecutionException`. To be consistent about how we
+      // handle various exceptions, we leave all exceptions unwrapped and declare it the responsibility of the user to
+      // unwrap the exceptions they wish to handle.
+      Try(get())
     }
   }
 

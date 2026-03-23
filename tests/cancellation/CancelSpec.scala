@@ -139,4 +139,22 @@ class CancelSpec extends AnyFlatSpec {
       }
     }
   }
+
+    it should "treat an InterruptedException thrown by the worker as a cancellation" in {
+      val requestId = 1
+      val workRequest = WorkerTestUtil.getWorkRequest(requestId)
+
+      WorkerTestUtil.withIOStreams { (testOut, testIn, workerStdOut, workerStdIn) =>
+        val worker = new AlwaysCancelWorker(workerStdIn, workerStdOut)
+
+        Future(worker.main(Array("--persistent_worker")))(ExecutionContext.global)
+
+        workRequest.writeDelimitedTo(testOut)
+
+        val response = WorkerProtocol.WorkResponse.parseDelimitedFrom(testIn)
+
+        assert(response.getRequestId() == requestId)
+        assert(response.getWasCancelled())
+      }
+    }
 }

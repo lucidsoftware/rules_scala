@@ -183,31 +183,31 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   writeResponse(requestId, maybeOutStream, Some(code))
                   logVerbose(s"WorkResponse for request id: $requestId sent with code $code")
 
-                case Failure(e: ExecutionException) =>
-                  e.getCause() match {
-                    // Task successfully cancelled
-                    case cancelError: InterruptedException =>
-                      flushOut()
-                      writeResponse(requestId, None, None, wasCancelled = true)
-                      logVerbose(
-                        s"Cancellation WorkResponse sent for request id: $requestId in response to an" +
-                          " InterruptedException",
-                      )
-                    // Work task threw a non-fatal error
-                    case e =>
-                      maybeOut.map(e.printStackTrace(_))
-                      flushOut()
-                      writeResponse(requestId, maybeOutStream, Some(-1))
-                      logVerbose(
-                        "Encountered an uncaught exception that was wrapped in an ExecutionException while" +
-                          s" proccessing the Future for WorkRequest id: $requestId. This usually means a non-fatal" +
-                          " error was thrown in the Future.",
-                      )
-                      e.printStackTrace(System.err)
-                  }
+                // `CancellableTask` wraps all exceptions in `ExecutionException`, so we need to unwrap them here
+                case Failure(e: ExecutionException)
+                    if e.getCause().isInstanceOf[CancellationException]
+                      || e.getCause().isInstanceOf[ClosedByInterruptException]
+                      || e.getCause().isInstanceOf[InterruptedException] =>
+                  flushOut()
+                  writeResponse(requestId, None, None, wasCancelled = true)
+                  logVerbose(
+                    s"Cancellation WorkResponse sent for request id: $requestId in response to a ${e.getCause().getClass.getCanonicalName}",
+                  )
+
+                // Work task threw an uncaught exception
+                case Failure(e: ExecutionException) if e.getCause() != null =>
+                  maybeOut.map(e.getCause().printStackTrace(_))
+                  flushOut()
+                  writeResponse(requestId, maybeOutStream, Some(-1))
+                  logVerbose(
+                    s"Uncaught exception in Future while proccessing WorkRequest id: $requestId\nType: ${e.getCause().getClass.getCanonicalName}",
+                  )
+                  e.getCause().printStackTrace(System.err)
 
                 // Task successfully cancelled
-                case Failure(e @ (_: CancellationException | _: ClosedByInterruptException)) =>
+                case Failure(
+                      e @ (_: CancellationException | _: ClosedByInterruptException | _: InterruptedException),
+                    ) =>
                   flushOut()
                   writeResponse(requestId, None, None, wasCancelled = true)
                   logVerbose(
@@ -215,7 +215,8 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                       e.getClass.getCanonicalName,
                   )
 
-                // Work task threw an uncaught exception
+                // Work task threw an uncaught exception. This branch should never be activated because of the
+                // exception wrapping described above, but it never hurts to be defensive ¯\_(ツ)_/¯
                 case Failure(e) =>
                   maybeOut.map(e.printStackTrace(_))
                   flushOut()

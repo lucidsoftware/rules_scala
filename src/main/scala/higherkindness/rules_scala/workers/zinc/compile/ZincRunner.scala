@@ -21,6 +21,7 @@ import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.javac.{DiagnosticsReporter, DirectoryClassFinder}
 import sbt.internal.inc.{CompileOutput, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import sbt.internal.util.LoggerWriter
+import scala.collection.View
 import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 import xsbti.compile.{DependencyChanges, ScalaInstance}
@@ -57,10 +58,8 @@ object ZincRunner extends WorkerMain[Unit] {
   // dynamic execution. The concurrency error happens very rarely, so it's hard to reproduce.
   override protected val mayInterruptWorkerTasks = false
 
-  private val classloaderCache = new ClassLoaderCache(new URLClassLoader(Array()))
+  private val classloaderCache = new ClassLoaderCache(new AnnexClassLoaderCacheImpl(new URLClassLoader(Array.empty)))
 
-  // prevents GC of the soft reference in classloaderCache
-  private var lastCompiler: AnyRef = null
   private def compileScala(
     task: WorkTask[Unit],
     parsedArguments: CommonArguments,
@@ -83,23 +82,24 @@ object ZincRunner extends WorkerMain[Unit] {
     val shouldIncludeSourceRoot = !scalaInstance.actualVersion.startsWith("0.") &&
       scalaInstance.actualVersion.startsWith("3")
 
-    val scalacOptions =
-      parsedArguments.plugins.view.map(p => s"-Xplugin:$p").toArray ++
-        parsedArguments.compilerOptions ++
-        parsedArguments.compilerOptionsReferencingPaths.toArray ++
+    val scalacOptions = (
+      // We don't use this phase, so we disable it to speed up compilation by a teeny tiny amount
+      View("-Yskip:xsbt-analyzer") ++
+        parsedArguments.plugins.view.map(p => s"-Xplugin:$p") ++
+        parsedArguments.compilerOptions.view ++
+        parsedArguments.compilerOptionsReferencingPaths.view ++
         (
           if (shouldIncludeSourceRoot) {
-            Array("-sourceroot", task.workDir.toAbsolutePath.toString)
+            View("-sourceroot", task.workDir.toAbsolutePath.toString)
           } else {
-            Array.empty[String]
+            View.empty
           }
         )
+    ).toArray
 
     val scalaCompiler = ZincUtil
       .scalaCompiler(scalaInstance, parsedArguments.compilerBridge)
       .withClassLoaderCache(classloaderCache)
-
-    lastCompiler = scalaCompiler
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 

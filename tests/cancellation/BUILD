@@ -3,6 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_library", "scala_test")
 scala_library(
     name = "cancel-spec-worker",
     srcs = [
+        "AlwaysCancelWorker.scala",
         "RunnerForCancelSpec.scala",
     ],
     scala_toolchain_name = "test_zinc_2_13",

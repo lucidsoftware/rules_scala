@@ -216,7 +216,7 @@ _testing_private_attributes = {
 def _extras_attributes(extras):
     return {
         "_phase_providers": attr.label_list(
-            default = [pp for extra in extras for pp in extra["phase_providers"]],
+            default = [pp for extra in extras for pp in extra.get("phase_providers", [])],
             providers = [_ScalaRulePhase],
         ),
     }
@@ -275,7 +275,7 @@ def make_scala_library(*extras):
             _library_attributes,
             _scala_toolchain_attributes,
             _extras_attributes(extras),
-            *[extra["attrs"] for extra in extras]
+            *[extra.get("attrs", {}) for extra in extras]
         ),
         cfg = _scala_incoming_transition,
         doc = "Compiles a Scala JVM library.",
@@ -284,13 +284,13 @@ def make_scala_library(*extras):
             {
                 "jar": "%{name}.jar",
             },
-            *[extra["outputs"] for extra in extras]
+            *[extra.get("outputs", {}) for extra in extras]
         ),
         toolchains = [
             "//rules/scala:toolchain_type",
             "//rules/scalafmt:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
-        ],
+        ] + [toolchain for extra in extras for toolchain in extra.get("toolchains", [])],
     )
 
 scala_library = make_scala_library()
@@ -309,7 +309,7 @@ def make_scala_binary(*extras):
                 ),
             },
             _extras_attributes(extras),
-            *[extra["attrs"] for extra in extras]
+            *[extra.get("attrs", {}) for extra in extras]
         ),
         cfg = _scala_incoming_transition,
         doc = """
@@ -331,13 +331,13 @@ To run the program: `bazel run <target>`
                 "jar": "%{name}.jar",
                 "deploy_jar": "%{name}_deploy.jar",
             },
-            *[extra["outputs"] for extra in extras]
+            *[extra.get("outputs", {}) for extra in extras]
         ),
         toolchains = [
             "//rules/scala:toolchain_type",
             "//rules/scalafmt:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
-        ],
+        ] + [toolchain for extra in extras for toolchain in extra.get("toolchains", [])],
     )
 
 scala_binary = make_scala_binary()
@@ -388,7 +388,7 @@ def make_scala_test(*extras):
                 ),
             },
             _extras_attributes(extras),
-            *[extra["attrs"] for extra in extras]
+            *[extra.get("attrs", {}) for extra in extras]
         ),
         cfg = _scala_incoming_transition,
         doc = """
@@ -408,14 +408,14 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
                 "bin": "%{name}-bin",
                 "jar": "%{name}.jar",
             },
-            *[extra["outputs"] for extra in extras]
+            *[extra.get("outputs", {}) for extra in extras]
         ),
         test = True,
         toolchains = [
             "//rules/scala:toolchain_type",
             "//rules/scalafmt:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
-        ],
+        ] + [toolchain for extra in extras for toolchain in extra.get("toolchains", [])],
     )
 
 scala_test = make_scala_test()

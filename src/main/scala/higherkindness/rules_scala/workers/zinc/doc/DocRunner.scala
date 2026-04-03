@@ -28,7 +28,6 @@ object DocRunner extends WorkerMain[Unit] {
     val options: List[String],
     val outputDir: Path,
     val sources: List[Path],
-    val tmpDir: Path,
   )
 
   private object DocRequest {
@@ -41,7 +40,6 @@ object DocRunner extends WorkerMain[Unit] {
         options = Option(namespace.getList[String]("option")).map(_.asScala.toList).getOrElse(List.empty),
         outputDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_html")),
         sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
-        tmpDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("tmp")),
         sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
       )
     }
@@ -89,12 +87,6 @@ object DocRunner extends WorkerMain[Unit] {
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
     parser
-      .addArgument("--tmp")
-      .help("Temporary directory")
-      .metavar("path")
-      .required(true)
-      .`type`(PathArgumentType.apply())
-    parser
       .addArgument("--output_html")
       .help("Output directory")
       .metavar("path")
@@ -119,12 +111,7 @@ object DocRunner extends WorkerMain[Unit] {
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 
-    val tmpDir = workRequest.tmpDir
-    try {
-      FileUtil.delete(tmpDir)
-    } catch {
-      case _: NoSuchFileException => {}
-    }
+    val tmpDir = Files.createTempDirectory(task.workDir, "tmp")
 
     val sources = workRequest.sources ++
       workRequest.sourceJars.zipWithIndex
@@ -166,7 +153,6 @@ object DocRunner extends WorkerMain[Unit] {
     } catch {
       case _: NoSuchFileException => {}
     }
-    Files.createDirectory(tmpDir)
     InterruptUtil.throwIfInterrupted(task.isCancelled)
   }
 }

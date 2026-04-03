@@ -26,7 +26,6 @@ def scaladoc_implementation(ctx):
     )
 
     html = ctx.actions.declare_directory("html")
-    tmp = ctx.actions.declare_directory("tmp")
 
     classpath = depset(transitive = [dep[JavaInfo].transitive_compile_time_jars for dep in ctx.attr.deps])
     compiler_classpath = depset(
@@ -46,7 +45,6 @@ def scaladoc_implementation(ctx):
     args.add_all(scalacopts, format_each = "--option=%s")
     args.add_all("--output_html", [html], expand_directories = False)
     args.add_all("--source_jars", src_jars)
-    args.add_all("--tmp", [tmp], expand_directories = False)
     args.add_all("--", srcs)
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
@@ -67,7 +65,7 @@ def scaladoc_implementation(ctx):
         ),
         mnemonic = "ScalaDoc",
         progress_message = "Generating Scaladoc %{label}",
-        outputs = [html, tmp],
+        outputs = [html],
         toolchain = None,
     )
 

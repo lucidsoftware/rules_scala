@@ -60,6 +60,12 @@ private class CallableLockedWhileRunning[S](callable: Callable[S]) extends Calla
   override def call(): S = {
     isRunning.lock()
     try {
+      // Clear any stale interrupt flag from a previous task. `FutureTask` deliberately doesn't clear the interrupt flag
+      // once task cancellation is complete because thread interruption could be used as an "an independent mechanism
+      // for a task to communicate with its caller".
+      // https://github.com/openjdk/jdk/blame/jdk-21%2B35/src/java.base/share/classes/java/util/concurrent/FutureTask.java#L390
+      Thread.interrupted()
+
       callable.call()
     } finally {
       isRunning.unlock()

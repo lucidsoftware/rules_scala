@@ -1,4 +1,4 @@
 #!/bin/bash -e
 . "$(dirname "$0")"/../common.sh
 
-bazel test :cancel-spec
+bazel test :cancel-spec :cancellabletask-spec

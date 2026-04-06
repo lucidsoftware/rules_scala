@@ -16,7 +16,6 @@ def phase_zinc_compile(ctx, g):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
-    tmp = ctx.actions.declare_directory("{}/tmp".format(ctx.label.name))
 
     javacopts = [
         ctx.expand_location(option, ctx.attr.data)
@@ -43,7 +42,6 @@ def phase_zinc_compile(ctx, g):
     args.add("--output_used", used)
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
-    args.add_all("--tmp", [tmp], expand_directories = False)
     args.add("--log_level", toolchain.zinc_configuration.log_level)
 
     g.semanticdb.arguments_modifier(args)
@@ -57,7 +55,7 @@ def phase_zinc_compile(ctx, g):
         ],
     )
 
-    outputs = [g.classpaths.jar, mains_file, used, tmp] + g.semanticdb.outputs
+    outputs = [g.classpaths.jar, mains_file, used] + g.semanticdb.outputs
 
     if hasattr(ctx.attr, "frameworks"):
         tests_file = ctx.actions.declare_file("{}/tests.json".format(ctx.label.name))

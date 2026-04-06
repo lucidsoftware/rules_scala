@@ -270,7 +270,7 @@ object ZincRunner extends WorkerMain[Unit] {
 
     val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)
 
-    val tmpDir = workRequest.tmpDir
+    val tmpDir = Files.createTempDirectory(task.workDir, "tmp")
 
     // extract srcjars
     val sources = {
@@ -395,7 +395,6 @@ object ZincRunner extends WorkerMain[Unit] {
 
     // clear temporary files
     FileUtil.delete(tmpDir)
-    Files.createDirectory(tmpDir)
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
   }

@@ -25,8 +25,6 @@ def phase_bootstrap_compile(ctx, g):
         ],
     )
 
-    tmp = ctx.actions.declare_directory("{}/tmp/classes".format(ctx.label.name))
-
     scala_configuration = g.javainfo.scala_info.scala_configuration
 
     main_class = "scala.tools.nsc.Main"
@@ -49,8 +47,6 @@ def phase_bootstrap_compile(ctx, g):
 
     if compile_classpath:
         args.add_joined("--compile_classpath", compile_classpath, join_with = ":")
-
-    args.add_all("--tmp", [tmp], expand_directories = False)
 
     if scala_configuration.global_scalacopts:
         args.add_joined("--global_scalacopts", scala_configuration.global_scalacopts, join_with = " ")
@@ -78,9 +74,6 @@ def phase_bootstrap_compile(ctx, g):
             |    --compile_classpath)
             |      compile_classpath="${2}"
             |      ;;
-            |    --tmp)
-            |      tmp="${2}"
-            |      ;;
             |    --global_scalacopts)
             |      global_scalacopts="${2}"
             |      ;;
@@ -104,16 +97,20 @@ def phase_bootstrap_compile(ctx, g):
             |  shift
             |done
             |
+            |class_directory="$(mktemp -d)"
+            |
+            |trap 'rm -rf -- "${class_directory}"' EXIT
+            |
             |"${java}" \\
             |  -cp "${compiler_classpath}" \\
             |  "${main_class}" \\
             |  -cp "${compile_classpath}" \\
-            |  -d "${tmp}" \\
+            |  -d "${class_directory}" \\
             |  ${global_scalacopts} \\
             |  ${scalacopts} \\
             |  ${srcs}
             |
-            |"${jar_creator}" "${output_jar}" "${tmp}" 2> /dev/null
+            |"${jar_creator}" "${output_jar}" "${class_directory}" 2> /dev/null
             |""",
     )
 
@@ -126,7 +123,7 @@ def phase_bootstrap_compile(ctx, g):
         inputs = inputs,
         mnemonic = "BootstrapScalaCompile",
         progress_message = "Bootstrap Compiling Scala %{label}",
-        outputs = [g.classpaths.jar, tmp],
+        outputs = [g.classpaths.jar],
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
         tools = [ctx.executable._jar_creator],
     )

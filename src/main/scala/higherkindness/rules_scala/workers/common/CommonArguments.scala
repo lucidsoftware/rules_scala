@@ -37,7 +37,6 @@ class CommonArguments private (
   val sourceJars: List[Path],
   val testFrameworks: List[String],
   val testsFile: Option[Path],
-  val tmpDir: Path,
   val sources: List[Path],
 )
 
@@ -175,12 +174,6 @@ object CommonArguments {
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
     parser
-      .addArgument("--tmp")
-      .help("Temporary directory")
-      .metavar("path")
-      .required(true)
-      .`type`(PathArgumentType.apply())
-    parser
       .addArgument("sources")
       .help("Source files")
       .metavar("source")
@@ -216,7 +209,6 @@ object CommonArguments {
       sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
       testFrameworks = namespace.getList[String]("test_frameworks").asScala.toList,
       testsFile = Option(namespace.get[Path]("tests_file")).map(SandboxUtil.getSandboxPath(workDir, _)),
-      tmpDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("tmp")),
       sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
     )
   }

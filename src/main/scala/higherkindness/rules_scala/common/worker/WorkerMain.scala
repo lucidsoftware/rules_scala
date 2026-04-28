@@ -8,6 +8,7 @@ import java.nio.file.Path
 import java.util.concurrent.{CancellationException, ConcurrentHashMap, ForkJoinPool}
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, ExecutionException, Future}
+import scala.jdk.CollectionConverters.*
 import scala.util.{Failure, Success, Using}
 import java.time.{ZoneId, ZonedDateTime}
 
@@ -164,7 +165,17 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
               maybeOutStream = Some(outStream)
               maybeOut = Some(out)
               try {
-                work(WorkTask(ctx, args, out, sandboxDir, verbosity, isCancelled))
+                work(
+                  WorkTask(
+                    ctx,
+                    args,
+                    out,
+                    sandboxDir,
+                    verbosity,
+                    isCancelled,
+                    Some(request.getInputsList.asScala.toList),
+                  ),
+                )
                 0
               } catch {
                 case e @ AnnexWorkerError(code, _, _) =>
@@ -277,6 +288,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                   workDir = Path.of(""),
                   verbosity = 0,
                   isCancelled = () => false,
+                  inputs = None,
                 ),
               )
 

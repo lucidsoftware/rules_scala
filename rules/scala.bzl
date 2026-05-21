@@ -382,6 +382,10 @@ def make_scala_test(*extras):
                     cfg = _scala_outgoing_transition,
                     default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test",
                 ),
+                "sequential": attr.bool(
+                    default = False,
+                    doc = "Whether to run test classes sequentially. If false, they'll be run concurrently.",
+                ),
                 "subprocess_runner": attr.label(
                     cfg = _scala_outgoing_transition,
                     default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess",

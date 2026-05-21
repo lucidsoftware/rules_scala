@@ -61,6 +61,8 @@ def phase_test_launcher(ctx, g):
         files.append(subprocess_executable)
         args.add("--isolation", "process")
         args.add("--subprocess_exec", subprocess_executable.short_path)
+    if ctx.attr.sequential:
+        args.add("--sequential")
     args.add_all("--", test_jars, map_each = _short_path)
     args.set_param_file_format("multiline")
     args_file = ctx.actions.declare_file("{}/test.params".format(ctx.label.name))

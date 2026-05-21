@@ -37,7 +37,7 @@ class TestFrameworkLoader(loader: ClassLoader) {
         (Some(`class`.getDeclaredConstructor().newInstance()), loadedJar)
       } catch {
         case _: ClassNotFoundException => (None, None)
-        case NonFatal(e) => throw new Exception(s"Failed to load framework $className", e)
+        case NonFatal(e)               => throw new Exception(s"Failed to load framework $className", e)
       }
     framework.map {
       case framework: Framework =>

@@ -6,7 +6,7 @@ build --tool_java_language_version="21"
 build --tool_java_runtime_version="remotejdk_21"
 
 # Other options
-build --experimental_use_hermetic_linux_sandbox
+# build --experimental_use_hermetic_linux_sandbox
 build --experimental_worker_cancellation
 build --experimental_worker_multiplex_sandboxing
 build --experimental_worker_sandbox_hardening

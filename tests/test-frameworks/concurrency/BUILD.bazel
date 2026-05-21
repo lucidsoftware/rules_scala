@@ -1,0 +1,16 @@
+load("@rules_scala_annex//rules:scala.bzl", "scala_test")
+
+scala_test(
+    name = "concurrent",
+    srcs = glob(["*.scala"]),
+    jvm_flags = ["-DTEST_MODE=concurrent"],
+    deps = ["@annex_test//:org_specs2_specs2_core_2_13"],
+)
+
+scala_test(
+    name = "sequential",
+    srcs = glob(["*.scala"]),
+    jvm_flags = ["-DTEST_MODE=sequential"],
+    sequential = True,
+    deps = ["@annex_test//:org_specs2_specs2_core_2_13"],
+)

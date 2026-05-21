@@ -2,7 +2,7 @@ package higherkindness.rules_scala.common.sbt_testing
 
 import java.nio.file.{Path, Paths}
 import play.api.libs.json.{Format, Json}
-import sbt.testing.{Event, Framework, Logger, Runner, Status, Task, TaskDef, TestWildcardSelector}
+import sbt.testing.{Framework, Logger, Runner, Task, TaskDef, TestWildcardSelector}
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
@@ -37,7 +37,7 @@ class TestFrameworkLoader(loader: ClassLoader) {
         (Some(`class`.getDeclaredConstructor().newInstance()), loadedJar)
       } catch {
         case _: ClassNotFoundException => (None, None)
-        case NonFatal(e)               => throw new Exception(s"Failed to load framework $className", e)
+        case NonFatal(e) => throw new Exception(s"Failed to load framework $className", e)
       }
     framework.map {
       case framework: Framework =>
@@ -100,26 +100,4 @@ class TestReporter(logger: Logger) {
   }
 
   def preTask(task: Task) = logger.info(task.taskDef.fullyQualifiedName)
-}
-
-class TestTaskExecutor(logger: Logger) {
-  def execute(task: Task, failures: mutable.Set[String]): mutable.ListBuffer[Event] = {
-    var events = new mutable.ListBuffer[Event]()
-    def execute(task: Task): Unit = {
-      val tasks = task.execute(
-        event => {
-          events += event
-          event.status match {
-            case Status.Failure | Status.Error =>
-              failures += task.taskDef.fullyQualifiedName
-            case _ =>
-          }
-        },
-        Array(new PrefixedTestingLogger(logger, "    ")),
-      )
-      tasks.foreach(execute)
-    }
-    execute(task)
-    events
-  }
 }

@@ -98,7 +98,6 @@ class ProcessTestRunner(
       }
     }
 
-    val taskExecutor = new TestTaskExecutor(logger)
     val failures = mutable.Set[String]()
     tests.foreach { test =>
       val process = new ProcessBuilder((command.executable +: command.arguments): _*)

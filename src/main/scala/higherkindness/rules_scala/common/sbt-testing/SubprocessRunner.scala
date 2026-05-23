@@ -3,7 +3,8 @@ package higherkindness.rules_scala.common.sbt_testing
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import java.io.ObjectInputStream
 import java.nio.file.Paths
-import scala.collection.mutable
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object SubprocessTestRunner {
 
@@ -20,14 +21,16 @@ object SubprocessTestRunner {
         val tasks = runner.tasks(Array(TestHelper.taskDef(request.test, request.scopeAndTestName)))
         tasks.length == 0 || {
           val reporter = new TestReporter(request.logger)
-          val taskExecutor = new TestTaskExecutor(request.logger)
-          val failures = mutable.Set[String]()
-          tasks.foreach { task =>
-            reporter.preTask(task)
-            taskExecutor.execute(task, failures)
-            reporter.postTask()
-          }
-          !failures.nonEmpty
+
+          // We're only running a single test class, so there's not much of a point in using the
+          // `ConcurrentTestTaskExecutor`
+          val taskExecutor = new SequentialTestTaskExecutor(request.logger)
+
+          tasks.foreach(taskExecutor.submitTask)
+
+          val result = Await.result(taskExecutor.waitForTasks(), Duration.Inf)
+
+          !result.failures.nonEmpty
         }
       }
     }

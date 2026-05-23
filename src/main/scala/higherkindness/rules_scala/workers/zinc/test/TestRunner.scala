@@ -4,7 +4,8 @@ import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import higherkindness.rules_scala.common.sandbox.SandboxUtil
-import higherkindness.rules_scala.common.sbt_testing.{AnnexTestingLogger, TestDefinition, TestFrameworkLoader, TestsFileData, Verbosity}
+import higherkindness.rules_scala.common.sbt_testing.{AnnexTestingLogger, ConcurrentTestTaskExecutor, SequentialTestTaskExecutor, TestDefinition, TestFrameworkLoader, TestsFileData, Verbosity}
+import higherkindness.rules_scala.workers.zinc.test.TestRunner.Isolation
 import java.io.FileInputStream
 import java.net.URLClassLoader
 import java.nio.file.attribute.FileTime
@@ -16,6 +17,8 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
 import play.api.libs.json.Json
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
@@ -83,9 +86,10 @@ object TestRunner {
   }
 
   private class TestRunnerRequest private (
-    val subprocessExecutable: Option[Path],
     val isolation: Isolation,
+    val sequential: Boolean,
     val sharedClasspath: List[Path],
+    val subprocessExecutable: Option[Path],
     val testClasspath: List[Path],
     val testsFile: Path,
   )
@@ -93,10 +97,11 @@ object TestRunner {
   private object TestRunnerRequest {
     def apply(runPath: Path, namespace: Namespace): TestRunnerRequest = {
       new TestRunnerRequest(
+        isolation = Isolation(namespace.getString("isolation")),
+        sequential = namespace.getBoolean("sequential"),
+        sharedClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("shared_classpath")),
         subprocessExecutable =
           Option(namespace.get[Path]("subprocess_exec")).map(SandboxUtil.getSandboxPath(runPath, _)),
-        isolation = Isolation(namespace.getString("isolation")),
-        sharedClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("shared_classpath")),
         testClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("classpath")),
         testsFile = namespace.get[Path]("tests_file"),
       )
@@ -106,14 +111,14 @@ object TestRunner {
   private val testArgParser: ArgumentParser = {
     val parser = ArgumentParsers.newFor("test").addHelp(true).build()
     parser
-      .addArgument("--subprocess_exec")
-      .help("Executable for SubprocessTestRunner")
-      .`type`(PathArgumentType.apply())
-    parser
       .addArgument("--isolation")
       .choices(Isolation.values.keys.toSeq: _*)
       .help("Test isolation")
       .setDefault_(Isolation.None.level)
+    parser
+      .addArgument("--sequential")
+      .help("If passed, run test classes sequentially instead of concurrently.")
+      .action(Arguments.storeTrue())
     parser
       .addArgument("--shared_classpath")
       .help("Classpath to share between tests")
@@ -121,6 +126,10 @@ object TestRunner {
       .nargs("*")
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--subprocess_exec")
+      .help("Executable for SubprocessTestRunner")
+      .`type`(PathArgumentType.apply())
     parser
       .addArgument("--tests_file")
       .help("File containing discovered tests.")
@@ -188,11 +197,21 @@ object TestRunner {
           }
         }
         filteredTests.isEmpty || {
+          if (testRunnerRequest.sequential && testRunnerRequest.isolation == Isolation.Process) {
+            throw new Exception("Process isolation isn't yet compatible with sequential execution.")
+          }
+
+          val testTaskExecutor = if (testRunnerRequest.sequential) {
+            new SequentialTestTaskExecutor(logger)
+          } else {
+            new ConcurrentTestTaskExecutor(logger)
+          }
+
           val runner = testRunnerRequest.isolation match {
             case Isolation.ClassLoader =>
               val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
               def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
-              new ClassLoaderTestRunner(framework, classLoaderProvider _, logger)
+              new ClassLoaderTestRunner(framework, classLoaderProvider _, logger, testTaskExecutor)
             case Isolation.Process =>
               val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
                 throw new Exception("Subprocess executable missing for test ran in process isolation mode.")
@@ -203,11 +222,14 @@ object TestRunner {
                 new ProcessCommand(executable, testRunnerArgs.subprocessArgs),
                 logger,
               )
-            case Isolation.None => new BasicTestRunner(framework, classLoader, logger)
+            case Isolation.None => new BasicTestRunner(framework, classLoader, logger, testTaskExecutor)
           }
 
           try {
-            runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs)
+            Await.result(
+              runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs),
+              Duration.Inf,
+            )
           } catch {
             case e: Throwable =>
               e.printStackTrace()

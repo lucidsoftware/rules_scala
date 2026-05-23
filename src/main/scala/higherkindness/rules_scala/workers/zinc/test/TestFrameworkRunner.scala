@@ -10,38 +10,48 @@ import higherkindness.rules_scala.common.sbt_testing.TestRequest
 import higherkindness.rules_scala.common.sbt_testing.TestTaskExecutor
 import java.io.ObjectOutputStream
 import java.nio.file.Path
-import sbt.testing.{Event, Framework, Logger}
+import sbt.testing.{Framework, Logger}
 import scala.collection.mutable
+import scala.concurrent.{blocking, ExecutionContext, Future}
 
-class BasicTestRunner(framework: Framework, classLoader: ClassLoader, logger: Logger) extends TestFrameworkRunner {
-  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
-    var tasksAndEvents = new mutable.ListBuffer[(String, mutable.ListBuffer[Event])]()
+class BasicTestRunner(
+  framework: Framework,
+  classLoader: ClassLoader,
+  logger: Logger,
+  testTaskExecutor: TestTaskExecutor,
+) extends TestFrameworkRunner {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Future[Boolean] = {
     ClassLoaders.withContextClassLoader(classLoader) {
       TestHelper.withRunner(framework, scopeAndTestName, classLoader, arguments) { runner =>
         val reporter = new TestReporter(logger)
         val tasks = runner.tasks(tests.map(TestHelper.taskDef(_, scopeAndTestName)).toArray)
         reporter.pre(framework, tasks)
-        val taskExecutor = new TestTaskExecutor(logger)
-        val failures = mutable.Set[String]()
-        tasks.foreach { task =>
-          reporter.preTask(task)
-          val events = taskExecutor.execute(task, failures)
-          reporter.postTask()
-          tasksAndEvents += ((task.taskDef.fullyQualifiedName, events))
-        }
-        reporter.post(failures)
-        val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-        xmlReporter.write()
-        !failures.nonEmpty
+        tasks.foreach(testTaskExecutor.submitTask)
+        testTaskExecutor
+          .waitForTasks()
+          .map { result =>
+            blocking {
+              reporter.post(result.failures)
+
+              val xmlReporter = new JUnitXmlReporter(result.taskEvents)
+
+              xmlReporter.write()
+
+              !result.failures.nonEmpty
+            }
+          }(ExecutionContext.global)
       }
     }
   }
 }
 
-class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => ClassLoader, logger: Logger)
-    extends TestFrameworkRunner {
-  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
-    var tasksAndEvents = new mutable.ListBuffer[(String, mutable.ListBuffer[Event])]()
+class ClassLoaderTestRunner(
+  framework: Framework,
+  classLoaderProvider: () => ClassLoader,
+  logger: Logger,
+  testTaskExecutor: TestTaskExecutor,
+) extends TestFrameworkRunner {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Future[Boolean] = {
     val reporter = new TestReporter(logger)
 
     val classLoader = framework.getClass.getClassLoader
@@ -52,27 +62,30 @@ class ClassLoaderTestRunner(framework: Framework, classLoaderProvider: () => Cla
       }
     }
 
-    val taskExecutor = new TestTaskExecutor(logger)
-    val failures = mutable.Set[String]()
     tests.foreach { test =>
       val classLoader = classLoaderProvider()
       val isolatedFramework = new TestFrameworkLoader(classLoader).load(framework.getClass.getName).get
       TestHelper.withRunner(isolatedFramework, scopeAndTestName, classLoader, arguments) { runner =>
         ClassLoaders.withContextClassLoader(classLoader) {
           val tasks = runner.tasks(Array(TestHelper.taskDef(test, scopeAndTestName)))
-          tasks.foreach { task =>
-            reporter.preTask(task)
-            val events = taskExecutor.execute(task, failures)
-            reporter.postTask()
-            tasksAndEvents += ((task.taskDef.fullyQualifiedName, events))
-          }
+          tasks.foreach(testTaskExecutor.submitTask)
         }
       }
     }
-    reporter.post(failures)
-    val xmlReporter = new JUnitXmlReporter(tasksAndEvents)
-    xmlReporter.write()
-    !failures.nonEmpty
+
+    testTaskExecutor
+      .waitForTasks()
+      .map { result =>
+        blocking {
+          reporter.post(result.failures)
+
+          val xmlReporter = new JUnitXmlReporter(result.taskEvents)
+
+          xmlReporter.write()
+
+          !result.failures.nonEmpty
+        }
+      }(ExecutionContext.global)
   }
 }
 
@@ -87,7 +100,7 @@ class ProcessTestRunner(
   command: ProcessCommand,
   logger: Logger with Serializable,
 ) extends TestFrameworkRunner {
-  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]) = {
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Future[Boolean] = {
     val reporter = new TestReporter(logger)
 
     val classLoader = framework.getClass.getClassLoader
@@ -98,7 +111,6 @@ class ProcessTestRunner(
       }
     }
 
-    val taskExecutor = new TestTaskExecutor(logger)
     val failures = mutable.Set[String]()
     tests.foreach { test =>
       val process = new ProcessBuilder((command.executable +: command.arguments): _*)
@@ -123,10 +135,10 @@ class ProcessTestRunner(
       } finally process.destroy
     }
     reporter.post(failures)
-    !failures.nonEmpty
+    Future.successful(!failures.nonEmpty) // We don't yet support concurrent execution with process isolation
   }
 }
 
 trait TestFrameworkRunner {
-  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Boolean
+  def execute(tests: List[TestDefinition], scopeAndTestName: String, arguments: List[String]): Future[Boolean]
 }

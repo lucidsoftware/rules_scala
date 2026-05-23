@@ -1,0 +1,74 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+# That the test completes at all is proof that the test classes are executed concurrently, because each waits for all
+# the others to start. This means that if the test doesn't complete, then the test classes are being executed
+# sequentially. You may find this helpful for debugging.
+concurrent_output="$(bazel run :concurrent)"
+
+# The logs for each test class should be buffered. See `tests/test-frameworks/concurrency/package.scala` to understand
+# why these messages being printed in sequence is proof of that.
+echo "$concurrent_output" | grep 'Spec\d executing...
+Spec\d executing...
+Spec\d executing...
+Spec\d executing...
+'
+
+# The output for each test class shouldn't be interleaved
+for i in {1..4}; do
+  echo "$concurrent_output" | grep "com.lucidchart.example.Spec$i
+    Spec$i
+
+
+
+    Total for specification Spec$i
+"
+done
+
+sequential_output="$(bazel run :sequential)"
+
+# The test classes should run in order
+echo "$sequential_output" | grep '
+com\.lucidchart\.example\.Spec1
+Spec1 executing\.\.\.
+    Spec1
+
+
+
+    Total for specification Spec1
+    Finished in .*
+0 example, 0 failure, 0 error
+
+
+com\.lucidchart\.example\.Spec2
+Spec2 executing\.\.\.
+    Spec2
+
+
+
+    Total for specification Spec2
+    Finished in .*
+0 example, 0 failure, 0 error
+
+
+com\.lucidchart\.example\.Spec3
+Spec3 executing\.\.\.
+    Spec3
+
+
+
+    Total for specification Spec3
+    Finished in .*
+0 example, 0 failure, 0 error
+
+
+com\.lucidchart\.example\.Spec4
+Spec4 executing\.\.\.
+    Spec4
+
+
+
+    Total for specification Spec4
+    Finished in .*
+0 example, 0 failure, 0 error
+'

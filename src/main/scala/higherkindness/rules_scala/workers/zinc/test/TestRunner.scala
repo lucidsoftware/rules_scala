@@ -183,60 +183,61 @@ object TestRunner {
     val testScopeAndName = testFilter.flatMap(_.lift(1))
 
     var count = 0
-    val passed = testsFileData.testsByFramework.view
-      .flatMap { case (frameworkName, tests) => loader.load(frameworkName).map((frameworkName, _, tests)) }
-      .forall { case (frameworkName, framework, tests) =>
-        val filter = for {
-          index <- sys.env.get("TEST_SHARD_INDEX").map(_.toInt)
-          total <- sys.env.get("TEST_TOTAL_SHARDS").map(_.toInt)
-        } yield (test: TestDefinition, i: Int) => i % total == index
-        val filteredTests = tests.filter { test =>
-          testClass.forall(_.matcher(test.name).matches) && {
-            count += 1
-            filter.fold(true)(_(test, count))
-          }
-        }
-        filteredTests.isEmpty || {
-          if (testRunnerRequest.sequential && testRunnerRequest.isolation == Isolation.Process) {
-            throw new Exception("Process isolation isn't yet compatible with sequential execution.")
-          }
+    val passed = testsFileData.testsByFramework.forall { case (frameworkName, tests) =>
+      val framework =
+        loader.load(frameworkName).getOrElse(throw new Exception(s"Failed to load test framework $frameworkName"))
 
-          val testTaskExecutor = if (testRunnerRequest.sequential) {
-            new SequentialTestTaskExecutor(logger)
-          } else {
-            new ConcurrentTestTaskExecutor(logger)
-          }
-
-          val runner = testRunnerRequest.isolation match {
-            case Isolation.ClassLoader =>
-              val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
-              def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
-              new ClassLoaderTestRunner(framework, classLoaderProvider _, logger, testTaskExecutor)
-            case Isolation.Process =>
-              val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
-                throw new Exception("Subprocess executable missing for test ran in process isolation mode.")
-              }
-              new ProcessTestRunner(
-                framework,
-                testClasspath.toSeq,
-                new ProcessCommand(executable, testRunnerArgs.subprocessArgs),
-                logger,
-              )
-            case Isolation.None => new BasicTestRunner(framework, classLoader, logger, testTaskExecutor)
-          }
-
-          try {
-            Await.result(
-              runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs),
-              Duration.Inf,
-            )
-          } catch {
-            case e: Throwable =>
-              e.printStackTrace()
-              false
-          }
+      val filter = for {
+        index <- sys.env.get("TEST_SHARD_INDEX").map(_.toInt)
+        total <- sys.env.get("TEST_TOTAL_SHARDS").map(_.toInt)
+      } yield (test: TestDefinition, i: Int) => i % total == index
+      val filteredTests = tests.filter { test =>
+        testClass.forall(_.matcher(test.name).matches) && {
+          count += 1
+          filter.fold(true)(_(test, count))
         }
       }
+      filteredTests.isEmpty || {
+        if (testRunnerRequest.sequential && testRunnerRequest.isolation == Isolation.Process) {
+          throw new Exception("Process isolation isn't yet compatible with sequential execution.")
+        }
+
+        val testTaskExecutor = if (testRunnerRequest.sequential) {
+          new SequentialTestTaskExecutor(logger)
+        } else {
+          new ConcurrentTestTaskExecutor(logger)
+        }
+
+        val runner = testRunnerRequest.isolation match {
+          case Isolation.ClassLoader =>
+            val urls = testClasspath.filterNot(sharedClasspath.toSet).map(_.toUri.toURL).toArray
+            def classLoaderProvider() = new URLClassLoader(urls, sharedClassLoader)
+            new ClassLoaderTestRunner(framework, classLoaderProvider _, logger, testTaskExecutor)
+          case Isolation.Process =>
+            val executable = testRunnerRequest.subprocessExecutable.map(_.toString).getOrElse {
+              throw new Exception("Subprocess executable missing for test ran in process isolation mode.")
+            }
+            new ProcessTestRunner(
+              framework,
+              testClasspath.toSeq,
+              new ProcessCommand(executable, testRunnerArgs.subprocessArgs),
+              logger,
+            )
+          case Isolation.None => new BasicTestRunner(framework, classLoader, logger, testTaskExecutor)
+        }
+
+        try {
+          Await.result(
+            runner.execute(filteredTests.toList, testScopeAndName.getOrElse(""), testRunnerArgs.frameworkArgs),
+            Duration.Inf,
+          )
+        } catch {
+          case e: Throwable =>
+            e.printStackTrace()
+            false
+        }
+      }
+    }
     sys.exit(if (passed) 0 else 1)
   }
 }

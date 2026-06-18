@@ -3,12 +3,12 @@ package higherkindness.rules_scala.workers.zinc.test
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.sbt_testing.{AnnexTestingLogger, ConcurrentTestTaskExecutor, SequentialTestTaskExecutor, TestDefinition, TestFrameworkLoader, TestsFileData, Verbosity}
 import higherkindness.rules_scala.workers.zinc.test.TestRunner.Isolation
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.net.URLClassLoader
-import java.nio.file.attribute.FileTime
+import java.nio.file.attribute.{FileTime, PosixFileAttributes, PosixFilePermissions}
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 import java.time.Instant
 import java.util.Collections
@@ -95,14 +95,13 @@ object TestRunner {
   )
 
   private object TestRunnerRequest {
-    def apply(runPath: Path, namespace: Namespace): TestRunnerRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): TestRunnerRequest = {
       new TestRunnerRequest(
         isolation = Isolation(namespace.getString("isolation")),
         sequential = namespace.getBoolean("sequential"),
-        sharedClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("shared_classpath")),
-        subprocessExecutable =
-          Option(namespace.get[Path]("subprocess_exec")).map(SandboxUtil.getSandboxPath(runPath, _)),
-        testClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("classpath")),
+        sharedClasspath = pathResolver.resolve(namespace.getList[Path]("shared_classpath")),
+        subprocessExecutable = Option(namespace.get[Path]("subprocess_exec")).map(pathResolver.resolve),
+        testClasspath = pathResolver.resolve(namespace.getList[Path]("classpath")),
         testsFile = namespace.get[Path]("tests_file"),
       )
     }
@@ -157,10 +156,11 @@ object TestRunner {
       }
     }
 
-    val runPath = Paths.get(sys.props("bazel.runPath"))
     val testArgFile = Paths.get(sys.props("scalaAnnex.test.args"))
-    val testRunnerRequest =
-      TestRunnerRequest(runPath, testArgParser.parseArgsOrFail(Files.readAllLines(testArgFile).asScala.toArray))
+    val testRunnerRequest = TestRunnerRequest(
+      PathResolver.forBinaryRunner,
+      testArgParser.parseArgsOrFail(Files.readAllLines(testArgFile).asScala.toArray),
+    )
 
     val logger = new AnnexTestingLogger(testRunnerArgs.color, testRunnerArgs.verbosity)
 

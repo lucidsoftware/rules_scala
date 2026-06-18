@@ -4,7 +4,7 @@ import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.{AnnexLogger, AnnexScalaInstance, FileUtil, LogLevel, LoggedReporter}
 import java.net.URLClassLoader
@@ -31,16 +31,16 @@ object DocRunner extends WorkerMain[Unit] {
   )
 
   private object DocRequest {
-    def apply(workDir: Path, namespace: Namespace): DocRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): DocRequest = {
       new DocRequest(
-        classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
-        compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
-        compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
+        classpath = pathResolver.resolve(namespace.getList[Path]("classpath")),
+        compilerBridge = pathResolver.resolve(namespace.get[Path]("compiler_bridge")),
+        compilerClasspath = pathResolver.resolve(namespace.getList[Path]("compiler_classpath")),
         logLevel = LogLevel(namespace.getString("log_level")),
         options = Option(namespace.getList[String]("option")).map(_.asScala.toList).getOrElse(List.empty),
-        outputDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_html")),
-        sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
-        sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
+        outputDir = pathResolver.resolve(namespace.get[Path]("output_html")),
+        sources = pathResolver.resolve(namespace.getList[Path]("sources")),
+        sourceJars = pathResolver.resolve(namespace.getList[Path]("source_jars")),
       )
     }
   }
@@ -106,7 +106,7 @@ object DocRunner extends WorkerMain[Unit] {
 
   override def work(task: WorkTask[Unit]): Unit = {
     val workRequest = DocRequest(
-      task.workDir,
+      PathResolver.forPersistentWorker(task.workDir),
       ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)

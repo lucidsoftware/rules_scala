@@ -2,7 +2,7 @@ package higherkindness.rules_scala.workers.zinc.repl
 
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.workers.common.AnnexLogger
 import higherkindness.rules_scala.workers.common.AnnexScalaInstance
 import higherkindness.rules_scala.workers.common.LogLevel
@@ -46,11 +46,11 @@ object ReplRunner {
   )
 
   private object ReplRequest {
-    def apply(runPath: Path, namespace: Namespace): ReplRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): ReplRequest = {
       new ReplRequest(
-        classpath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("classpath")),
-        compilerBridge = SandboxUtil.getSandboxPath(runPath, namespace.get[Path]("compiler_bridge")),
-        compilerClasspath = SandboxUtil.getSandboxPaths(runPath, namespace.getList[Path]("compiler_classpath")),
+        classpath = pathResolver.resolve(namespace.getList[Path]("classpath")),
+        compilerBridge = pathResolver.resolve(namespace.get[Path]("compiler_bridge")),
+        compilerClasspath = pathResolver.resolve(namespace.getList[Path]("compiler_classpath")),
         compilerOptions =
           Option(namespace.getList[String]("compiler_option")).map(_.asScala.toList).getOrElse(List.empty),
       )
@@ -97,7 +97,7 @@ object ReplRunner {
 
     val replArgFile = Paths.get(sys.props("scalaAnnex.test.args"))
     val replRequest = ReplRequest(
-      runPath = Paths.get(sys.props("bazel.runPath")),
+      PathResolver.forBinaryRunner,
       replArgParser.parseArgsOrFail(Files.readAllLines(replArgFile).asScala.toArray),
     )
 

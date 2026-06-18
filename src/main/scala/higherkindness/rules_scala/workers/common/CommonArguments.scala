@@ -2,7 +2,7 @@ package higherkindness.rules_scala.workers.common
 
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import java.nio.file.{Path, Paths}
 import java.util.Collections
 import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
@@ -47,33 +47,34 @@ class Analysis private (
 )
 
 object Analysis {
-  def apply(workDir: Path, label: String, analysisStore: String, jars: List[String]): Analysis = {
+  def apply(pathResolver: PathResolver, label: String, analysisStore: String, jars: List[String]): Analysis = {
     new Analysis(
       label,
-      SandboxUtil.getSandboxPath(workDir, Paths.get(analysisStore)),
-      jars.map(jar => SandboxUtil.getSandboxPath(workDir, Paths.get(jar))),
+      pathResolver.resolve(Paths.get(analysisStore)),
+      jars.map(jar => pathResolver.resolve(Paths.get(jar))),
     )
   }
 }
 
 object CommonArguments {
-  private def adjustCompilerOptions(workDir: Path, options: List[String]) = options.map { option =>
-    val i = option.lastIndexOf(' ')
-    val withPathReplaced = if (i == -1) {
-      option
-    } else {
-      val template = option.slice(0, i)
-      val path = option.slice(i + 1, option.length)
+  private def adjustCompilerOptions(pathResolver: PathResolver, workDir: Path, options: List[String]) = options.map {
+    option =>
+      val i = option.lastIndexOf(' ')
+      val withPathReplaced = if (i == -1) {
+        option
+      } else {
+        val template = option.slice(0, i)
+        val path = option.slice(i + 1, option.length)
 
-      template.replace(
-        "${path}",
-        SandboxUtil.getSandboxPath(workDir, Paths.get(path)).toString,
-      )
-    }
+        template.replace(
+          "${path}",
+          pathResolver.resolve(Paths.get(path)).toString,
+        )
+      }
 
-    // Use an absolute path here for the work dir to avoid problems when the working directory is " "
-    withPathReplaced
-      .replace("${workDir}", workDir.toAbsolutePath().normalize().toString())
+      // Use an absolute path here for the work dir to avoid problems when the working directory is " "
+      withPathReplaced
+        .replace("${workDir}", workDir.toAbsolutePath().normalize().toString())
   }
 
   /**
@@ -184,32 +185,33 @@ object CommonArguments {
     parser
   }
 
-  def apply(namespace: Namespace, workDir: Path): CommonArguments = {
+  def apply(namespace: Namespace, pathResolver: PathResolver, workDir: Path): CommonArguments = {
     new CommonArguments(
-      compilerBridge = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("compiler_bridge")),
-      compilerClasspath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("compiler_classpath")),
+      compilerBridge = pathResolver.resolve(namespace.get[Path]("compiler_bridge")),
+      compilerClasspath = pathResolver.resolve(namespace.getList[Path]("compiler_classpath")),
       compilerOptions = Option(namespace.getList[String]("compiler_option"))
         .map(_.asScala.toArray)
         .getOrElse(Array.empty),
       compilerOptionsReferencingPaths = adjustCompilerOptions(
+        pathResolver,
         workDir,
         Option(namespace.getList[String]("compiler_option_referencing_path"))
           .map(_.asScala.toList)
           .getOrElse(List.empty),
       ),
-      classpath = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("classpath")),
+      classpath = pathResolver.resolve(namespace.getList[Path]("classpath")),
       debug = namespace.getBoolean("debug"),
       javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toArray,
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
-      mainManifest = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("main_manifest")),
-      outputJar = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_jar")),
-      outputUsed = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_used")),
-      plugins = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("plugins")),
-      sourceJars = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("source_jars")),
+      mainManifest = pathResolver.resolve(namespace.get[Path]("main_manifest")),
+      outputJar = pathResolver.resolve(namespace.get[Path]("output_jar")),
+      outputUsed = pathResolver.resolve(namespace.get[Path]("output_used")),
+      plugins = pathResolver.resolve(namespace.getList[Path]("plugins")),
+      sourceJars = pathResolver.resolve(namespace.getList[Path]("source_jars")),
       testFrameworks = namespace.getList[String]("test_frameworks").asScala.toList,
-      testsFile = Option(namespace.get[Path]("tests_file")).map(SandboxUtil.getSandboxPath(workDir, _)),
-      sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
+      testsFile = Option(namespace.get[Path]("tests_file")).map(pathResolver.resolve),
+      sources = pathResolver.resolve(namespace.getList[Path]("sources")),
     )
   }
 

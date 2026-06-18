@@ -3,7 +3,7 @@ package higherkindness.rules_scala.workers.jacoco.instrumenter
 import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import java.io.{BufferedInputStream, BufferedOutputStream}
 import java.net.URI
@@ -32,7 +32,7 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
   )
 
   private object JacocoRequest {
-    def apply(workDir: Path, namespace: Namespace): JacocoRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): JacocoRequest = {
       val pathPairs = namespace
         .getList[JList[String]]("jar")
         .asScala
@@ -41,8 +41,8 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
           other.split("=") match {
             case Array(in, out) =>
               (
-                SandboxUtil.getSandboxPath(workDir, Paths.get(in)),
-                SandboxUtil.getSandboxPath(workDir, Paths.get(out)),
+                pathResolver.resolve(Paths.get(in)),
+                pathResolver.resolve(Paths.get(out)),
               )
             case _ =>
               throw new AnnexWorkerError(1, "expected input=output for argument: " + other)
@@ -69,7 +69,7 @@ object JacocoInstrumenter extends WorkerMain[Unit] {
 
   override def work(task: WorkTask[Unit]): Unit = {
     val workRequest = JacocoRequest(
-      task.workDir,
+      PathResolver.forPersistentWorker(task.workDir),
       ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
     )
 

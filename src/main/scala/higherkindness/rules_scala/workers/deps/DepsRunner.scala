@@ -5,7 +5,7 @@ import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.AnnexMapper
 import higherkindness.rules_scala.workers.common.FileUtil
@@ -32,14 +32,14 @@ object DepsRunner extends WorkerMain[Unit] {
   )
 
   private object DepsRunnerRequest {
-    def apply(workDir: Path, namespace: Namespace): DepsRunnerRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): DepsRunnerRequest = {
       val groups = Option(namespace.getList[java.util.List[String]]("group"))
         .map(_.asScala)
         .getOrElse(List.empty)
         .view
         .map { group =>
           group.asScala match {
-            case Buffer(label, jars @ _*) => Group.apply(workDir, label, jars)
+            case Buffer(label, jars @ _*) => Group.apply(label, jars)
             case _                        => throw new Exception(s"Unexpected case in DepsRunner")
           }
         }
@@ -51,10 +51,10 @@ object DepsRunner extends WorkerMain[Unit] {
         directDepLabels = namespace.getList[String]("direct").asScala.view.map(_.tail).toList,
         groups = groups,
         label = namespace.getString("label").tail,
-        usedDepsFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("used")),
+        usedDepsFile = pathResolver.resolve(namespace.get[Path]("used")),
         usedDepWhitelist = namespace.getList[String]("used_whitelist").asScala.view.map(_.tail).toList,
         unusedDepWhitelist = namespace.getList[String]("unused_whitelist").asScala.view.map(_.tail).toList,
-        successFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("success")),
+        successFile = pathResolver.resolve(namespace.get[Path]("success")),
       )
     }
   }
@@ -65,7 +65,7 @@ object DepsRunner extends WorkerMain[Unit] {
   )
 
   private object Group {
-    def apply(workDir: Path, prependedLabel: String, jars: Seq[String]): Group = {
+    def apply(prependedLabel: String, jars: Seq[String]): Group = {
       new Group(
         prependedLabel.tail,
         jars.toSet,
@@ -111,7 +111,7 @@ object DepsRunner extends WorkerMain[Unit] {
 
   override def work(task: WorkTask[Unit]): Unit = {
     val workRequest = DepsRunnerRequest(
-      task.workDir,
+      PathResolver.forPersistentWorker(task.workDir),
       ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)

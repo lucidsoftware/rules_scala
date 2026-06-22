@@ -10,7 +10,6 @@ scala_library(
     scala_toolchain_name = "test_zinc_2_13",
     tags = ["manual"],
     deps = [
-        "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
     ],
 )

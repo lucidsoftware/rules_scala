@@ -3,7 +3,7 @@ package annex.scalafmt
 import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.Color
 import java.io.{File, PrintStream}
@@ -26,11 +26,11 @@ object ScalafmtRunner extends WorkerMain[Unit] {
   )
 
   private object ScalafmtRequest {
-    def apply(workDir: Path, namespace: Namespace): ScalafmtRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): ScalafmtRequest = {
       new ScalafmtRequest(
-        configFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("config")),
-        inputFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("input")),
-        outputFile = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output")),
+        configFile = pathResolver.resolve(namespace.get[Path]("config")),
+        inputFile = pathResolver.resolve(namespace.get[Path]("input")),
+        outputFile = pathResolver.resolve(namespace.get[Path]("output")),
       )
     }
   }
@@ -47,7 +47,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
 
   protected def work(task: WorkTask[Unit]): Unit = {
     val workRequest = ScalafmtRequest(
-      task.workDir,
+      PathResolver.forPersistentWorker(task.workDir),
       ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)

@@ -1,10 +1,8 @@
 package anx.cancellation
 
 import higherkindness.rules_scala.common.worker.{WorkerMain, WorkTask}
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
 
 import java.io.{InputStream, PrintStream}
-import java.nio.file.{Files, Path, Paths}
 
 class RunnerForCancelSpec(stdin: InputStream, stdout: PrintStream)
   extends WorkerMain[Unit](stdin, stdout) {

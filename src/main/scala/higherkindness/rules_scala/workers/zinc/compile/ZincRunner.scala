@@ -5,6 +5,7 @@ import higherkindness.rules_scala.common.args.ArgsUtil
 import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import higherkindness.rules_scala.common.error.AnnexWorkerError
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.sbt_testing.{TestDiscovery, TestFrameworkLoader, TestsFileData}
 import higherkindness.rules_scala.common.worker.{WorkTask, WorkerMain}
 import higherkindness.rules_scala.workers.common.*
@@ -264,6 +265,7 @@ object ZincRunner extends WorkerMain[Unit] {
   protected def work(task: WorkTask[Unit]): Unit = {
     val workRequest = CommonArguments(
       ArgsUtil.parseArgsOrFailSafe(task.args, parser, task.output),
+      PathResolver.forPersistentWorker(task.workDir),
       task.workDir,
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)

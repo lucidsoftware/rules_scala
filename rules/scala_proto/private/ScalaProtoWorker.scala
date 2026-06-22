@@ -5,7 +5,7 @@ import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.interrupt.InterruptUtil
 import higherkindness.rules_scala.common.error.AnnexWorkerError
-import higherkindness.rules_scala.common.sandbox.SandboxUtil
+import higherkindness.rules_scala.common.sandbox.PathResolver
 import higherkindness.rules_scala.common.worker.{WorkerMain, WorkTask}
 import java.io.{File, PrintStream}
 import java.nio.file.{Files, Path, Paths}
@@ -29,13 +29,13 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
   )
 
   private object ScalaProtoRequest {
-    def apply(workDir: Path, namespace: Namespace): ScalaProtoRequest = {
+    def apply(pathResolver: PathResolver, namespace: Namespace): ScalaProtoRequest = {
       new ScalaProtoRequest(
         isGrpc = namespace.getBoolean("grpc"),
-        outputDir = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("output_dir")),
-        protoc = SandboxUtil.getSandboxPath(workDir, namespace.get[Path]("protoc")),
-        protoPaths = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("proto_paths")),
-        sources = SandboxUtil.getSandboxPaths(workDir, namespace.getList[Path]("sources")),
+        outputDir = pathResolver.resolve(namespace.get[Path]("output_dir")),
+        protoc = pathResolver.resolve(namespace.get[Path]("protoc")),
+        protoPaths = pathResolver.resolve(namespace.getList[Path]("proto_paths")),
+        sources = pathResolver.resolve(namespace.getList[Path]("sources")),
       )
     }
   }
@@ -74,7 +74,7 @@ object ScalaProtoWorker extends WorkerMain[Unit] {
 
   protected def work(task: WorkTask[Unit]): Unit = {
     val workRequest = ScalaProtoRequest(
-      task.workDir,
+      PathResolver.forPersistentWorker(task.workDir),
       ArgsUtil.parseArgsOrFailSafe(task.args, argParser, task.output),
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)

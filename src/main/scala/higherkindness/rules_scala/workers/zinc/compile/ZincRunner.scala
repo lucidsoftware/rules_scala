@@ -17,16 +17,16 @@ import java.util.Optional
 import javax.tools.{StandardLocation, ToolProvider}
 import net.sourceforge.argparse4j.ArgumentParsers
 import play.api.libs.json.Json
+import sbt.internal.inc.{CompileOutput, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import sbt.internal.inc.classfile.analyzeJavaClasses
 import sbt.internal.inc.classpath.ClassLoaderCache
 import sbt.internal.inc.javac.{DiagnosticsReporter, DirectoryClassFinder}
-import sbt.internal.inc.{CompileOutput, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import sbt.internal.util.LoggerWriter
 import scala.collection.View
 import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
-import xsbti.compile.{DependencyChanges, ScalaInstance}
 import xsbti.{AnalysisCallback, AnalysisCallback3, CompileFailed, Logger, Reporter, VirtualFile, VirtualFileRef}
+import xsbti.compile.{DependencyChanges, ScalaInstance}
 
 /**
  * <strong>Caching</strong>
@@ -272,131 +272,137 @@ object ZincRunner extends WorkerMain[Unit] {
 
     val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)
 
-    val tmpDir = Files.createTempDirectory(task.workDir, "tmp")
+    // base tmp dir that uses the output path. This is to make tasty paths deterministic between builds.
+    val tmpDir = workRequest.outputJar.getParent.resolve("tmp")
 
-    // extract srcjars
-    val sources = {
-      val sourcesDir = tmpDir.resolve("src")
-      workRequest.sources ++
-        workRequest.sourceJars.zipWithIndex
-          .flatMap { case (jar, i) =>
-            FileUtil.extractZip(jar, sourcesDir.resolve(i.toString))
-          }
-          // Filter out MANIFEST files as they are not source files
-          .filterNot(_.endsWith("META-INF/MANIFEST.MF"))
+    if (Files.exists(tmpDir)) {
+      FileUtil.delete(tmpDir)
     }
-
-    // extract upstream classes
-    val classesDir = tmpDir.resolve("classes")
-    val outputJar = workRequest.outputJar
-    val readWriteMappers = AnnexMapper.mappers(task.workDir)
-    val classesOutputDir = classesDir.resolve(labelToPath(workRequest.label))
-    Files.createDirectories(classesOutputDir)
-
-    val scalaInstance = AnnexScalaInstance
-      .getAnnexScalaInstance(workRequest.compilerClasspath.view.map(_.toFile).toArray, task.workDir, isWorker)
-
-    val normalizedSources = sources.view.map(_.toAbsolutePath.normalize()).toArray
-    val reporter = new LoggedReporter(logger, scalaInstance.actualVersion)
-
-    InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-    val analysis = AnnexAnalysis()
-    val analysisCallback = analysis.getCallback(PlainVirtualFileConverter.converter)
-
-    compileScala(
-      task,
-      workRequest,
-      scalaInstance,
-      normalizedSources,
-      classesOutputDir,
-      analysisCallback,
-      reporter,
-      logger,
-    )
-
-    InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-    maybeCompileJava(
-      task,
-      workRequest,
-      normalizedSources,
-      classesOutputDir,
-      analysisCallback,
-      reporter,
-      logger,
-    )
-
-    InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-    /*
-     * JARs on the classpath used during test discovery, but not used by compiler won't show up in `analysis.usedJars`, so
-     * we need to consider them in addition to those used by the compiler.
-     *
-     * Test discovery works by iterating through the list of test frameworks provided via `workRequest.testFrameworks`,
-     * attempting to classload each framework, and then using that framework to discover tests. If a given framework
-     * successfully loads and we found a test with it we take note of the JAR it was loaded from and consider that JAR
-     * (and therefore the target to which it belongs) used.
-     */
-    val usedDepsDuringTestDiscovery = maybeWriteTestsFile(workRequest, analysis)
-
-    InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-    // create used deps
-    val scalaStandardLibraryJars = scalaInstance.libraryJars.view
-      .map(file => Paths.get(FileUtil.getNameWithoutRulesJvmExternalStampPrefix(file)))
-      .toSet
-
-    val usedDeps = workRequest.classpath.view
-      .map(_.normalize().toAbsolutePath)
-      .toSet
-      .intersect((analysis.usedJars.view ++ usedDepsDuringTestDiscovery.view).toSet)
-      // Filter out the Scala standard library as they should always be implicitly available we shouldn't be
-      // bookkeeping them
-      .view
-      .filter { path =>
-        val filteredPath = Paths.get(FileUtil.getNameWithoutRulesJvmExternalStampPrefix(path))
-
-        !scalaStandardLibraryJars.contains(filteredPath)
-      }
-      .toList
-    val writeMapper = readWriteMappers.getWriteMapper()
-    Files.write(
-      workRequest.outputUsed,
-      // Send the used deps through the read write mapper, to strip the sandbox prefix and
-      // make sure they're deterministic across machines
-      usedDeps.view
-        .map(writeMapper.mapClasspathEntry(_).toString)
-        .toList
-        .sorted
-        .asJava,
-    )
-
-    // create jar
-    val mains = analysis.mainClasses.toArray
-    val pw = new PrintWriter(workRequest.mainManifest.toFile)
     try {
-      mains.foreach(pw.println)
+      // extract srcjars
+      val sources = {
+        val sourcesDir = tmpDir.resolve("src")
+        workRequest.sources ++
+          workRequest.sourceJars.zipWithIndex
+            .flatMap { case (jar, i) =>
+              FileUtil.extractZip(jar, sourcesDir.resolve(i.toString))
+            }
+            // Filter out MANIFEST files as they are not source files
+            .filterNot(_.endsWith("META-INF/MANIFEST.MF"))
+      }
+
+      // extract upstream classes
+      val classesDir = tmpDir.resolve("classes")
+      val outputJar = workRequest.outputJar
+      val readWriteMappers = AnnexMapper.mappers(task.workDir)
+      val classesOutputDir = classesDir.resolve(labelToPath(workRequest.label))
+      Files.createDirectories(classesOutputDir)
+
+      val scalaInstance = AnnexScalaInstance
+        .getAnnexScalaInstance(workRequest.compilerClasspath.view.map(_.toFile).toArray, task.workDir, isWorker)
+
+      val normalizedSources = sources.view.map(_.toAbsolutePath.normalize()).toArray
+      val reporter = new LoggedReporter(logger, scalaInstance.actualVersion)
+
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+      val analysis = AnnexAnalysis()
+      val analysisCallback = analysis.getCallback(PlainVirtualFileConverter.converter)
+
+      compileScala(
+        task,
+        workRequest,
+        scalaInstance,
+        normalizedSources,
+        classesOutputDir,
+        analysisCallback,
+        reporter,
+        logger,
+      )
+
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+      maybeCompileJava(
+        task,
+        workRequest,
+        normalizedSources,
+        classesOutputDir,
+        analysisCallback,
+        reporter,
+        logger,
+      )
+
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+      /*
+       * JARs on the classpath used during test discovery, but not used by compiler won't show up in `analysis.usedJars`, so
+       * we need to consider them in addition to those used by the compiler.
+       *
+       * Test discovery works by iterating through the list of test frameworks provided via `workRequest.testFrameworks`,
+       * attempting to classload each framework, and then using that framework to discover tests. If a given framework
+       * successfully loads and we found a test with it we take note of the JAR it was loaded from and consider that JAR
+       * (and therefore the target to which it belongs) used.
+       */
+      val usedDepsDuringTestDiscovery = maybeWriteTestsFile(workRequest, analysis)
+
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+      // create used deps
+      val scalaStandardLibraryJars = scalaInstance.libraryJars.view
+        .map(file => Paths.get(FileUtil.getNameWithoutRulesJvmExternalStampPrefix(file)))
+        .toSet
+
+      val usedDeps = workRequest.classpath.view
+        .map(_.normalize().toAbsolutePath)
+        .toSet
+        .intersect((analysis.usedJars.view ++ usedDepsDuringTestDiscovery.view).toSet)
+        // Filter out the Scala standard library as they should always be implicitly available we shouldn't be
+        // bookkeeping them
+        .view
+        .filter { path =>
+          val filteredPath = Paths.get(FileUtil.getNameWithoutRulesJvmExternalStampPrefix(path))
+
+          !scalaStandardLibraryJars.contains(filteredPath)
+        }
+        .toList
+      val writeMapper = readWriteMappers.getWriteMapper()
+      Files.write(
+        workRequest.outputUsed,
+        // Send the used deps through the read write mapper, to strip the sandbox prefix and
+        // make sure they're deterministic across machines
+        usedDeps.view
+          .map(writeMapper.mapClasspathEntry(_).toString)
+          .toList
+          .sorted
+          .asJava,
+      )
+
+      // create jar
+      val mains = analysis.mainClasses.toArray
+      val pw = new PrintWriter(workRequest.mainManifest.toFile)
+      try {
+        mains.foreach(pw.println)
+      } finally {
+        pw.close()
+      }
+
+      val jarCreator = new JarCreator(outputJar)
+      jarCreator.addDirectory(classesOutputDir)
+      jarCreator.setCompression(true)
+      jarCreator.setNormalize(true)
+      jarCreator.setVerbose(false)
+
+      mains match {
+        case Array(main) =>
+          jarCreator.setMainClass(main)
+        case _ =>
+      }
+
+      jarCreator.execute()
     } finally {
-      pw.close()
+      // clear temporary files
+      FileUtil.delete(tmpDir)
     }
-
-    val jarCreator = new JarCreator(outputJar)
-    jarCreator.addDirectory(classesOutputDir)
-    jarCreator.setCompression(true)
-    jarCreator.setNormalize(true)
-    jarCreator.setVerbose(false)
-
-    mains match {
-      case Array(main) =>
-        jarCreator.setMainClass(main)
-      case _ =>
-    }
-
-    jarCreator.execute()
-
-    // clear temporary files
-    FileUtil.delete(tmpDir)
 
     InterruptUtil.throwIfInterrupted(task.isCancelled)
   }

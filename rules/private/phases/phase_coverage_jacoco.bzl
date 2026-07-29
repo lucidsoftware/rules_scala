@@ -4,6 +4,10 @@ load(
     _JacocoInfo = "JacocoInfo",
 )
 load(
+    "@rules_scala_annex//rules/common:private/utils.bzl",
+    _make_jvm_flag_args = "make_jvm_flag_args",
+)
+load(
     "@rules_scala_annex//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
@@ -27,8 +31,11 @@ def phase_coverage_jacoco(ctx, g):
 
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
+
+    jvm_flag_args = _make_jvm_flag_args(ctx, toolchain.scala_configuration.jvm_flags)
+
     ctx.actions.run(
-        arguments = [args],
+        arguments = [jvm_flag_args, args],
         executable = toolchain.code_coverage_configuration.instrumentation_worker.files_to_run,
         execution_requirements = {
             "supports-multiplex-workers": "1",

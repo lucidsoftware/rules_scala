@@ -33,6 +33,7 @@ bzl_library(
         ":bazel_tools_build_defs_repo",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:selects",
         "@bazel_skylib//lib:shell",
         "@rules_java//toolchains:toolchain_utils",
         "@rules_jvm_external//:implementation",

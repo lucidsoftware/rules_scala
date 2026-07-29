@@ -15,6 +15,7 @@ register_zinc_toolchain(
     ],
     global_plugins = ["@annex_test//:org_scalameta_semanticdb_scalac_2_13_14"],
     global_scalacopts = ["-Wconf:any:error"],
+    prefix = "semanticdb",
     runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     semanticdb_bundle = False,
     version = scala_2_13_version,
@@ -28,6 +29,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala3_library_3",
     ],
     global_scalacopts = ["-Wconf:any:error"],
+    prefix = "semanticdb",
     runtime_classpath = [
         "@annex_test//:org_scala_lang_scala3_library_3",
         "@annex_test//:org_scala_lang_scala3_interfaces",
@@ -41,7 +43,7 @@ register_zinc_toolchain(
 scala_library(
     name = "semanticdb-2_13",
     srcs = glob(["*.scala"]),
-    scala_toolchain_name = "scala_2_13_with_semanticdb",
+    scala_version = "semanticdb_2.13",
 )
 
 read_semanticdb_info(
@@ -52,7 +54,7 @@ read_semanticdb_info(
 scala_library(
     name = "semanticdb-3",
     srcs = glob(["*.scala"]),
-    scala_toolchain_name = "scala_3_with_semanticdb",
+    scala_version = "semanticdb_3",
 )
 
 read_semanticdb_info(
@@ -63,7 +65,7 @@ read_semanticdb_info(
 scala_library(
     name = "semanticdb-empty",
     srcs = [],
-    scala_toolchain_name = "scala_2_13_with_semanticdb",
+    scala_version = "semanticdb_2.13",
 )
 
 java_library(
@@ -80,7 +82,7 @@ copy_file(
 scala_library(
     name = "semanticdb-sourcejar",
     srcs = [":sourcejar"],
-    scala_toolchain_name = "scala_2_13_with_semanticdb",
+    scala_version = "semanticdb_2.13",
 )
 
 read_semanticdb_info(

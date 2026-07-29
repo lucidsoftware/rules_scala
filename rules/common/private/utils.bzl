@@ -10,6 +10,23 @@ load("@rules_java//java/common:java_common.bzl", "java_common")
 def collect(index, iterable):
     return [entry[index] for entry in iterable]
 
+def make_jvm_flag_args(ctx, jvm_flags):
+    """Build an Args object carrying toolchain JVM options as --jvm_flag entries.
+
+    These are read by the worker launcher script rather than the param file, which is why they're
+    kept in a separate Args object from the param-file args.
+
+    Args:
+        ctx: the rule context.
+        jvm_flags: the JVM options to forward (e.g. toolchain.scala_configuration.jvm_flags).
+
+    Returns:
+        A ctx.actions.args() with each option formatted as --jvm_flag=<opt>.
+    """
+    args = ctx.actions.args()
+    args.add_all(jvm_flags, format_each = "--jvm_flag=%s")
+    return args
+
 def strip_margin(str, delim = "|"):
     """
     For every line in str:

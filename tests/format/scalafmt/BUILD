@@ -5,16 +5,38 @@ load("@rules_scala_annex//rules:scalafmt.bzl", "scala_format_test")
 scala_format_test(
     name = "formatted",
     srcs = ["formatted.scala"],
+    scala_version = "2.13",
 )
 
 scala_format_test(
     name = "unformatted",
     srcs = ["unformatted.scala"],
+    scala_version = "2.13",
 )
 
 scala_format_test(
     name = "unformatted-copy",
     srcs = ["unformatted.tmp.scala"],
+    scala_version = "2.13",
+)
+
+### scala_format_test with a different scalafmt toolchain ###
+scala_format_test(
+    name = "formatted-scala3",
+    srcs = ["formatted.scala"],
+    scala_version = "3",
+)
+
+scala_format_test(
+    name = "unformatted-scala3",
+    srcs = ["unformatted.scala"],
+    scala_version = "3",
+)
+
+scala_format_test(
+    name = "unformatted-scala3-copy",
+    srcs = ["unformatted-scala3.tmp.scala"],
+    scala_version = "3",
 )
 
 ### scala_binary ###
@@ -87,6 +109,7 @@ scala_test(
 scala_format_test(
     name = "utf8-encoding-test-default",
     srcs = ["utf8-unformatted.tmp.scala"],
+    scala_version = "2.13",
 )
 
 scala_binary(

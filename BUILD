@@ -3,6 +3,7 @@ load(
     "DEFAULT_TOOLCHAIN_CONFIGURATION",
     "default_java_toolchain",
 )
+load("//rules/scala:versions.bzl", "scala_2_13_version", "scala_3_version")
 load("//rules/scalafmt:register_toolchain.bzl", "register_scalafmt_toolchain")
 
 default_java_toolchain(
@@ -17,4 +18,9 @@ default_java_toolchain(
 register_scalafmt_toolchain(
     name = "annex_scalafmt",
     config = ".scalafmt.conf",
+    scala_versions = [
+        scala_2_13_version,
+        scala_3_version,
+        "bootstrap_" + scala_3_version,
+    ],
 )

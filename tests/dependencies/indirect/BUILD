@@ -13,6 +13,7 @@ register_zinc_toolchain(
     ],
     deps_used = "off",
     global_scalacopts = ["-Ytasty-reader"],
+    prefix = "used-deps-off",
     runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     version = scala_2_13_version,
     visibility = ["//visibility:public"],
@@ -21,20 +22,20 @@ register_zinc_toolchain(
 scala_library(
     name = "used_deps_off_a",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13_used_deps_off",
+    scala_version = "used-deps-off_2.13",
 )
 
 scala_library(
     name = "used_deps_off_b",
     srcs = ["B.scala"],
-    scala_toolchain_name = "test_zinc_2_13_used_deps_off",
+    scala_version = "used-deps-off_2.13",
     deps = [":used_deps_off_a"],
 )
 
 scala_library(
     name = "used_deps_off_c",
     srcs = ["C.scala"],
-    scala_toolchain_name = "test_zinc_2_13_used_deps_off",
+    scala_version = "used-deps-off_2.13",
     deps = [":used_deps_off_b"],
 )
 
@@ -49,6 +50,7 @@ register_zinc_toolchain(
     ],
     deps_direct = "off",
     global_scalacopts = ["-Ytasty-reader"],
+    prefix = "direct-deps-off",
     runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],
     version = scala_2_13_version,
     visibility = ["//visibility:public"],
@@ -57,20 +59,20 @@ register_zinc_toolchain(
 scala_library(
     name = "direct_deps_off_a",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13_direct_deps_off",
+    scala_version = "direct-deps-off_2.13",
 )
 
 scala_library(
     name = "direct_deps_off_b",
     srcs = ["B.scala"],
-    scala_toolchain_name = "test_zinc_2_13_direct_deps_off",
+    scala_version = "direct-deps-off_2.13",
     deps = [":direct_deps_off_a"],
 )
 
 scala_library(
     name = "direct_deps_off_c",
     srcs = ["C.scala"],
-    scala_toolchain_name = "test_zinc_2_13_direct_deps_off",
+    scala_version = "direct-deps-off_2.13",
     deps = [":direct_deps_off_b"],
 )
 
@@ -78,19 +80,19 @@ scala_library(
 scala_library(
     name = "define_a",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 scala_library(
     name = "define_b",
     srcs = ["B.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [":define_a"],
 )
 
 scala_library(
     name = "define_c",
     srcs = ["C.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [":define_b"],
 )

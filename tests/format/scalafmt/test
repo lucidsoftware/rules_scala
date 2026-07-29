@@ -12,6 +12,17 @@ bazel run :unformatted-copy
 bazel test :unformatted-copy
 rm unformatted.tmp.scala
 
+# scala_format_test with scala_version = "3"
+## check
+bazel test :formatted-scala3
+! bazel test :unformatted-scala3
+## copy
+cp unformatted.template.scala unformatted-scala3.tmp.scala
+! bazel test :unformatted-scala3-copy
+bazel run :unformatted-scala3-copy
+bazel test :unformatted-scala3-copy
+rm unformatted-scala3.tmp.scala
+
 # non-default output format test: binary
 ## check
 bazel run :formatted-binary.format-test

@@ -4,6 +4,8 @@ load(
     "default_java_toolchain",
 )
 
+exports_files([".scalafmt.conf"])
+
 default_java_toolchain(
     name = "repository_default_toolchain_21",
     configuration = DEFAULT_TOOLCHAIN_CONFIGURATION,

@@ -1,4 +1,3 @@
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag", "string_setting")
 load("//rules:scala.bzl", "scala_binary")
 load("//rules:scalafmt.bzl", "scala_format_test")
 load(
@@ -31,23 +30,11 @@ toolchain_type(
     visibility = ["//visibility:public"],
 )
 
-string_setting(
-    name = "original-scalafmt-toolchain",
-    build_setting_default = "",
-    visibility = ["//visibility:public"],
-)
-
-string_flag(
-    name = "scalafmt-toolchain",
-    build_setting_default = "annex_scalafmt",
-    visibility = ["//visibility:public"],
-)
-
 scala_binary(
     name = "scalafmt",
     srcs = glob(["scalafmt/**/*.scala"]),
     main_class = "annex.scalafmt.ScalafmtRunner",
-    scala_toolchain_name = "annex_bootstrap_3",
+    scala_version = "bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/scala/higherkindness/rules_scala/common/interrupt",

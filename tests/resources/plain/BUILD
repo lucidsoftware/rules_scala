@@ -4,7 +4,7 @@ scala_library(
     name = "plain",
     srcs = [],
     resources = glob(["**/*.txt"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 scala_library(
@@ -13,5 +13,5 @@ scala_library(
     resource_jars = [":plain"],
     resource_strip_prefix = "resources",
     resources = glob(["**/*.txt"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )

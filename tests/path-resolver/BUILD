@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_test")
 scala_test(
     name = "specs",
     srcs = glob(["*.scala"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [
         "@annex_test//:org_scalactic_scalactic_2_13",
         "@annex_test//:org_scalatest_scalatest_compatible",

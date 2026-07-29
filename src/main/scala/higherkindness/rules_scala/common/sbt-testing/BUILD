@@ -12,7 +12,7 @@ _common_srcs = [
 scala_library(
     name = "subprocess",
     srcs = _subprocess_srcs,
-    scala_toolchain_name = "annex_zinc_3",
+    scala_version = "3",
     visibility = ["//visibility:public"],
     deps = [
         ":common",
@@ -24,7 +24,7 @@ scala_library(
 scala_library(
     name = "common",
     srcs = _common_srcs,
-    scala_toolchain_name = "annex_bootstrap_3",
+    scala_version = "bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
         "@annex//:org_playframework_play_json_3",

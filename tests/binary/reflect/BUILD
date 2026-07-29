@@ -3,13 +3,13 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_binary", "scala_library")
 scala_library(
     name = "bad",
     srcs = ["Reflect.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )
 
 scala_binary(
     name = "good",
     srcs = ["Reflect.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     deps = [
         "@annex_test//:org_scala_lang_scala_reflect",
     ],

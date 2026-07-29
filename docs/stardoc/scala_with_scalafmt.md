@@ -21,9 +21,9 @@ formatted.
 <pre>
 load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_binary")
 
-scala_binary(<a href="#scala_binary-name">name</a>, <a href="#scala_binary-deps">deps</a>, <a href="#scala_binary-srcs">srcs</a>, <a href="#scala_binary-data">data</a>, <a href="#scala_binary-resources">resources</a>, <a href="#scala_binary-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_binary-deps_used_whitelist">deps_used_whitelist</a>, <a href="#scala_binary-format">format</a>,
-             <a href="#scala_binary-javacopts">javacopts</a>, <a href="#scala_binary-jvm_flags">jvm_flags</a>, <a href="#scala_binary-main_class">main_class</a>, <a href="#scala_binary-plugins">plugins</a>, <a href="#scala_binary-resource_jars">resource_jars</a>, <a href="#scala_binary-resource_strip_prefix">resource_strip_prefix</a>,
-             <a href="#scala_binary-runtime_deps">runtime_deps</a>, <a href="#scala_binary-scala_toolchain_name">scala_toolchain_name</a>, <a href="#scala_binary-scalacopts">scalacopts</a>, <a href="#scala_binary-scalafmt_toolchain_name">scalafmt_toolchain_name</a>)
+scala_binary(<a href="#scala_binary-name">name</a>, <a href="#scala_binary-deps">deps</a>, <a href="#scala_binary-srcs">srcs</a>, <a href="#scala_binary-data">data</a>, <a href="#scala_binary-resources">resources</a>, <a href="#scala_binary-deps_checker_label">deps_checker_label</a>, <a href="#scala_binary-deps_unused_whitelist">deps_unused_whitelist</a>,
+             <a href="#scala_binary-deps_used_whitelist">deps_used_whitelist</a>, <a href="#scala_binary-format">format</a>, <a href="#scala_binary-javacopts">javacopts</a>, <a href="#scala_binary-jvm_flags">jvm_flags</a>, <a href="#scala_binary-main_class">main_class</a>, <a href="#scala_binary-plugins">plugins</a>, <a href="#scala_binary-resource_jars">resource_jars</a>,
+             <a href="#scala_binary-resource_strip_prefix">resource_strip_prefix</a>, <a href="#scala_binary-runtime_deps">runtime_deps</a>, <a href="#scala_binary-scala_version">scala_version</a>, <a href="#scala_binary-scalacopts">scalacopts</a>)
 </pre>
 
 Compiles and links a Scala JVM executable.
@@ -43,9 +43,10 @@ To run the program: `bazel run <target>`
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="scala_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="scala_binary-deps"></a>deps |  The JVM library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_binary-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_binary-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 | <a id="scala_binary-data"></a>data |  The additional runtime files needed by this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-resources"></a>resources |  The files to include as classpath resources.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_binary-deps_checker_label"></a>deps_checker_label |  The label to identify this target in the output of the dependency checker.<br><br>By default, this is just the label of the target. But sometimes—for example, when overriding an artifact with `rules_jvm_external` to point to your own, or defining an alias to target—you want the dependency checker to suggest you add or remove a different label as a dependency. In that case, you can set this attribute to that label.   | String | optional |  `""`  |
 | <a id="scala_binary-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-format"></a>format |  Whether to format the target. If this is False, the formatter and format tester will do nothing.   | Boolean | optional |  `True`  |
@@ -56,9 +57,8 @@ To run the program: `bazel run <target>`
 | <a id="scala_binary-resource_jars"></a>resource_jars |  The JARs to merge into the output JAR.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_binary-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_binary-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_binary-scala_toolchain_name"></a>scala_toolchain_name |  The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)   | String | optional |  `""`  |
+| <a id="scala_binary-scala_version"></a>scala_version |  The Scala version to use, e.g., '3', '2.13', '3.3.7', or '<prefix>_<version>' for prefixed versions.   | String | optional |  `""`  |
 | <a id="scala_binary-scalacopts"></a>scalacopts |  The Scalac options.   | List of strings | optional |  `[]`  |
-| <a id="scala_binary-scalafmt_toolchain_name"></a>scalafmt_toolchain_name |  The name of the Scalafmt configuration toolchain.   | String | optional |  `""`  |
 
 
 <a id="scala_library"></a>
@@ -68,10 +68,9 @@ To run the program: `bazel run <target>`
 <pre>
 load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_library")
 
-scala_library(<a href="#scala_library-name">name</a>, <a href="#scala_library-deps">deps</a>, <a href="#scala_library-srcs">srcs</a>, <a href="#scala_library-data">data</a>, <a href="#scala_library-resources">resources</a>, <a href="#scala_library-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_library-deps_used_whitelist">deps_used_whitelist</a>,
-              <a href="#scala_library-exports">exports</a>, <a href="#scala_library-format">format</a>, <a href="#scala_library-javacopts">javacopts</a>, <a href="#scala_library-macro">macro</a>, <a href="#scala_library-neverlink">neverlink</a>, <a href="#scala_library-plugins">plugins</a>, <a href="#scala_library-resource_jars">resource_jars</a>,
-              <a href="#scala_library-resource_strip_prefix">resource_strip_prefix</a>, <a href="#scala_library-runtime_deps">runtime_deps</a>, <a href="#scala_library-scala_toolchain_name">scala_toolchain_name</a>, <a href="#scala_library-scalacopts">scalacopts</a>,
-              <a href="#scala_library-scalafmt_toolchain_name">scalafmt_toolchain_name</a>)
+scala_library(<a href="#scala_library-name">name</a>, <a href="#scala_library-deps">deps</a>, <a href="#scala_library-srcs">srcs</a>, <a href="#scala_library-data">data</a>, <a href="#scala_library-resources">resources</a>, <a href="#scala_library-deps_checker_label">deps_checker_label</a>, <a href="#scala_library-deps_unused_whitelist">deps_unused_whitelist</a>,
+              <a href="#scala_library-deps_used_whitelist">deps_used_whitelist</a>, <a href="#scala_library-exports">exports</a>, <a href="#scala_library-format">format</a>, <a href="#scala_library-javacopts">javacopts</a>, <a href="#scala_library-macro">macro</a>, <a href="#scala_library-neverlink">neverlink</a>, <a href="#scala_library-plugins">plugins</a>,
+              <a href="#scala_library-resource_jars">resource_jars</a>, <a href="#scala_library-resource_strip_prefix">resource_strip_prefix</a>, <a href="#scala_library-runtime_deps">runtime_deps</a>, <a href="#scala_library-scala_version">scala_version</a>, <a href="#scala_library-scalacopts">scalacopts</a>)
 </pre>
 
 Compiles a Scala JVM library.
@@ -83,9 +82,10 @@ Compiles a Scala JVM library.
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="scala_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="scala_library-deps"></a>deps |  The JVM library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_library-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_library-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 | <a id="scala_library-data"></a>data |  The additional runtime files needed by this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-resources"></a>resources |  The files to include as classpath resources.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_library-deps_checker_label"></a>deps_checker_label |  The label to identify this target in the output of the dependency checker.<br><br>By default, this is just the label of the target. But sometimes—for example, when overriding an artifact with `rules_jvm_external` to point to your own, or defining an alias to target—you want the dependency checker to suggest you add or remove a different label as a dependency. In that case, you can set this attribute to that label.   | String | optional |  `""`  |
 | <a id="scala_library-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-exports"></a>exports |  The JVM libraries to add as dependencies to any libraries dependent on this one.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
@@ -97,9 +97,8 @@ Compiles a Scala JVM library.
 | <a id="scala_library-resource_jars"></a>resource_jars |  The JARs to merge into the output JAR.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_library-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_library-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_library-scala_toolchain_name"></a>scala_toolchain_name |  The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)   | String | optional |  `""`  |
+| <a id="scala_library-scala_version"></a>scala_version |  The Scala version to use, e.g., '3', '2.13', '3.3.7', or '<prefix>_<version>' for prefixed versions.   | String | optional |  `""`  |
 | <a id="scala_library-scalacopts"></a>scalacopts |  The Scalac options.   | List of strings | optional |  `[]`  |
-| <a id="scala_library-scalafmt_toolchain_name"></a>scalafmt_toolchain_name |  The name of the Scalafmt configuration toolchain.   | String | optional |  `""`  |
 
 
 <a id="scala_test"></a>
@@ -109,10 +108,10 @@ Compiles a Scala JVM library.
 <pre>
 load("@rules_scala_annex//rules:scala_with_scalafmt.bzl", "scala_test")
 
-scala_test(<a href="#scala_test-name">name</a>, <a href="#scala_test-deps">deps</a>, <a href="#scala_test-srcs">srcs</a>, <a href="#scala_test-data">data</a>, <a href="#scala_test-resources">resources</a>, <a href="#scala_test-deps_unused_whitelist">deps_unused_whitelist</a>, <a href="#scala_test-deps_used_whitelist">deps_used_whitelist</a>, <a href="#scala_test-format">format</a>,
-           <a href="#scala_test-frameworks">frameworks</a>, <a href="#scala_test-isolation">isolation</a>, <a href="#scala_test-javacopts">javacopts</a>, <a href="#scala_test-jvm_flags">jvm_flags</a>, <a href="#scala_test-plugins">plugins</a>, <a href="#scala_test-resource_jars">resource_jars</a>, <a href="#scala_test-resource_strip_prefix">resource_strip_prefix</a>,
-           <a href="#scala_test-runner">runner</a>, <a href="#scala_test-runtime_deps">runtime_deps</a>, <a href="#scala_test-scala_toolchain_name">scala_toolchain_name</a>, <a href="#scala_test-scalacopts">scalacopts</a>, <a href="#scala_test-scalafmt_toolchain_name">scalafmt_toolchain_name</a>,
-           <a href="#scala_test-shared_deps">shared_deps</a>, <a href="#scala_test-subprocess_runner">subprocess_runner</a>)
+scala_test(<a href="#scala_test-name">name</a>, <a href="#scala_test-deps">deps</a>, <a href="#scala_test-srcs">srcs</a>, <a href="#scala_test-data">data</a>, <a href="#scala_test-resources">resources</a>, <a href="#scala_test-deps_checker_label">deps_checker_label</a>, <a href="#scala_test-deps_unused_whitelist">deps_unused_whitelist</a>,
+           <a href="#scala_test-deps_used_whitelist">deps_used_whitelist</a>, <a href="#scala_test-format">format</a>, <a href="#scala_test-frameworks">frameworks</a>, <a href="#scala_test-isolation">isolation</a>, <a href="#scala_test-javacopts">javacopts</a>, <a href="#scala_test-jvm_flags">jvm_flags</a>, <a href="#scala_test-plugins">plugins</a>,
+           <a href="#scala_test-resource_jars">resource_jars</a>, <a href="#scala_test-resource_strip_prefix">resource_strip_prefix</a>, <a href="#scala_test-runner">runner</a>, <a href="#scala_test-runtime_deps">runtime_deps</a>, <a href="#scala_test-scala_version">scala_version</a>, <a href="#scala_test-scalacopts">scalacopts</a>,
+           <a href="#scala_test-sequential">sequential</a>, <a href="#scala_test-shared_deps">shared_deps</a>, <a href="#scala_test-subprocess_runner">subprocess_runner</a>)
 </pre>
 
 Compiles and links a collection of Scala tests.
@@ -131,9 +130,10 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="scala_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="scala_test-deps"></a>deps |  The JVM library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_test-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_test-srcs"></a>srcs |  The source Scala and Java files (and `-sources.jar` `.srcjar` `-src.jar` files of those).   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 | <a id="scala_test-data"></a>data |  The additional runtime files needed by this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-resources"></a>resources |  The files to include as classpath resources.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scala_test-deps_checker_label"></a>deps_checker_label |  The label to identify this target in the output of the dependency checker.<br><br>By default, this is just the label of the target. But sometimes—for example, when overriding an artifact with `rules_jvm_external` to point to your own, or defining an alias to target—you want the dependency checker to suggest you add or remove a different label as a dependency. In that case, you can set this attribute to that label.   | String | optional |  `""`  |
 | <a id="scala_test-deps_unused_whitelist"></a>deps_unused_whitelist |  The JVM library dependencies to always consider unused for `scala_deps_direct` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-deps_used_whitelist"></a>deps_used_whitelist |  The JVM library dependencies to always consider used for `scala_deps_used` checks.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-format"></a>format |  Whether to format the target. If this is False, the formatter and format tester will do nothing.   | Boolean | optional |  `True`  |
@@ -146,9 +146,9 @@ To build and run a specific test: `bazel test <target> --test_filter=<filter_exp
 | <a id="scala_test-resource_strip_prefix"></a>resource_strip_prefix |  The path prefix to strip from classpath resources.   | String | optional |  `""`  |
 | <a id="scala_test-runner"></a>runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/test"`  |
 | <a id="scala_test-runtime_deps"></a>runtime_deps |  The JVM runtime-only library dependencies.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="scala_test-scala_toolchain_name"></a>scala_toolchain_name |  The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)   | String | optional |  `""`  |
+| <a id="scala_test-scala_version"></a>scala_version |  The Scala version to use, e.g., '3', '2.13', '3.3.7', or '<prefix>_<version>' for prefixed versions.   | String | optional |  `""`  |
 | <a id="scala_test-scalacopts"></a>scalacopts |  Options to pass to scalac.   | List of strings | optional |  `[]`  |
-| <a id="scala_test-scalafmt_toolchain_name"></a>scalafmt_toolchain_name |  The name of the Scalafmt configuration toolchain.   | String | optional |  `""`  |
+| <a id="scala_test-sequential"></a>sequential |  Whether to run test classes sequentially. If false, they'll be run concurrently.   | Boolean | optional |  `False`  |
 | <a id="scala_test-shared_deps"></a>shared_deps |  If isolation is "classloader", the list of deps to keep loaded between tests   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scala_test-subprocess_runner"></a>subprocess_runner |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:subprocess"`  |
 

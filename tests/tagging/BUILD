@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_binary", "scala_library", "sc
 scala_binary(
     name = "binary-all-propagatable",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"] + [
         "no-cache",
         "no-remote",
@@ -16,7 +16,7 @@ scala_binary(
 scala_library(
     name = "library-no-propagatable",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = [
         "manual",
         "requires-network",
@@ -26,7 +26,7 @@ scala_library(
 scala_test(
     name = "test-no-remote-only",
     srcs = ["A.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = [
         "manual",
         "no-remote",

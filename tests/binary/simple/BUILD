@@ -3,6 +3,6 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_binary")
 scala_binary(
     name = "one_discovered",
     srcs = ["one_discovered.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"],
 )

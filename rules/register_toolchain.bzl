@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//rules:providers.bzl",
@@ -15,10 +16,8 @@ load(
     "phase_zinc_depscheck",
 )
 
-original_scala_toolchain_setting = "@rules_scala_annex//rules/scala:original-scala-toolchain"
-original_scalafmt_toolchain_setting = "@rules_scala_annex//rules/scalafmt:original-scalafmt-toolchain"
-scala_toolchain_setting = "@rules_scala_annex//rules/scala:scala-toolchain"
-scalafmt_toolchain_setting = "@rules_scala_annex//rules/scalafmt:scalafmt-toolchain"
+scala_version_setting = "@rules_scala_annex_config//:scala-version"
+original_scala_version_setting = "@rules_scala_annex_config//:original-scala-version"
 
 def _bootstrap_configuration_impl(ctx):
     return [
@@ -28,6 +27,7 @@ def _bootstrap_configuration_impl(ctx):
                 global_plugins = ctx.attr.global_plugins,
                 global_scalacopts = ctx.attr.global_scalacopts,
                 runtime_classpath = ctx.attr.runtime_classpath,
+                jvm_flags = ctx.attr.jvm_flags,
                 semanticdb_bundle = ctx.attr.semanticdb_bundle,
                 version = ctx.attr.version,
                 use_ijar = ctx.attr.use_ijar,
@@ -59,6 +59,9 @@ _bootstrap_configuration = rule(
             mandatory = True,
             providers = [JavaInfo],
         ),
+        "jvm_flags": attr.string_list(
+            doc = "JVM options to pass when invoking Scala-related actions.",
+        ),
         "semanticdb_bundle": attr.bool(
             default = True,
             doc = "Whether to bundle SemanticDB files in the resulting JAR. Note that in Scala 2, this requires the SemanticDB compiler plugin.",
@@ -83,6 +86,7 @@ def _zinc_configuration_impl(ctx):
                 global_plugins = ctx.attr.global_plugins,
                 global_scalacopts = ctx.attr.global_scalacopts,
                 runtime_classpath = ctx.attr.runtime_classpath,
+                jvm_flags = ctx.attr.jvm_flags,
                 semanticdb_bundle = ctx.attr.semanticdb_bundle,
                 use_ijar = ctx.attr.use_ijar,
                 version = ctx.attr.version,
@@ -142,6 +146,9 @@ off: Don't perform unused dependency checking.""",
             mandatory = True,
             providers = [JavaInfo],
         ),
+        "jvm_flags": attr.string_list(
+            doc = "JVM options to pass when invoking Scala-related actions.",
+        ),
         "semanticdb_bundle": attr.bool(default = True),
         "use_ijar": attr.bool(default = True),
         "version": attr.string(mandatory = True),
@@ -182,24 +189,65 @@ def _zinc_configuration(**kwargs):
 
     _zinc_configuration_underlying(**kwargs)
 
+def create_version_config_settings(name, version, prefix = ""):
+    """Creates hierarchical version config_settings for toolchain matching.
+
+    For version "3.3.7" with no prefix, creates config_settings matching: "3", "3.3", "3.3.7"
+
+    For version "3.3.7" with prefix "<prefix>", creates config_settings matching: "<prefix>_3",
+    "<prefix>_3.3", "<prefix>_3.3.7"
+
+    Args:
+        name: The toolchain name, used as a prefix for config_setting target names.
+        version: The Scala version, e.g., "3.3.7", "2.13.16".
+        prefix: Optional prefix for scala_version to disambiguate multiple toolchains with the same
+            scala_version.
+
+    Returns:
+        The name of the config_setting_group that matches any of the above.
+    """
+    if prefix:
+        prefix = prefix + "_"
+
+    parts = version.split(".")
+    match_settings = []
+
+    # Create a config_setting for each version prefix: major ("3"), major.minor ("3.3"),
+    # major.minor.patch ("3.3.7"). Each optionally namespaced by `prefix`. The toolchain matches a
+    # target whose scala_version equals any of these config settings.
+    for part in range(1, len(parts) + 1):
+        setting_name = "{}-match_{}".format(name, part)
+        native.config_setting(
+            name = setting_name,
+            flag_values = {scala_version_setting: prefix + ".".join(parts[:part])},
+            visibility = ["//visibility:private"],
+        )
+        match_settings.append(":" + setting_name)
+
+    # Group: toolchain matches if any of the above are true
+    scala_version_settings_group_name = "{}-version_setting".format(name)
+    selects.config_setting_group(
+        name = scala_version_settings_group_name,
+        match_any = match_settings,
+        visibility = ["//visibility:private"],
+    )
+
+    return scala_version_settings_group_name
+
 def _make_register_toolchain(configuration_rule):
-    def result(name, visibility = ["//visibility:public"], **kwargs):
+    def result(name, version, prefix = "", visibility = ["//visibility:public"], **kwargs):
         configuration_rule(
             name = "{}-configuration".format(name),
             visibility = visibility,
+            version = version,
             **kwargs
         )
 
-        native.config_setting(
-            name = "{}-setting".format(name),
-            flag_values = {
-                scala_toolchain_setting: name,
-            },
-        )
+        scala_version_settings_group_name = create_version_config_settings(name, version, prefix)
 
         native.toolchain(
             name = name,
-            target_settings = [":{}-setting".format(name)],
+            target_settings = [":{}".format(scala_version_settings_group_name)],
             toolchain = ":{}-configuration".format(name),
             toolchain_type = "@rules_scala_annex//rules/scala:toolchain_type",
             visibility = visibility,
@@ -213,15 +261,15 @@ register_zinc_toolchain = _make_register_toolchain(_zinc_configuration)
 def _scala_incoming_transition_impl(settings, attr):
     result = dict(settings)
 
-    if attr.scala_toolchain_name != "" and attr.scala_toolchain_name != settings[scala_toolchain_setting]:
-        # We set `original_scala_toolchain_setting` so we can reset the toolchain to its
+    if attr.scala_version != "" and attr.scala_version != settings[scala_version_setting]:
+        # We set `original_scala_version_setting` so we can reset the version to its
         # original value in `scala_outgoing_transition`. That way, we can ensure every target is
         # built under a single toolchain, thus preventing duplicate builds.
         #
-        # We do not do this work when the toolchain name is set, but is no different than what is
-        # already set. By having that check we avoid the failure mode where the original toolchain
-        # name gets set equal to the current toolchain name and destroys whatever the actual original
-        # toolchain name was. For example
+        # We do not do this work when the version is set, but is no different than what is
+        # already set. By having that check we avoid the failure mode where the original version
+        # gets set equal to the current version and destroys whatever the actual original
+        # version was. For example
         #  State 1:              State 2:          State 3:
         #    Setting: A      =>    Setting: B  =>    Setting: B  => Game over
         #    Original: Unset       Original: A       Original: B
@@ -231,68 +279,50 @@ def _scala_incoming_transition_impl(settings, attr):
         # temporary, but who knows.
         #
         # This is inspired by what the rules_go folks are doing.
-        result[original_scala_toolchain_setting] = settings[scala_toolchain_setting]
-        result[scala_toolchain_setting] = attr.scala_toolchain_name
-
-    if (hasattr(attr, "scalafmt_toolchain_name") and attr.scalafmt_toolchain_name != "" and
-        attr.scalafmt_toolchain_name != settings[scalafmt_toolchain_setting]):
-        result[original_scalafmt_toolchain_setting] = settings[scalafmt_toolchain_setting]
-        result[scalafmt_toolchain_setting] = attr.scalafmt_toolchain_name
+        result[original_scala_version_setting] = settings[scala_version_setting]
+        result[scala_version_setting] = attr.scala_version
 
     return result
 
 scala_incoming_transition = transition(
     implementation = _scala_incoming_transition_impl,
     inputs = [
-        original_scala_toolchain_setting,
-        original_scalafmt_toolchain_setting,
-        scala_toolchain_setting,
-        scalafmt_toolchain_setting,
+        original_scala_version_setting,
+        scala_version_setting,
     ],
     outputs = [
-        original_scala_toolchain_setting,
-        original_scalafmt_toolchain_setting,
-        scala_toolchain_setting,
-        scalafmt_toolchain_setting,
+        original_scala_version_setting,
+        scala_version_setting,
     ],
 )
 
 def _scala_outgoing_transition_impl(settings, _):
     result = dict(settings)
-    original_scala_toolchain = settings[original_scala_toolchain_setting]
-    original_scalafmt_toolchain = settings[original_scalafmt_toolchain_setting]
+    original_scala_version = settings[original_scala_version_setting]
 
-    # Although `original_scala_toolchain_setting` and `original_scalafmt_toolchain_setting` will be
-    # overridden in the incoming transition, we set them to "" so non-Scala targets aren't built
-    # under different values of these settings. That way, they aren't built multiple times.
-    if original_scala_toolchain != "":
-        result[original_scala_toolchain_setting] = ""
-        result[scala_toolchain_setting] = original_scala_toolchain
-
-    if original_scalafmt_toolchain != "":
-        result[original_scalafmt_toolchain_setting] = ""
-        result[scalafmt_toolchain_setting] = original_scalafmt_toolchain
+    # Although these original settings will be overridden in the incoming transition, we set them
+    # to "" so non-Scala targets aren't built under different values of these settings. That way,
+    # they aren't built multiple times.
+    if original_scala_version != "":
+        result[original_scala_version_setting] = ""
+        result[scala_version_setting] = original_scala_version
 
     return result
 
 scala_outgoing_transition = transition(
     implementation = _scala_outgoing_transition_impl,
     inputs = [
-        original_scala_toolchain_setting,
-        original_scalafmt_toolchain_setting,
-        scala_toolchain_setting,
-        scalafmt_toolchain_setting,
+        original_scala_version_setting,
+        scala_version_setting,
     ],
     outputs = [
-        original_scala_toolchain_setting,
-        original_scalafmt_toolchain_setting,
-        scala_toolchain_setting,
-        scalafmt_toolchain_setting,
+        original_scala_version_setting,
+        scala_version_setting,
     ],
 )
 
 scala_toolchain_attributes = {
-    "scala_toolchain_name": attr.string(
-        doc = "The name of the Scala toolchain to use for this target (as provided to `register_*_toolchain`)",
+    "scala_version": attr.string(
+        doc = "The Scala version to use, e.g., '3', '2.13', '3.3.7', or '<prefix>_<version>' for prefixed versions.",
     ),
 }

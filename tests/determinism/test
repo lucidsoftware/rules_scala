@@ -6,7 +6,7 @@ echo "Testing TASTy file generation with Scala 3..."
 
 # Build the Scala 3 target, explicitly using Scala 3 toolchain
 echo "Building target with Scala 3 toolchain..."
-bazel build --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_3 --keep_going --remote_executor= --remote_cache= --disk_cache= :tasty_test_lib 
+bazel build --@rules_scala_annex_config//:scala-version=3 --keep_going --remote_executor= --remote_cache= --disk_cache= :tasty_test_lib
 
 # Get the generated jar file
 bazel_bin=$(bazel info bazel-bin)
@@ -58,12 +58,12 @@ temp_dirs=("$temp_dir")
 for i in $(seq 2 5); do
     echo "Build $i/5..."
     bazel clean
-    bazel build --@rules_scala_annex//rules/scala:scala-toolchain=test_zinc_3 --remote_executor= --remote_cache= --disk_cache= :tasty_test_lib
-    
+    bazel build --@rules_scala_annex_config//:scala-version=3 --remote_executor= --remote_cache= --disk_cache= :tasty_test_lib
+
     # Create temp directory for this build
     temp_dir_n=$(mktemp -d)
     temp_dirs+=("$temp_dir_n")
-    
+
     # Extract TASTy files from this build
     unzip -j "$jar_file" "*.tasty" -d "$temp_dir_n" 2>/dev/null || {
         echo "ERROR: Failed to extract TASTy files from build $i"

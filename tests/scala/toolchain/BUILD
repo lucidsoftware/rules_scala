@@ -9,7 +9,7 @@ scala_library(
 scala_library(
     name = "parent1",
     srcs = ["Parent.scala"],
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     tags = ["manual"],
     deps = [":child"],
 )
@@ -17,7 +17,7 @@ scala_library(
 scala_library(
     name = "parent2",
     srcs = ["Parent.scala"],
-    scala_toolchain_name = "test_zinc_3",
+    scala_version = "3",
     tags = ["manual"],
     deps = [":child"],
 )

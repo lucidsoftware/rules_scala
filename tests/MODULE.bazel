@@ -1,9 +1,9 @@
 module(name = "rules_scala_annex_tests")
 
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "protobuf", version = "29.3")
-bazel_dep(name = "rules_java", version = "8.11.0")
-bazel_dep(name = "rules_jvm_external", version = "6.5")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "protobuf", version = "35.0")
+bazel_dep(name = "rules_java", version = "9.6.1")
+bazel_dep(name = "rules_jvm_external", version = "6.9")
 bazel_dep(name = "rules_scala_annex")
 local_path_override(
     module_name = "rules_scala_annex",
@@ -17,14 +17,19 @@ register_toolchains(
     "//plugins/kind-projector:test_zinc_2_13_with_kind_projector",
     "//plugins/semanticdb:scala_2_13_with_semanticdb",
     "//plugins/semanticdb:scala_3_with_semanticdb",
-    "//scala:test_bootstrap_2_12",
-    "//scala:test_bootstrap_2_13",
     "//scala:test_bootstrap_3",
+    "//scala:test_scalafmt",
     "//scala:test_zinc_2_12",
     "//scala:test_zinc_2_13",
     "//scala:test_zinc_3",
     "//scala:test_zinc_2_13_fatal_deprecation_opt",
     "//scala:test_zinc_2_13_log_level_debug",
+    "//jvm_flags:bootstrap_3_bad_jvm_flags",
+    "//jvm_flags:bootstrap_3_good_jvm_flags",
+    "//jvm_flags:zinc_3_bad_jvm_flags",
+    "//jvm_flags:zinc_3_good_jvm_flags",
+    "//jvm_flags:scalafmt_3_bad_jvm_flags",
+    "//jvm_flags:scalafmt_3_good_jvm_flags",
 )
 
 # Please ensure these stay up-to-date with the versions in `/rules/scala/versions.bzl`,
@@ -45,6 +50,10 @@ specs2_version = "4.20.9"
 scalatest_version = "3.2.19"
 
 scalacheck_version = "1.18.1"
+
+scala = use_extension("@rules_scala_annex//:extensions.bzl", "scala")
+scala.defaults(scala_version = scala_2_13_version)
+use_repo(scala, "rules_scala_annex_config")
 
 annex_test = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex_test.install(

@@ -4,5 +4,5 @@ scala_library(
     name = "special_characters",
     srcs = [],
     resources = glob(["**/*.txt"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
 )

@@ -3,7 +3,7 @@ load("@rules_scala_annex//rules:scala.bzl", "scala_test")
 scala_test(
     name = "mixed_2_13",
     srcs = glob(["*.scala"]),
-    scala_toolchain_name = "test_zinc_2_13",
+    scala_version = "2.13",
     shard_count = 2,
     tags = ["manual"],
     deps = [
@@ -23,7 +23,7 @@ scala_test(
 scala_test(
     name = "mixed_2_12",
     srcs = glob(["*.scala"]),
-    scala_toolchain_name = "test_zinc_2_12",
+    scala_version = "2.12",
     shard_count = 2,
     tags = ["manual"],
     deps = [

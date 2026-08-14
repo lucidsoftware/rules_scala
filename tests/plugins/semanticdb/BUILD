@@ -13,7 +13,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala_reflect",
         "@annex_test//:org_scala_lang_scala_library",
     ],
-    global_plugins = ["@annex_test//:org_scalameta_semanticdb_scalac_2_13_14"],
+    global_plugins = ["@annex_test//:org_scalameta_semanticdb_scalac_2_13_18"],
     global_scalacopts = ["-Wconf:any:error"],
     prefix = "semanticdb",
     runtime_classpath = ["@annex_test//:org_scala_lang_scala_library"],

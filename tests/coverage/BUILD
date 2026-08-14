@@ -8,8 +8,8 @@ scala_test(
     ],
     scala_version = "2.13",
     runtime_deps = [
-        "@annex_test//:com_novocode_junit_interface",
-        "@annex_test//:org_hamcrest_hamcrest_core",
+        "@annex_test//:com_github_sbt_junit_interface",
+        "@annex_test//:org_hamcrest_hamcrest",
     ],
     deps = [
         ":a1",

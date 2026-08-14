@@ -7,7 +7,7 @@ scala_test(
     shard_count = 2,
     tags = ["manual"],
     deps = [
-        "@annex_test//:com_novocode_junit_interface",
+        "@annex_test//:com_github_sbt_junit_interface",
         "@annex_test//:junit_junit",
         "@annex_test//:org_scalacheck_scalacheck_2_13",
         "@annex_test//:org_scalactic_scalactic_2_13",
@@ -27,7 +27,7 @@ scala_test(
     shard_count = 2,
     tags = ["manual"],
     deps = [
-        "@annex_test//:com_novocode_junit_interface",
+        "@annex_test//:com_github_sbt_junit_interface",
         "@annex_test//:junit_junit",
         "@annex_test_2_12//:org_scalacheck_scalacheck_2_12",
         "@annex_test_2_12//:org_scalactic_scalactic_2_12",

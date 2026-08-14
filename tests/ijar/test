@@ -12,7 +12,7 @@ invalidate_dependent_cache() {
 test_actions_executed() {
   scalacompile_runs="$(
     bazel build --color no --subcommands "$1" |& \
-      grep '^SUBCOMMAND: # //ijar:.* \[.*, mnemonic: ScalaCompile\]$' | \
+      grep '^SUBCOMMAND: # scala_library rule target //ijar:.* \[.*, mnemonic: ScalaCompile\]$' | \
       wc -l
   )"
 

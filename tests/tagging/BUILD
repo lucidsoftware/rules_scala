@@ -4,7 +4,7 @@ scala_binary(
     name = "binary-all-propagatable",
     srcs = ["A.scala"],
     scala_version = "2.13",
-    tags = ["manual"] + [
+    tags = [
         "no-cache",
         "no-remote",
         "no-remote-cache",
@@ -18,7 +18,6 @@ scala_library(
     srcs = ["A.scala"],
     scala_version = "2.13",
     tags = [
-        "manual",
         "requires-network",
     ],
 )
@@ -28,7 +27,6 @@ scala_test(
     srcs = ["A.scala"],
     scala_version = "2.13",
     tags = [
-        "manual",
         "no-remote",
     ],
 )

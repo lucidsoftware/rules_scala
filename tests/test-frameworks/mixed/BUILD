@@ -5,7 +5,6 @@ scala_test(
     srcs = glob(["*.scala"]),
     scala_version = "2.13",
     shard_count = 2,
-    tags = ["manual"],
     deps = [
         "@annex_test//:com_github_sbt_junit_interface",
         "@annex_test//:junit_junit",
@@ -25,7 +24,6 @@ scala_test(
     srcs = glob(["*.scala"]),
     scala_version = "2.12",
     shard_count = 2,
-    tags = ["manual"],
     deps = [
         "@annex_test//:com_github_sbt_junit_interface",
         "@annex_test//:junit_junit",

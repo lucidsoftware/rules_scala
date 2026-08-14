@@ -79,7 +79,6 @@ scala_library(
     name = "bootstrap_good",
     srcs = ["Example.scala"],
     scala_version = "jvm-flags-good-bootstrap_3",
-    tags = ["manual"],
 )
 
 scala_library(
@@ -93,7 +92,6 @@ scala_library(
     name = "zinc_good",
     srcs = ["Example.scala"],
     scala_version = "jvm-flags-good-zinc_3",
-    tags = ["manual"],
 )
 
 scala_library(
@@ -107,7 +105,6 @@ scala_format_test(
     name = "scalafmt_good",
     srcs = ["Example.scala"],
     scala_version = "jvm-flags-good-scalafmt_3",
-    tags = ["manual"],
 )
 
 scala_format_test(

@@ -36,6 +36,7 @@ scala_library(
     name = "used_deps_off_c",
     srcs = ["C.scala"],
     scala_version = "used-deps-off_2.13",
+    tags = ["manual"],
     deps = [":used_deps_off_b"],
 )
 
@@ -66,6 +67,7 @@ scala_library(
     name = "direct_deps_off_b",
     srcs = ["B.scala"],
     scala_version = "direct-deps-off_2.13",
+    tags = ["manual"],
     deps = [":direct_deps_off_a"],
 )
 
@@ -73,6 +75,7 @@ scala_library(
     name = "direct_deps_off_c",
     srcs = ["C.scala"],
     scala_version = "direct-deps-off_2.13",
+    tags = ["manual"],
     deps = [":direct_deps_off_b"],
 )
 
@@ -87,6 +90,7 @@ scala_library(
     name = "define_b",
     srcs = ["B.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [":define_a"],
 )
 
@@ -94,5 +98,6 @@ scala_library(
     name = "define_c",
     srcs = ["C.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [":define_b"],
 )

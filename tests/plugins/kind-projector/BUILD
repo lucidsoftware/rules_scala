@@ -8,7 +8,6 @@ scala_library(
     plugins = [
         "@annex_test//:org_typelevel_kind_projector_2_13_18",
     ],
-    tags = ["manual"],
 )
 
 register_zinc_toolchain(
@@ -33,5 +32,4 @@ scala_library(
     name = "kind-projector-via-global-plugins",
     srcs = ["KindProjector.scala"],
     scala_version = "kind-projector_2.13",
-    tags = ["manual"],
 )

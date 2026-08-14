@@ -14,4 +14,5 @@ scala_library(
     resource_strip_prefix = "{}/other".format(package_name()),
     resources = glob(["**/*.txt"]),
     scala_version = "2.13",
+    tags = ["manual"],
 )

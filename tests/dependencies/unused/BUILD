@@ -4,7 +4,6 @@ scala_library(
     name = "0_used",
     srcs = ["0_used.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
     ],
@@ -27,7 +26,6 @@ scala_library(
         "@annex_test//:org_scalacheck_scalacheck_2_13",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@annex_test//:org_scalacheck_scalacheck_2_13",
     ],
@@ -37,7 +35,6 @@ scala_library(
     name = "indirect_unused",
     srcs = ["indirect_unused.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",
@@ -63,7 +60,6 @@ scala_library(
         "@annex_test//:org_specs2_specs2_matcher_2_13",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",

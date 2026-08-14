@@ -4,6 +4,7 @@ scala_library(
     name = "bad",
     srcs = ["Reflect.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
 )
 
 scala_binary(

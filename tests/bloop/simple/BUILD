@@ -4,5 +4,4 @@ scala_library(
     name = "welcome_to_bloop",
     srcs = ["welcome_to_bloop.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
 )

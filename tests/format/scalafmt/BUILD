@@ -18,6 +18,7 @@ scala_format_test(
     name = "unformatted-copy",
     srcs = ["unformatted.tmp.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
 )
 
 ### scala_format_test with a different scalafmt toolchain ###
@@ -37,6 +38,7 @@ scala_format_test(
     name = "unformatted-scala3-copy",
     srcs = ["unformatted-scala3.tmp.scala"],
     scala_version = "3",
+    tags = ["manual"],
 )
 
 ### scala_binary ###
@@ -58,7 +60,10 @@ scala_binary(
     name = "unformatted-binary-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
-    tags = ["no-cache"],
+    tags = [
+        "manual",
+        "no-cache",
+    ],
 )
 
 ### scala_library ###
@@ -80,7 +85,10 @@ scala_library(
     name = "unformatted-library-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
-    tags = ["no-cache"],
+    tags = [
+        "manual",
+        "no-cache",
+    ],
 )
 
 ### scala_test ###
@@ -102,7 +110,10 @@ scala_test(
     name = "unformatted-test-copy",
     srcs = ["unformatted.tmp.scala"],
     format = True,
-    tags = ["no-cache"],
+    tags = [
+        "manual",
+        "no-cache",
+    ],
 )
 
 ### utf8 encoding test ###
@@ -110,11 +121,15 @@ scala_format_test(
     name = "utf8-encoding-test-default",
     srcs = ["utf8-unformatted.tmp.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
 )
 
 scala_binary(
     name = "utf8-encoding-test-non-default",
     srcs = ["utf8-unformatted.tmp.scala"],
     format = True,
-    tags = ["no-cache"],
+    tags = [
+        "manual",
+        "no-cache",
+    ],
 )

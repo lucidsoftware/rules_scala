@@ -5,7 +5,6 @@ scala_library(
     name = "plugin-lib",
     srcs = ["plugin-lib.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
 )
 
 _gen_plugin_xml_cmd = """
@@ -37,7 +36,6 @@ scala_library(
         ":resources",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         ":plugin-lib",
         "@annex_test//:org_scala_lang_scala_compiler",
@@ -52,5 +50,4 @@ scala_library(
         ":plugin",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
 )

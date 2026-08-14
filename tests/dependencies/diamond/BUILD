@@ -12,14 +12,12 @@ scala_library(
     name = "A",
     srcs = ["A.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
 )
 
 scala_library(
     name = "B1",
     srcs = ["B1.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [":A"],
 )
 
@@ -27,7 +25,6 @@ scala_library(
     name = "B2",
     srcs = ["B2.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [":A"],
 )
 
@@ -35,7 +32,6 @@ scala_library(
     name = "C",
     srcs = ["C.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         ":B1",
         ":B2",

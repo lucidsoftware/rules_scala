@@ -10,10 +10,12 @@ scala_library(
     name = "lib-sources-jar",
     srcs = ["example-sources.jar"],
     scala_version = "2.13",
+    tags = ["manual"],
 )
 
 scala_library(
     name = "lib-src-jar",
     srcs = ["example-src.jar"],
     scala_version = "2.13",
+    tags = ["manual"],
 )

@@ -7,7 +7,6 @@ scala_binary(
         "RunnerThatPrintsVerbosity.scala",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",

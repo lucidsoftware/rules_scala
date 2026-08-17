@@ -18,6 +18,7 @@ string_flag(
 string_setting(
     name = "original-scala-version",
     build_setting_default = "",
+    scope = "universal",
     visibility = ["//visibility:public"],
 )
 """.format(

@@ -7,7 +7,6 @@ scala_library(
         "RunnerForCancelSpec.scala",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
     ],
@@ -17,7 +16,6 @@ scala_test(
     name = "cancel-spec",
     srcs = ["CancelSpec.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         ":cancel-spec-worker",
         "//test-lib/worker",
@@ -35,7 +33,6 @@ scala_test(
     name = "cancellabletask-spec",
     srcs = ["CancellableTaskSpec.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@annex_test//:org_scalactic_scalactic_2_13",
         "@annex_test//:org_scalatest_scalatest_core_2_13",

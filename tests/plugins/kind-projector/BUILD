@@ -6,9 +6,8 @@ scala_library(
     name = "kind-projector",
     srcs = ["KindProjector.scala"],
     plugins = [
-        "@annex_test//:org_typelevel_kind_projector_2_13_14",
+        "@annex_test//:org_typelevel_kind_projector_2_13_18",
     ],
-    tags = ["manual"],
 )
 
 register_zinc_toolchain(
@@ -20,7 +19,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala_library",
     ],
     global_plugins = [
-        "@annex_test//:org_typelevel_kind_projector_2_13_14",
+        "@annex_test//:org_typelevel_kind_projector_2_13_18",
     ],
     prefix = "kind-projector",
     runtime_classpath = [
@@ -33,5 +32,4 @@ scala_library(
     name = "kind-projector-via-global-plugins",
     srcs = ["KindProjector.scala"],
     scala_version = "kind-projector_2.13",
-    tags = ["manual"],
 )

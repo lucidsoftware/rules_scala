@@ -4,5 +4,4 @@ scala_binary(
     name = "one_discovered",
     srcs = ["one_discovered.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
 )

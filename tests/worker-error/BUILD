@@ -8,7 +8,6 @@ scala_library(
         "RunnerThatThrowsFatalError.scala",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/worker",
     ],
@@ -18,7 +17,6 @@ scala_test(
     name = "error-spec",
     srcs = ["ErrorSpec.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         ":fatal-error-spec-workers",
         "//test-lib/worker",
@@ -35,7 +33,6 @@ scala_test(
     name = "fatal-error-spec",
     srcs = ["FatalErrorSpec.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [
         ":fatal-error-spec-workers",
         "//test-lib/worker",

@@ -44,6 +44,5 @@ scala_library(
     srcs = [],
     deps_used_whitelist = [":library-alias"],
     scala_version = "2.13",
-    tags = ["manual"],
     deps = [":library-alias"],
 )

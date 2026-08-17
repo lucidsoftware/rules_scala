@@ -4,5 +4,4 @@ scala_library(
     name = "validation_action",
     srcs = [],
     scala_version = "2.13",
-    tags = ["manual"],
 )

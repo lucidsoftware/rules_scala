@@ -5,12 +5,10 @@ scala_library(
     name = "my_plugin_lib",
     srcs = ["plugin.scala"],
     scala_version = "2.13",
-    tags = ["manual"],
 )
 
 my_plugin(
     name = "my_plugin",
-    tags = ["manual"],
     deps = [
         ":my_plugin_lib",
     ],
@@ -23,5 +21,4 @@ scala_library(
         ":my_plugin",
     ],
     scala_version = "2.13",
-    tags = ["manual"],
 )

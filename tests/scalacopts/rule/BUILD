@@ -14,6 +14,7 @@ scala_library(
         "-deprecation",
         "-Xfatal-warnings",
     ],
+    tags = ["manual"],
 )
 
 scala_library(
@@ -29,4 +30,5 @@ scala_library(
     name = "fatal_glob",
     srcs = ["Deprecated.scala"],
     scala_version = "fatal-deprecation_2.13",
+    tags = ["manual"],
 )

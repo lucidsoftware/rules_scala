@@ -4,7 +4,6 @@ scala_library(
     name = "example",
     srcs = ["Example.scala"],
     scala_version = "3",
-    tags = ["manual"],
 )
 
 scala_library(

@@ -4,6 +4,7 @@ scala_library(
     name = "bad_compile",
     srcs = ["TestMacro.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         ":macro_bad",
         "@annex_test//:org_scala_lang_scala_reflect",

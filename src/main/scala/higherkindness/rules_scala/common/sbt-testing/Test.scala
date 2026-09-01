@@ -66,7 +66,7 @@ object TestHelper {
           // \Q is the only thing from scope that we _don't_ want to drop (since it's not actually part of the scope,
           // it's part of the overall regex)
           val prefix = if (scopeAndTestName.startsWith(raw"\Q") && !testName.startsWith(raw"\Q")) raw"\Q" else ""
-          Array("-ex", prefix + testName)
+          Array("-ex", Specs2FilterCompatibility.normalize(prefix + testName))
         } else {
           Array.empty[String]
         }

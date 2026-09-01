@@ -22,6 +22,9 @@ original_scala_version_setting = "@rules_scala_annex_config//:original-scala-ver
 def _bootstrap_configuration_impl(ctx):
     return [
         platform_common.ToolchainInfo(
+            # JetBrains' IntelliJ Bazel aspect reads global Scala compiler options directly from
+            # ToolchainInfo.scalacopts when the rule exposes _scala_toolchain.
+            scalacopts = ctx.attr.global_scalacopts,
             scala_configuration = ScalaConfiguration(
                 compiler_classpath = ctx.attr.compiler_classpath,
                 global_plugins = ctx.attr.global_plugins,
@@ -81,6 +84,9 @@ _bootstrap_configuration = rule(
 def _zinc_configuration_impl(ctx):
     return [
         platform_common.ToolchainInfo(
+            # JetBrains' IntelliJ Bazel aspect reads global compiler options directly from
+            # ToolchainInfo.scalacopts when the rule exposes _scala_toolchain.
+            scalacopts = ctx.attr.global_scalacopts,
             scala_configuration = ScalaConfiguration(
                 compiler_classpath = ctx.attr.compiler_classpath,
                 global_plugins = ctx.attr.global_plugins,

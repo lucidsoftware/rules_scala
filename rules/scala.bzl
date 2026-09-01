@@ -6,6 +6,10 @@ load("@bazel_skylib//lib:dicts.bzl", _dicts = "dicts")
 load("@rules_java//java/common:java_common.bzl", "java_common")
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
+    "//rules:intellij_aspect_compat.bzl",
+    _intellij_aspect_compat_attributes = "intellij_aspect_compat_attributes",
+)
+load(
     "//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
@@ -274,6 +278,7 @@ def make_scala_library(*extras):
             _compile_private_attributes,
             _library_attributes,
             _scala_toolchain_attributes,
+            _intellij_aspect_compat_attributes,
             _extras_attributes(extras),
             *[extra.get("attrs", {}) for extra in extras]
         ),
@@ -303,6 +308,7 @@ def make_scala_binary(*extras):
             _runtime_attributes,
             _runtime_private_attributes,
             _scala_toolchain_attributes,
+            _intellij_aspect_compat_attributes,
             {
                 "main_class": attr.string(
                     doc = "The main class. If not provided, it will be inferred by its type signature.",
@@ -350,6 +356,7 @@ def make_scala_test(*extras):
             _runtime_attributes,
             _runtime_private_attributes,
             _scala_toolchain_attributes,
+            _intellij_aspect_compat_attributes,
             _testing_private_attributes,
             {
                 "isolation": attr.string(
@@ -441,6 +448,7 @@ scala_repl = rule(
     attrs = _dicts.add(
         _scala_repl_private_attributes,
         _scala_toolchain_attributes,
+        _intellij_aspect_compat_attributes,
         {
             "data": attr.label_list(
                 cfg = _scala_outgoing_transition,
@@ -517,6 +525,7 @@ Use this only for libraries with macros. Otherwise, use `java_import`.""",
 scaladoc = rule(
     attrs = _dicts.add(
         _scala_toolchain_attributes,
+        _intellij_aspect_compat_attributes,
         _scaladoc_private_attributes,
         {
             "compiler_deps": attr.label_list(

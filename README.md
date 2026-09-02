@@ -65,17 +65,42 @@ MODULE.bazel
 bazel_dep(name = "rules_scala_annex")
 
 rules_scala_annex_version = "<COMMIT>"
+rules_scala_annex_integrity = "<INTEGRITY>"
+rules_scala_annex_urls = [
+    "https://github.com/lucidsoftware/rules_scala/archive/{}.zip".format(
+        rules_scala_annex_version,
+    ),
+]
 
 archive_override(
     module_name = "rules_scala_annex",
-    integrity = "<INTEGRITY>",
+    integrity = rules_scala_annex_integrity,
     strip_prefix = "rules_scala-{}".format(rules_scala_annex_version),
-    urls = ["https://github.com/lucidsoftware/rules_scala/archive/refs/heads/{}.zip".format(rules_scala_annex_version)],
+    urls = rules_scala_annex_urls,
 )
 ```
 
-BUILD
+If you want to use the Bazel IntelliJ plugin with rules_scala_annex, you can add this snippet to
+expose Annex's Scala toolchain type to the IntelliJ plugin under @rules_scala. It's a bit hacky,
+but it prevents the need to maintain a small patch for the IntelliJ plugin.
 
+```
+# Expose Annex's Scala toolchain under @rules_scala for tools that identify the Scala ruleset by
+# repository name, including the official Bazel IntelliJ plugin.
+bazel_dep(
+    name = "rules_scala_toolchain_shim",
+    repo_name = "rules_scala",
+)
+
+archive_override(
+    module_name = "rules_scala_toolchain_shim",
+    integrity = rules_scala_annex_integrity,
+    strip_prefix = "rules_scala-{}/rules-scala-toolchain-shim".format(rules_scala_annex_version),
+    urls = rules_scala_annex_urls,
+)
+```
+
+BUILD.bazel
 ```starlark
 load("@rules_scala_annex//rules:scala.bzl", "scala_library")
 

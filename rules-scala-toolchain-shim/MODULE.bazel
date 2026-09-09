@@ -1,0 +1,7 @@
+module(name = "rules_scala_toolchain_shim")
+
+bazel_dep(name = "rules_scala_annex")
+
+# Keep this version in sync with the root MODULE.bazel. Some tools read rules_java's repository
+# mapping directly from the repository they detect as rules_scala.
+bazel_dep(name = "rules_java", version = "9.8.0")

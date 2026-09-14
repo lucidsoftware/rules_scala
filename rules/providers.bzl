@@ -68,6 +68,7 @@ LabeledJars = provider(
     doc = "Exported jars and their labels.",
     fields = {
         "label": "The label of the target providing this provider.",
+        "transitive_label_objects": "The transitive depset of `Label` objects, excluding `deps_checker_label` overrides.",
         "values": "The preorder depset of label and jars.",
     },
 )

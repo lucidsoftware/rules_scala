@@ -9,6 +9,11 @@ def get_labeled_jars(label, java_info, deps):
     deps_labeled_jars = [dep[_LabeledJars] for dep in deps if _LabeledJars in dep]
     return _LabeledJars(
         label = label,
+        transitive_label_objects = depset(
+            [label] if type(label) == "Label" else [],
+            order = "preorder",
+            transitive = [labeled_jars.transitive_label_objects for labeled_jars in deps_labeled_jars],
+        ),
         values = depset(
             [
                 _LabeledJarsData(

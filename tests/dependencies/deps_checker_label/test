@@ -6,3 +6,5 @@ bazel build :depends-on-library-alias |& grep "buildozer 'remove deps //dependen
 
 ! bazel build :depends-on-import-alias || false
 bazel build :depends-on-import-alias |& grep "buildozer 'remove deps //dependencies/deps_checker_label:import-alias' //dependencies/deps_checker_label:depends-on-import-alias"
+
+bazel build :depends-on-whitelisted-library-alias

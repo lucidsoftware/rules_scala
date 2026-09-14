@@ -33,13 +33,21 @@ object DepsRunner extends WorkerMain[Unit] {
 
   private object DepsRunnerRequest {
     def apply(pathResolver: PathResolver, namespace: Namespace): DepsRunnerRequest = {
+      val labelKeys = namespace.getList[String]("label_keys").asScala.map(_.tail)
+      val labelNames = namespace.getList[String]("label_names").asScala.map(_.tail)
+
+      if (labelKeys.size != labelNames.size) {
+        throw new AnnexWorkerError(1, "Dependency label mapping has different numbers of keys and names")
+      }
+
+      val labelMapping = labelKeys.view.zip(labelNames).toMap
       val groups = Option(namespace.getList[java.util.List[String]]("group"))
         .map(_.asScala)
         .getOrElse(List.empty)
         .view
         .map { group =>
           group.asScala match {
-            case Buffer(label, jars @ _*) => Group.apply(label, jars)
+            case Buffer(label, jars @ _*) => Group.apply(label, jars, labelMapping)
             case _                        => throw new Exception(s"Unexpected case in DepsRunner")
           }
         }
@@ -65,9 +73,10 @@ object DepsRunner extends WorkerMain[Unit] {
   )
 
   private object Group {
-    def apply(prependedLabel: String, jars: Seq[String]): Group = {
+    def apply(prependedLabel: String, jars: Seq[String], labelMapping: Map[String, String]): Group = {
+      val label = prependedLabel.tail
       new Group(
-        prependedLabel.tail,
+        labelMapping.getOrElse(label, label),
         jars.toSet,
       )
     }
@@ -77,6 +86,16 @@ object DepsRunner extends WorkerMain[Unit] {
     val parser = ArgumentParsers.newFor("deps").addHelp(true).fromFilePrefix("@").build
     parser.addArgument("--check_direct").`type`(Arguments.booleanType)
     parser.addArgument("--check_used").`type`(Arguments.booleanType)
+    parser
+      .addArgument("--label_keys")
+      .help("The canonical labels in every group, in the same order as `--label_names`")
+      .nargs("*")
+      .setDefault_(Collections.emptyList())
+    parser
+      .addArgument("--label_names")
+      .help("The apparent labels in every group, in the same order as `--label_keys`")
+      .nargs("*")
+      .setDefault_(Collections.emptyList())
     parser
       .addArgument("--direct")
       .help("Labels of direct deps")

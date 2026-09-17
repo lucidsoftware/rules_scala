@@ -42,3 +42,10 @@ assert_jvm_flag_applied "ScalaCompile" ":zinc_good"
 
 assert_jvm_flag_applied "ScalaFmt" ":scalafmt_good"
 ! bazel build :scalafmt_bad
+
+substitution_flags="$(bazel run :substitution-binary)"
+
+grep -q '^bazel-out/.*/bin$' <<<"${substitution_flags}"
+grep -q '^Hello, world!$' <<<"${substitution_flags}"
+
+bazel test :substitution-test

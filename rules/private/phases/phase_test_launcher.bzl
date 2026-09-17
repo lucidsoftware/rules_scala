@@ -79,7 +79,10 @@ def phase_test_launcher(ctx, g):
         output = ctx.outputs.bin,
         runtime_classpath = runner_jars,  # + ctx.files._jacocorunner,
         main_class = "higherkindness.rules_scala.workers.zinc.test.TestRunner",
-        jvm_flags = [ctx.expand_location(f, ctx.attr.data) for f in ctx.attr.jvm_flags] + [
+        jvm_flags = [
+            ctx.expand_make_variables("jvm_flags", ctx.expand_location(f, ctx.attr.data), {})
+            for f in ctx.attr.jvm_flags
+        ] + [
             "-Dbazel.runPath=$RUNPATH",
             "-DscalaAnnex.test.args=${{RUNPATH}}{}".format(args_file.short_path),
         ],

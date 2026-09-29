@@ -1,6 +1,6 @@
 load("@rules_scala_annex//rules:default_bootstrap_toolchain.bzl", "default_bootstrap_toolchain")
 load("@rules_scala_annex//rules:register_toolchain.bzl", "register_zinc_toolchain")
-load("@rules_scala_annex//rules:scala.bzl", "scala_library")
+load("@rules_scala_annex//rules:scala.bzl", "scala_binary", "scala_library", "scala_test")
 load("@rules_scala_annex//rules:scalafmt.bzl", "scala_format_test")
 load("@rules_scala_annex//rules/scala:versions.bzl", "scala_3_version")
 load("@rules_scala_annex//rules/scalafmt:register_toolchain.bzl", "register_scalafmt_toolchain")
@@ -10,6 +10,11 @@ bad_jvm_flags = ["-XX:+AnnexDefinitelyNotARealJvmFlag"]
 good_jvm_flags = [
     "-Dannex.jvm_flags.test=enabled",
     "-XshowSettings:properties",
+]
+
+substitution_jvm_flags = [
+    "-Dannex.jvm_flags.test.makeVariable=$(BINDIR)",
+    "-Dannex.jvm_flags.test.shellExpansion=\"$$(echo 'Hello, world!')\"",
 ]
 
 compiler_classpath_3 = [
@@ -99,6 +104,23 @@ scala_library(
     srcs = ["Example.scala"],
     scala_version = "jvm-flags-bad-zinc_3",
     tags = ["manual"],
+)
+
+scala_binary(
+    name = "substitution-binary",
+    srcs = ["Substitution.scala"],
+    jvm_flags = substitution_jvm_flags,
+)
+
+scala_test(
+    name = "substitution-test",
+    srcs = ["SubstitutionSpec.scala"],
+    jvm_flags = substitution_jvm_flags,
+    deps = [
+        "@annex_test//:org_specs2_specs2_common_2_13",
+        "@annex_test//:org_specs2_specs2_core_2_13",
+        "@annex_test//:org_specs2_specs2_matcher_2_13",
+    ],
 )
 
 scala_format_test(

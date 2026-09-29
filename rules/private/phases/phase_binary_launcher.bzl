@@ -30,7 +30,10 @@ def phase_binary_launcher(ctx, g):
         "{}/".format(ctx.label.name),
         ctx.outputs.bin,
         g.javainfo.java_info.transitive_runtime_jars,
-        jvm_flags = [ctx.expand_location(f, ctx.attr.data) for f in ctx.attr.jvm_flags],
+        jvm_flags = [
+            ctx.expand_make_variables("jvm_flags", ctx.expand_location(f, ctx.attr.data), {})
+            for f in ctx.attr.jvm_flags
+        ],
         main_class = main_class,
         mains_file = mains_file,
     )

@@ -3,6 +3,6 @@
 # so we have to copy them here.
 scala_2_12_version = "2.12.21"
 scala_2_13_version = "2.13.18"
-scala_3_version = "3.3.8"
+scala_3_version = "3.7.4"
 scalapb_version = "0.11.20"
 zinc_version = "1.12.1"

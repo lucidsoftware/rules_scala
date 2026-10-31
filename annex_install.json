@@ -10,9 +10,9 @@
     "org.scala-lang:scala-compiler": -1090598736,
     "org.scala-lang:scala-library": -326864392,
     "org.scala-lang:scala-reflect": 545594166,
-    "org.scala-lang:scala3-compiler_3": -2113614684,
-    "org.scala-lang:scala3-library_3": -2098785134,
-    "org.scala-lang:scala3-sbt-bridge": -195395325,
+    "org.scala-lang:scala3-compiler_3": -2071602268,
+    "org.scala-lang:scala3-library_3": -2056772718,
+    "org.scala-lang:scala3-sbt-bridge": -153382909,
     "org.scala-sbt:compiler-bridge_2.13": 528371808,
     "org.scala-sbt:compiler-interface": -761554272,
     "org.scala-sbt:io_2.13": -1144910965,
@@ -236,14 +236,14 @@
     "org.ow2.asm:asm-util": -527104222,
     "org.ow2.asm:asm-util:jar:sources": -1470386248,
     "org.ow2.asm:asm:jar:sources": 1289848914,
-    "org.playframework:play-functional_3": 1062742909,
+    "org.playframework:play-functional_3": -368134885,
     "org.playframework:play-functional_3:jar:sources": 245363865,
-    "org.playframework:play-json_3": -1782079447,
+    "org.playframework:play-json_3": 1178050188,
     "org.playframework:play-json_3:jar:sources": -702025203,
     "org.reactivestreams:reactive-streams": -1996658890,
     "org.reactivestreams:reactive-streams:jar:sources": -258070571,
-    "org.scala-lang.modules:scala-asm": 984733790,
-    "org.scala-lang.modules:scala-asm:jar:sources": -852890143,
+    "org.scala-lang.modules:scala-asm": -954047924,
+    "org.scala-lang.modules:scala-asm:jar:sources": -145899331,
     "org.scala-lang.modules:scala-collection-compat_2.12": 2028750324,
     "org.scala-lang.modules:scala-collection-compat_2.12:jar:sources": 374719087,
     "org.scala-lang.modules:scala-collection-compat_2.13": 57753233,
@@ -264,16 +264,16 @@
     "org.scala-lang:scala-library:jar:sources": -541418894,
     "org.scala-lang:scala-reflect": 2030778053,
     "org.scala-lang:scala-reflect:jar:sources": 1936739630,
-    "org.scala-lang:scala3-compiler_3": -1056177762,
-    "org.scala-lang:scala3-compiler_3:jar:sources": -1329492936,
-    "org.scala-lang:scala3-interfaces": -1902024494,
-    "org.scala-lang:scala3-interfaces:jar:sources": -1516777846,
-    "org.scala-lang:scala3-library_3": -1714704820,
-    "org.scala-lang:scala3-library_3:jar:sources": -1587123532,
-    "org.scala-lang:scala3-sbt-bridge": -1461732907,
-    "org.scala-lang:scala3-sbt-bridge:jar:sources": 176460909,
-    "org.scala-lang:tasty-core_3": -1667228363,
-    "org.scala-lang:tasty-core_3:jar:sources": -1156443684,
+    "org.scala-lang:scala3-compiler_3": 139372376,
+    "org.scala-lang:scala3-compiler_3:jar:sources": 1743926807,
+    "org.scala-lang:scala3-interfaces": -1913613221,
+    "org.scala-lang:scala3-interfaces:jar:sources": 8501770,
+    "org.scala-lang:scala3-library_3": -419115481,
+    "org.scala-lang:scala3-library_3:jar:sources": -669655359,
+    "org.scala-lang:scala3-sbt-bridge": 522060984,
+    "org.scala-lang:scala3-sbt-bridge:jar:sources": -1596636685,
+    "org.scala-lang:tasty-core_3": -136206253,
+    "org.scala-lang:tasty-core_3:jar:sources": -807343857,
     "org.scala-sbt.ivy:ivy": 914089176,
     "org.scala-sbt.ivy:ivy:jar:sources": 446680254,
     "org.scala-sbt.jline:jline": -1732851213,
@@ -1145,10 +1145,10 @@
     },
     "org.scala-lang.modules:scala-asm": {
       "shasums": {
-        "jar": "75ac366e8ecb691e06a7e85041eed0f67919a646e5262fa0901225698c104375",
-        "sources": "c4a40287795a38e23d971ecd7287f9d14c3ed207081ce40afb4fbac2f18ba2cf"
+        "jar": "86af037580bdf9ce9c05f8b2afd734daf1a8564c38cd10ca5d08bf81508ad2e4",
+        "sources": "78543ab8bafec0e7d09227872db06f4c725f5e0743f1f3eab1f60ef6876588e9"
       },
-      "version": "9.9.0-scala-1"
+      "version": "9.8.0-scala-1"
     },
     "org.scala-lang.modules:scala-collection-compat_2.12": {
       "shasums": {
@@ -1222,38 +1222,38 @@
     },
     "org.scala-lang:scala3-compiler_3": {
       "shasums": {
-        "jar": "89de0156398ce8547656bb2324ff2fbcfd7a85d7da065df4e01a85d949d081b8",
-        "sources": "194058f5aa33bbf7c8b6312edb446cc9eeb984004f7c528d92e9875c0b30f034"
+        "jar": "1a60682b898fb04753dec78f2904078d48670079b7ad5106d442a0f431d346e0",
+        "sources": "9be3d36dfb771f76e1030b4d012a6dfd62dab5d0fac7661991ae1f765b901a9d"
       },
-      "version": "3.3.8"
+      "version": "3.7.4"
     },
     "org.scala-lang:scala3-interfaces": {
       "shasums": {
-        "jar": "a7734cf3b9ccb6ab2597b279421bb29471da7c6d7bacfc947600883de4eeb3eb",
-        "sources": "ec904b4a9946c4b34b6b2309f8864fd5643904c9d533ccbcb8b2c2bc84bbaec4"
+        "jar": "c19ba8ea1a13c7fcdef675353c8ddd671156cf220879dcb28b27e986aae31ea9",
+        "sources": "0c2667c1fa6053ddc26a456d8dc3c6c5587078eb4768d8389c86f878fc27c1ea"
       },
-      "version": "3.3.8"
+      "version": "3.7.4"
     },
     "org.scala-lang:scala3-library_3": {
       "shasums": {
-        "jar": "2c6eace9158df8ee4485a06128a479d968c1ebfc83ae9b1a394b58429f0d1492",
-        "sources": "3ee0545cd93486a5b950f578c90a74a1d2934b5e9c002db405c75eea7aa24e65"
+        "jar": "73089d33f763b94758170e0a66be978f9397c14b7795e343898aa89b3d7b6639",
+        "sources": "8fa31d20f0ee9a66d1ef5fd3d406561473a66ae2639f7bed6f44f94e628635de"
       },
-      "version": "3.3.8"
+      "version": "3.7.4"
     },
     "org.scala-lang:scala3-sbt-bridge": {
       "shasums": {
-        "jar": "8a79303cbc804d30cae39f48829618f1ffa3d1cf1a1f71fe58a735dcd1a776c0",
-        "sources": "8fe42ebe19bb8e0df5852e5e18374a1ca4f023c175ed627f38f966f6b2320104"
+        "jar": "7ad43c60ac9617fe6bf0e7706bae9dce2492d25bf4a3b7c18eb8e2b7593fbb0e",
+        "sources": "6d474093fca461188f39ac4dbee10656066e1a8be4774571b7ba7d991c7574e4"
       },
-      "version": "3.3.8"
+      "version": "3.7.4"
     },
     "org.scala-lang:tasty-core_3": {
       "shasums": {
-        "jar": "e3a0ba5b0eed0ec5e0b5c29234abce911577d5571366ab75f11c52924874a945",
-        "sources": "559a2c25880618414bd713e02b45a7e1eb53bc9d0b3d98b0425d3bc70dd53eb1"
+        "jar": "24dfe7089232a42d28d5bee1209f462e4b4ca90622e0b13752399c12585e3069",
+        "sources": "5abd3c1fa1bc3c973410dcc10087da8bd89fff86ffa1280649a4a4cb30abedcc"
       },
-      "version": "3.3.8"
+      "version": "3.7.4"
     },
     "org.scala-sbt.ivy:ivy": {
       "shasums": {
@@ -3622,6 +3622,7 @@
       "dotty.tools.backend",
       "dotty.tools.backend.jvm",
       "dotty.tools.backend.sjs",
+      "dotty.tools.debug",
       "dotty.tools.dotc",
       "dotty.tools.dotc.ast",
       "dotty.tools.dotc.cc",
@@ -3662,6 +3663,7 @@
       "dotty.tools.runner",
       "dotty.tools.scripting",
       "dotty.tools.sjs.ir",
+      "dotty.tools.tasty.besteffort",
       "scala.quoted.runtime.impl",
       "scala.quoted.runtime.impl.printers"
     ],
@@ -3673,6 +3675,8 @@
       "scala.annotation",
       "scala.annotation.internal",
       "scala.annotation.unchecked",
+      "scala.caps",
+      "scala.compiletime",
       "scala.compiletime.ops",
       "scala.compiletime.testing",
       "scala.deriving",

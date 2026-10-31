@@ -320,7 +320,7 @@ private[common] class AnnexScalaInstance(override val allJars: Array[File]) exte
  * https://github.com/sbt/zinc/blob/4eacff2a9bf5c8750bfc5096955065ce67f4e68a/internal/zinc-classpath/src/main/scala/sbt/internal/inc/classpath/DualLoader.scala#L47
  */
 class ScalaInstanceDualLoader(sbtClassLoader: ClassLoader, otherLoader: ClassLoader) extends ClassLoader(otherLoader) {
-  override final def loadClass(name: String, resolve: Boolean): Class[_] = {
+  override final def loadClass(name: String, resolve: Boolean): Class[?] = {
     if (name.startsWith("xsbti.") || name.startsWith("org.jline.")) {
       val klass = sbtClassLoader.loadClass(name)
       if (resolve) {

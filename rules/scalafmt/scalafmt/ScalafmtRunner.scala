@@ -52,7 +52,7 @@ object ScalafmtRunner extends WorkerMain[Unit] {
     )
     InterruptUtil.throwIfInterrupted(task.isCancelled)
 
-    val source = PlatformFileOps.readFile(workRequest.inputFile)(Codec.UTF8)
+    val source = PlatformFileOps.readFile(workRequest.inputFile)(using Codec.UTF8)
 
     val config = ScalafmtConfig.fromHoconFile(workRequest.configFile).get
     @tailrec

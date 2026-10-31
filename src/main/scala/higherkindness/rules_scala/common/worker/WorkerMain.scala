@@ -139,7 +139,7 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
             Option(activeRequests.get(requestId)).foreach { case (_, workTask) =>
               // Cancel will wait for the thread to complete or be interrupted, so we do it in a future
               // to prevent blocking the worker from processing more requests
-              Future(workTask.cancel(mayInterruptIfRunning = mayInterruptWorkerTasks))(
+              Future(workTask.cancel(mayInterruptIfRunning = mayInterruptWorkerTasks))(using
                 scala.concurrent.ExecutionContext.global,
               )
             }
@@ -236,11 +236,11 @@ abstract class WorkerMain[S](stdin: InputStream = System.in, stdout: PrintStream
                     s"Uncaught exception in Future while proccessing WorkRequest id: $requestId\nType: ${e.getClass.getCanonicalName}",
                   )
                   e.printStackTrace(System.err)
-              }(scala.concurrent.ExecutionContext.global)
+              }(using scala.concurrent.ExecutionContext.global)
               .andThen { case _ =>
                 maybeOut.map(_.close())
                 maybeOutStream.map(_.close())
-              }(scala.concurrent.ExecutionContext.global)
+              }(using scala.concurrent.ExecutionContext.global)
 
             // putIfAbsent will return a non-null value if there was already a value in the map
             // for this requestId. If that's the case, we have a book keeping error or there are

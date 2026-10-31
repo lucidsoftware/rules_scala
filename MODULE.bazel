@@ -27,7 +27,7 @@ scala_2_12_version = "2.12.21"
 
 scala_2_13_version = "2.13.18"
 
-scala_3_version = "3.3.8"
+scala_3_version = "3.7.4"
 
 scalapb_version = "0.11.20"
 
@@ -132,3 +132,7 @@ annex_proto.install(
     ],
 )
 use_repo(annex_proto, "annex_proto")
+
+# Needed for syncing with the IntelliJ Bazel plugin
+compat = use_extension("@rules_java//java:rules_java_deps.bzl", "compatibility_proxy")
+use_repo(compat, "compatibility_proxy")

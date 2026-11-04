@@ -3,7 +3,7 @@ package higherkindness.rules_scala.workers.common
 import higherkindness.rules_scala.common.args.ArgsUtil.PathArgumentType
 import higherkindness.rules_scala.common.args.implicits.*
 import higherkindness.rules_scala.common.sandbox.PathResolver
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 import java.util.Collections
 import net.sourceforge.argparse4j.impl.Arguments as ArgumentsImpl
 import net.sourceforge.argparse4j.inf.{ArgumentParser, Namespace}
@@ -32,12 +32,15 @@ class CommonArguments private (
   val logLevel: LogLevel,
   val mainManifest: Path,
   val outputJar: Path,
-  val outputUsed: Path,
+  val outputUsedJarsForDepsCheck: Path,
+  val outputUsedJarsForInputPruning: Option[Path],
   val plugins: List[Path],
   val sourceJars: List[Path],
   val testFrameworks: List[String],
   val testsFile: Option[Path],
   val sources: List[Path],
+  val usedJarListExportedJars: List[String],
+  val usedJarReporterPlugin: Option[Path],
 )
 
 class Analysis private (
@@ -155,10 +158,22 @@ object CommonArguments {
       .required(true)
       .`type`(PathArgumentType.apply())
     parser
-      .addArgument("--output_used")
-      .help("Output list of used jars")
+      .addArgument("--output_used_jars_for_depscheck")
+      .help(
+        "Where to output the list of JARs used during compilation for the purposes of direct/unused dependency checking.",
+      )
       .metavar("path")
       .required(true)
+      .`type`(PathArgumentType.apply())
+    parser
+      .addArgument("--output_used_jars_for_input_pruning")
+      .help(
+        """Where the used JAR reporter plugin should output the list of JARs used during compilation for the purposes of
+          |input pruning.
+          |
+          |This option should be used with `--used_jar_reporter_plugin`""".stripMargin,
+      )
+      .metavar("path")
       .`type`(PathArgumentType.apply())
     parser
       .addArgument("--plugins")
@@ -175,6 +190,21 @@ object CommonArguments {
       .`type`(PathArgumentType.apply())
       .setDefault_(Collections.emptyList)
     parser
+      .addArgument("--unused_inputs_list")
+      .help("Predicted unused compile JARs to remove before invoking the compiler.")
+      .metavar("path")
+      .`type`(PathArgumentType.apply())
+    parser
+      .addArgument("--used_jar_list_exported_jars")
+      .help("Short paths of exported JARs to include in the file passed to `--output_used_jars_for_input_pruning`.")
+      .nargs("*")
+      .setDefault_(Collections.emptyList)
+    parser
+      .addArgument("--used_jar_reporter_plugin")
+      .help("The path to the used JAR reporter plugin, which is used for input pruning.")
+      .metavar("path")
+      .`type`(PathArgumentType.apply())
+    parser
       .addArgument("sources")
       .help("Source files")
       .metavar("source")
@@ -186,6 +216,20 @@ object CommonArguments {
   }
 
   def apply(namespace: Namespace, pathResolver: PathResolver, workDir: Path): CommonArguments = {
+    // Although Bazel should remove these inputs with https://github.com/bazelbuild/bazel/pull/29193, remove them from
+    // classpath to make sure we're not using them
+    val unusedJars = Option(namespace.get[Path]("unused_inputs_list")).toList
+      .flatMap(path => Files.readAllLines(pathResolver.resolve(path)).asScala)
+      .filter(_.nonEmpty)
+      .map(path => FileUtil.bazelShortPath(Paths.get(path).normalize()))
+      .toSet
+
+    val classpath = namespace
+      .getList[Path]("classpath")
+      .asScala
+      .filterNot(path => unusedJars.contains(FileUtil.bazelShortPath(path.normalize())))
+      .toList
+
     new CommonArguments(
       compilerBridge = pathResolver.resolve(namespace.get[Path]("compiler_bridge")),
       compilerClasspath = pathResolver.resolve(namespace.getList[Path]("compiler_classpath")),
@@ -199,19 +243,23 @@ object CommonArguments {
           .map(_.asScala.toList)
           .getOrElse(List.empty),
       ),
-      classpath = pathResolver.resolve(namespace.getList[Path]("classpath")),
+      classpath = pathResolver.resolve(classpath),
       debug = namespace.getBoolean("debug"),
       javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toArray,
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = pathResolver.resolve(namespace.get[Path]("main_manifest")),
       outputJar = pathResolver.resolve(namespace.get[Path]("output_jar")),
-      outputUsed = pathResolver.resolve(namespace.get[Path]("output_used")),
+      outputUsedJarsForDepsCheck = pathResolver.resolve(namespace.get[Path]("output_used_jars_for_depscheck")),
+      outputUsedJarsForInputPruning =
+        Option(namespace.get[Path]("output_used_jars_for_input_pruning")).map(pathResolver.resolve),
       plugins = pathResolver.resolve(namespace.getList[Path]("plugins")),
       sourceJars = pathResolver.resolve(namespace.getList[Path]("source_jars")),
       testFrameworks = namespace.getList[String]("test_frameworks").asScala.toList,
       testsFile = Option(namespace.get[Path]("tests_file")).map(pathResolver.resolve),
       sources = pathResolver.resolve(namespace.getList[Path]("sources")),
+      usedJarListExportedJars = namespace.getList[String]("used_jar_list_exported_jars").asScala.toList,
+      usedJarReporterPlugin = Option(namespace.get[Path]("used_jar_reporter_plugin")).map(pathResolver.resolve),
     )
   }
 

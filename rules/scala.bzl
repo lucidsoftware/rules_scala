@@ -10,6 +10,10 @@ load(
     _intellij_aspect_compat_attributes = "intellij_aspect_compat_attributes",
 )
 load(
+    "//rules/private:compile_runtime_jar_pairs.bzl",
+    _compile_runtime_jar_pairs_aspect = "compile_runtime_jar_pairs_aspect",
+)
+load(
     "//rules/private:coverage_replacements_provider.bzl",
     _coverage_replacements_provider = "coverage_replacements_provider",
 )
@@ -116,6 +120,7 @@ _compile_attributes = _deps_checker_label_attributes | {
         aspects = [
             _labeled_jars,
             _coverage_replacements_provider.aspect,
+            _compile_runtime_jar_pairs_aspect,
         ],
         doc = "The JVM library dependencies.",
         providers = [JavaInfo],

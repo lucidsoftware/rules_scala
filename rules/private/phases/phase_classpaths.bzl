@@ -70,6 +70,7 @@ def phase_classpaths(ctx, g):
         compile = compile_classpath,
         compiler = compiler_classpath,
         jar = jar,
+        macro = macro_classpath,
         plugin = plugin_classpath,
         sdeps = sdeps,
         src_jars = src_jars,

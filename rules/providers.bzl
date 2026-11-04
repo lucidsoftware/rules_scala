@@ -20,12 +20,22 @@ ScalaInfo = provider(
     },
 )
 
+ScalaUsedJarsInfo = provider(
+    doc = "Provides metadata used for input pruning.",
+    fields = {
+        "used_jar_list": "File containing the short paths of JARs used when compiling this target.",
+    },
+)
+
 ZincConfiguration = provider(
     doc = "Zinc configuration.",
     fields = {
-        "compiler_bridge": "compiled Zinc compiler bridge",
         "compile_worker": "the worker label for compilation with Zinc",
+        "compiler_bridge": "compiled Zinc compiler bridge",
+        "input_pruning": "Whether input pruning is enabled.",
         "log_level": "log level for the Zinc compiler",
+        "unused_input_predictor": "The executable that generates `unused_inputs_list` for `ScalaCompile` actions.",
+        "used_jar_reporter_plugin": "The compiler plugin that generates the list of JARs used during `ScalaCompile` actions.",
     },
 )
 
@@ -98,6 +108,7 @@ ClasspathInfo = provider(
         "compile": "Classpath for this compilation.",
         "compiler": "Classpath needed by the compiler for this compilation.",
         "jar": "Output jar for this compilation.",
+        "macro": "Classpath needed to execute macros during this compilation.",
         "plugin": "Classpath for the compiler plugins for this compilation.",
         "sdeps": "Deps. TODO: better name for this?",
         "src_jars": "Source jars for this compilation.",

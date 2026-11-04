@@ -1,0 +1,7 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+sh_binary(
+    name = "unusedinputpredictor",
+    srcs = ["unused_input_predictor.sh"],
+    visibility = ["//rules:__pkg__"],
+)

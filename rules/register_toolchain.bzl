@@ -82,6 +82,9 @@ _bootstrap_configuration = rule(
 )
 
 def _zinc_configuration_impl(ctx):
+    if ctx.attr.input_pruning and not ctx.attr.version.startswith("3.7."):
+        fail("Input pruning is currently only supported for Scala 3.7.x.")
+
     return [
         platform_common.ToolchainInfo(
             # JetBrains' IntelliJ Bazel aspect reads global compiler options directly from
@@ -100,7 +103,10 @@ def _zinc_configuration_impl(ctx):
             zinc_configuration = ZincConfiguration(
                 compile_worker = ctx.attr._compile_worker,
                 compiler_bridge = ctx.file.compiler_bridge,
+                input_pruning = ctx.attr.input_pruning,
                 log_level = ctx.attr.log_level,
+                unused_input_predictor = ctx.attr._unused_input_predictor,
+                used_jar_reporter_plugin = ctx.attr._used_jar_reporter_plugin,
             ),
             deps_configuration = DepsConfiguration(
                 direct = ctx.attr.deps_direct,
@@ -144,6 +150,32 @@ off: Don't perform unused dependency checking.""",
         ),
         "global_plugins": attr.label_list(providers = [JavaInfo]),
         "global_scalacopts": attr.string_list(),
+        "input_pruning": attr.bool(
+            doc = """Whether to perform input pruning—a caching optimization.
+
+When enabled, `ScalaCompile` actions will output a list of JARs unused by the compiler, which Bazel is made aware of
+via the [`unused_inputs_list` attribute](https://bazel.build/rules/lib/builtins/actions#parameters-7). If these
+unused JARs change, the action won't be re-run.
+
+If your Bazel server has [bazel#29193](https://github.com/bazelbuild/bazel/pull/29193), enabling this option will
+trigger a more aggressive optimization: we'll compute a conservative list of JARs we're confident the compiler won't use,
+and these won't be provided to the compiler at all. This means `ScalaCompile` actions won't need to be run with these
+JARs a first time before they can be pruned from subsequent runs. This has positive implications for
+remote cacheability.
+
+Another approach to input pruning would be to only include dependencies of a certain depth (e.g. direct dependencies) on
+the classpath, but in practice this doesn't work well because:
+1. When a dependency is transitive but not direct but it's needed, the compiler emits very confusing error messages
+2. The compiler sometimes uses JARs that aren't reported as used by the
+   [compiler bridge](https://github.com/scala/compiler-interface). See
+   [zinc#150](https://github.com/sbt/zinc/issues/150) for an example of just one instance of this. This is because the
+   compiler bridge only promises to report JARs used *for the purposes of incremental compilation* and not for the
+   purposes of dependency checking, which we're using it for.
+
+NOTE: This currently only works for Scala 3.7.x because it uses a version-specific compiler plugin. If you want to
+enable with a different version of the compiler, please file an issue on
+[GitHub](https://github.com/lucidsoftware/rules_scala).""",
+        ),
         "log_level": attr.string(
             default = "warn",
             values = ["error", "warn", "info", "debug", "none"],
@@ -175,6 +207,16 @@ off: Don't perform unused dependency checking.""",
             allow_files = True,
             executable = True,
             cfg = "exec",
+        ),
+        "_unused_input_predictor": attr.label(
+            default = "@rules_scala_annex//rules/scala/private/unusedinputpredictor",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_used_jar_reporter_plugin": attr.label(
+            cfg = "exec",
+            default = "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/workers/zinc/compile/usedjarreporter",
+            providers = [JavaInfo],
         ),
     },
     implementation = _zinc_configuration_impl,

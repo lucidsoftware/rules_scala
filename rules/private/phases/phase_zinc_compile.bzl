@@ -1,8 +1,10 @@
 load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_toolchain")
 load(
     "@rules_scala_annex//rules:providers.bzl",
     _ScalaConfiguration = "ScalaConfiguration",
+    _ScalaUsedJarsInfo = "ScalaUsedJarsInfo",
     _ZincCompilationInfo = "ZincCompilationInfo",
 )
 load(
@@ -13,12 +15,103 @@ load(
     "@rules_scala_annex//rules/common:private/utils.bzl",
     _make_jvm_flag_args = "make_jvm_flag_args",
 )
+load(
+    "@rules_scala_annex//rules/private:compile_runtime_jar_pairs.bzl",
+    _CompileRuntimeJarPairsInfo = "CompileRuntimeJarPairsInfo",
+)
 
 #
 # PHASE: compile
 #
 # Compiles Scala sources ;)
 #
+
+def _format_jar_pairs_info(info):
+    return "{}:{}".format(info.compile_jar.short_path, info.runtime_jar.short_path)
+
+def _short_path(file):
+    return file.short_path
+
+def input_pruning(ctx, g, compiler_args):
+    toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
+    unused_inputs_list = ctx.actions.declare_file("{}/predicted_unused_inputs.txt".format(ctx.label.name))
+    predictor_inputs = []
+    predictor_args = ctx.actions.args()
+    predictor_args.add_all("--compile_classpath", g.classpaths.compile)
+    predictor_args.add_all("--compile_classpath_short_paths", g.classpaths.compile, map_each = _short_path)
+    predictor_args.add_all(
+        "--compile_runtime_jar_pairs",
+        depset(transitive = [
+            dependency[_CompileRuntimeJarPairsInfo].pairs
+            for dependency in ctx.attr.deps
+            if _CompileRuntimeJarPairsInfo in dependency
+        ]),
+        map_each = _format_jar_pairs_info,
+    )
+
+    predictor_args.add("--output", unused_inputs_list)
+    predictor_args.add_all(
+        "--used_jars",
+        depset(
+            direct = ctx.files.data + ctx.files.srcs,
+            transitive = g.classpaths.macro + [
+                g.classpaths.sdeps.compile_jars,
+                # These almost certainly won't be on the compile classpath, but if they are, we don't want them to be
+                # declared as unused inputs because they're needed for compilation, even if they're not declared as
+                # direct dependencies.
+                g.classpaths.compiler,
+                g.classpaths.plugin,
+                toolchain.zinc_configuration.compile_worker[DefaultInfo].files,
+                toolchain.zinc_configuration.compile_worker[DefaultInfo].default_runfiles.files,
+            ] + [
+                dependency[JavaInfo].transitive_compile_time_jars
+                for dependency in toolchain.scala_configuration.runtime_classpath
+            ],
+        ),
+        map_each = _short_path,
+    )
+
+    for dependency in ctx.attr.deps:
+        if _ScalaUsedJarsInfo in dependency:
+            predictor_args.add("--used_jar_list", dependency[_ScalaUsedJarsInfo].used_jar_list)
+            predictor_inputs.append(dependency[_ScalaUsedJarsInfo].used_jar_list)
+        elif JavaInfo in dependency:
+            # Without information about used JARs, retain the dependency's entire compile classpath
+            predictor_args.add_all("--used_jars", dependency[JavaInfo].transitive_compile_time_jars, map_each = _short_path)
+
+    predictor_args.set_param_file_format("multiline")
+    predictor_args.use_param_file("@%s", use_always = True)
+
+    ctx.actions.run(
+        arguments = [predictor_args],
+        executable = toolchain.zinc_configuration.unused_input_predictor[DefaultInfo].files_to_run,
+        execution_requirements = {"supports-path-mapping": "1"},
+        inputs = predictor_inputs,
+        outputs = [unused_inputs_list],
+        mnemonic = "ScalaUnusedInputs",
+    )
+
+    used_jar_list = ctx.actions.declare_file("{}/used_jars.txt".format(ctx.label.name))
+    used_jar_reporter_plugin = toolchain.zinc_configuration.used_jar_reporter_plugin[JavaInfo].runtime_output_jars[0]
+
+    compiler_args.add("--output_used_jars_for_input_pruning", used_jar_list)
+    compiler_args.add("--unused_inputs_list", unused_inputs_list)
+    compiler_args.add_all(
+        "--used_jar_list_exported_jars",
+        depset(transitive = [
+            dependency[JavaInfo].transitive_compile_time_jars
+            for dependency in getattr(ctx.attr, "exports", [])
+        ]),
+        map_each = _short_path,
+    )
+
+    compiler_args.add("--used_jar_reporter_plugin", used_jar_reporter_plugin)
+
+    return struct(
+        unused_inputs_list = unused_inputs_list,
+        used_jar_list = used_jar_list,
+        used_jar_reporter_plugin = used_jar_reporter_plugin,
+    )
 
 def phase_zinc_compile(ctx, g):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
@@ -37,8 +130,8 @@ def phase_zinc_compile(ctx, g):
     ])
 
     common_scalacopts = toolchain.scala_configuration.global_scalacopts + ctx.attr.scalacopts
-
     args = ctx.actions.args()
+    input_pruning_result = input_pruning(ctx, g, args) if toolchain.zinc_configuration.input_pruning else None
     args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
     args.add_all("--classpath", g.classpaths.compile)
@@ -47,7 +140,7 @@ def phase_zinc_compile(ctx, g):
     args.add(ctx.label, format = "--label=%s")
     args.add("--main_manifest", mains_file)
     args.add("--output_jar", g.classpaths.jar)
-    args.add("--output_used", used)
+    args.add("--output_used_jars_for_depscheck", used)
     args.add_all("--plugins", g.classpaths.plugin)
     args.add_all("--source_jars", g.classpaths.src_jars)
     args.add("--log_level", toolchain.zinc_configuration.log_level)
@@ -55,7 +148,14 @@ def phase_zinc_compile(ctx, g):
     g.semanticdb.arguments_modifier(args)
 
     inputs = depset(
-        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs,
+        [toolchain.zinc_configuration.compiler_bridge] + ctx.files.data + ctx.files.srcs + (
+            [] if input_pruning_result == None else [
+                # This causes Bazel to prune action inputs:
+                # https://github.com/bazelbuild/bazel/pull/29193
+                input_pruning_result.unused_inputs_list,
+                input_pruning_result.used_jar_reporter_plugin,
+            ]
+        ),
         transitive = [
             g.classpaths.plugin,
             g.classpaths.compile,
@@ -64,6 +164,9 @@ def phase_zinc_compile(ctx, g):
     )
 
     outputs = [g.classpaths.jar, mains_file, used] + g.semanticdb.outputs
+
+    if input_pruning_result != None:
+        outputs.append(input_pruning_result.used_jar_list)
 
     if hasattr(ctx.attr, "frameworks"):
         tests_file = ctx.actions.declare_file("{}/tests.json".format(ctx.label.name))
@@ -101,12 +204,11 @@ def phase_zinc_compile(ctx, g):
         outputs = outputs,
         progress_message = "Compiling Scala %{label}",
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
+        unused_inputs_list = None if input_pruning_result == None else input_pruning_result.unused_inputs_list,
     )
 
-    jars = []
-    for jar in g.javainfo.java_info.outputs.jars:
-        jars.append(jar.class_jar)
-        jars.append(jar.ijar)
+    if input_pruning_result != None:
+        g.out.providers.append(_ScalaUsedJarsInfo(used_jar_list = input_pruning_result.used_jar_list))
 
     return _ZincCompilationInfo(
         mains_file = mains_file,

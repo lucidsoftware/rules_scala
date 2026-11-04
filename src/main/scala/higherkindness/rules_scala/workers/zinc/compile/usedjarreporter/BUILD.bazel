@@ -1,0 +1,16 @@
+load("//rules:scala.bzl", "scala_binary", "scala_library")
+load("//rules:scalafmt.bzl", "scala_format_test")
+
+scala_library(
+    name = "usedjarreporter",
+    srcs = glob(["*.scala"]),
+    resources = ["src/main/resources/plugin.properties"],
+    scala_version = "bootstrap_3",
+    visibility = ["//visibility:public"],
+    deps = ["@annex//:org_scala_lang_scala3_compiler_3"],
+)
+
+scala_format_test(
+    name = "format",
+    srcs = glob(["*.scala"]),
+)

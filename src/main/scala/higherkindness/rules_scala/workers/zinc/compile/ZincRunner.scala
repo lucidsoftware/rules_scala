@@ -87,6 +87,8 @@ object ZincRunner extends WorkerMain[Unit] {
       // We don't use this phase, so we disable it to speed up compilation by a teeny tiny amount
       View("-Yskip:xsbt-analyzer") ++
         parsedArguments.plugins.view.map(p => s"-Xplugin:$p") ++
+        parsedArguments.usedJarReporterPlugin.map(path => s"-Xplugin:$path") ++
+        parsedArguments.outputUsedJarsForInputPruning.map(path => s"-P:annex-used-jar-reporter:$path") ++
         parsedArguments.compilerOptions.view ++
         parsedArguments.compilerOptionsReferencingPaths.view ++
         (
@@ -309,6 +311,10 @@ object ZincRunner extends WorkerMain[Unit] {
       val analysis = AnnexAnalysis()
       val analysisCallback = analysis.getCallback(PlainVirtualFileConverter.converter)
 
+      // `AnnexUsedJarReporterPlugin` merges used JAR reports across macro-suspension rounds. Delete the report before
+      // compilation so we don't use a report from a previous work request.
+      workRequest.outputUsedJarsForInputPruning.foreach(UsedJarReport.reset)
+
       compileScala(
         task,
         workRequest,
@@ -319,6 +325,20 @@ object ZincRunner extends WorkerMain[Unit] {
         reporter,
         logger,
       )
+
+      workRequest.outputUsedJarsForInputPruning.foreach { output =>
+        // With no sources, the compiler doesn't run the plugin that writes this report
+        if (normalizedSources.isEmpty) {
+          Files.write(output, Array.emptyByteArray)
+        }
+
+        UsedJarReport.normalize(
+          output,
+          workRequest.classpath,
+          workRequest.usedJarListExportedJars,
+          readWriteMappers.getWriteMapper(),
+        )
+      }
 
       InterruptUtil.throwIfInterrupted(task.isCancelled)
 
@@ -367,7 +387,7 @@ object ZincRunner extends WorkerMain[Unit] {
         .toList
       val writeMapper = readWriteMappers.getWriteMapper()
       Files.write(
-        workRequest.outputUsed,
+        workRequest.outputUsedJarsForDepsCheck,
         // Send the used deps through the read write mapper, to strip the sandbox prefix and
         // make sure they're deterministic across machines
         usedDeps.view

@@ -1,0 +1,20 @@
+#!/bin/bash -e
+. "$(dirname "$0")"/../../common.sh
+
+bazel build :consumer
+
+# All four libraries use the same Scala configuration, which can differ from
+# the default configuration returned by `bazel info bazel-bin`.
+consumer_jar="$(bazel cquery :consumer --output=files)"
+output_dir="../../${consumer_jar%/*}"
+unused_inputs="$output_dir/consumer/predicted_unused_inputs.txt"
+used_jars="$output_dir/middle/used_jars.txt"
+
+# The predictor retains the parent trait needed to load Middle, but prunes the
+# dependency that Middle never used. Match suffixes to allow mapped output paths.
+grep -Fx 'dependencies/input_pruning/required-ijar.jar' "$used_jars"
+grep -E '/dependencies/input_pruning/unused-ijar\.jar$' "$unused_inputs"
+if grep -E '/dependencies/input_pruning/(required|middle)-ijar\.jar$' "$unused_inputs"; then
+    echo "A required JAR was predicted unused"
+    exit 1
+fi

@@ -29,6 +29,7 @@ register_zinc_toolchain(
         "@annex_test//:org_scala_lang_scala3_library_3",
     ],
     global_scalacopts = ["-Wconf:any:error"],
+    input_pruning = True,
     prefix = "semanticdb",
     runtime_classpath = [
         "@annex_test//:org_scala_lang_scala3_library_3",

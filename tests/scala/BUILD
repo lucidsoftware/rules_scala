@@ -77,6 +77,7 @@ register_zinc_toolchain(
     name = "test_zinc_3",
     compiler_bridge = "@annex_test//:org_scala_lang_scala3_sbt_bridge",
     compiler_classpath = compiler_classpath_3,
+    input_pruning = True,
     runtime_classpath = runtime_classpath_3,
     use_ijar = True,
     version = scala_3_version,

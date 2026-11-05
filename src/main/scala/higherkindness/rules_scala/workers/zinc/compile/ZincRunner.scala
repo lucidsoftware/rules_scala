@@ -14,14 +14,12 @@ import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import java.util.Optional
-import javax.tools.{StandardLocation, ToolProvider}
 import net.sourceforge.argparse4j.ArgumentParsers
 import play.api.libs.json.Json
 import sbt.internal.inc.{CompileOutput, PlainVirtualFile, PlainVirtualFileConverter, ZincUtil}
 import sbt.internal.inc.classfile.analyzeJavaClasses
 import sbt.internal.inc.classpath.ClassLoaderCache
-import sbt.internal.inc.javac.{DiagnosticsReporter, DirectoryClassFinder}
-import sbt.internal.util.LoggerWriter
+import sbt.internal.inc.javac.DirectoryClassFinder
 import scala.collection.View
 import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
@@ -160,9 +158,8 @@ object ZincRunner extends WorkerMain[Unit] {
     normalizedSources: Iterable[Path],
     classesOutputDirectory: Path,
     analysisCallback: AnalysisCallback,
-    reporter: Reporter,
     logger: Logger,
-  ): Unit = {
+  ): Option[Path] = {
     def findClassesInOutputDirectory(): Set[Path] = {
       val classes = DirectoryClassFinder(classesOutputDirectory).classes
 
@@ -177,41 +174,13 @@ object ZincRunner extends WorkerMain[Unit] {
 
     if (javaSources.nonEmpty) {
       val classesBeforeJavaCompilation = findClassesInOutputDirectory()
-      val javaCompiler = ToolProvider.getSystemJavaCompiler
-      val writer = new LoggerWriter(logger)
-      val diagnosticListener = new DiagnosticsReporter(reporter)
-      val fileManager = javaCompiler.getStandardFileManager(diagnosticListener, null, null)
-
-      fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List(classesOutputDirectory.toFile).asJava)
-
-      val options = "-classpath" +:
-        (classesOutputDirectory +: parsedArguments.classpath).map(_.toString).mkString(":") +:
-        parsedArguments.javaCompilerOptions.toList
-
-      val compilationTask = javaCompiler.getTask(
-        writer,
-        fileManager,
-        diagnosticListener,
-        options.asJava,
-        null,
-        fileManager.getJavaFileObjects(javaSources*),
+      val javaDeps = JavaBuilderCompiler.compile(
+        task,
+        parsedArguments,
+        parsedArguments.javaBuilder,
+        javaSources,
+        classesOutputDirectory,
       )
-
-      val wasSuccessful =
-        try {
-          compilationTask.call()
-        } catch {
-          case NonFatal(exception) =>
-            InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-            throw exception
-        }
-
-      if (!wasSuccessful) {
-        InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-        throw new AnnexWorkerError(1)
-      }
 
       InterruptUtil.throwIfInterrupted(task.isCancelled)
 
@@ -226,6 +195,9 @@ object ZincRunner extends WorkerMain[Unit] {
         logger,
         analysisCallback,
       )
+      javaDeps
+    } else {
+      None
     }
   }
 
@@ -326,6 +298,17 @@ object ZincRunner extends WorkerMain[Unit] {
         logger,
       )
 
+      InterruptUtil.throwIfInterrupted(task.isCancelled)
+
+      val javaDeps = maybeCompileJava(
+        task,
+        workRequest,
+        normalizedSources,
+        classesOutputDir,
+        analysisCallback,
+        logger,
+      )
+
       workRequest.outputUsedJarsForInputPruning.foreach { output =>
         // With no sources, the compiler doesn't run the plugin that writes this report
         if (normalizedSources.isEmpty) {
@@ -337,20 +320,9 @@ object ZincRunner extends WorkerMain[Unit] {
           workRequest.classpath,
           workRequest.usedJarListExportedJars,
           readWriteMappers.getWriteMapper(),
+          javaDeps,
         )
       }
-
-      InterruptUtil.throwIfInterrupted(task.isCancelled)
-
-      maybeCompileJava(
-        task,
-        workRequest,
-        normalizedSources,
-        classesOutputDir,
-        analysisCallback,
-        reporter,
-        logger,
-      )
 
       InterruptUtil.throwIfInterrupted(task.isCancelled)
 

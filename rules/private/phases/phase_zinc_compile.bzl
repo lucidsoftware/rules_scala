@@ -32,7 +32,7 @@ def _format_jar_pairs_info(info):
 def _short_path(file):
     return file.short_path
 
-def input_pruning(ctx, g, compiler_args):
+def input_pruning(ctx, g, compiler_args, java_inputs):
     toolchain = ctx.toolchains["//rules/scala:toolchain_type"]
     unused_inputs_list = ctx.actions.declare_file("{}/predicted_unused_inputs.txt".format(ctx.label.name))
     predictor_inputs = []
@@ -56,6 +56,7 @@ def input_pruning(ctx, g, compiler_args):
             direct = ctx.files.data + ctx.files.srcs,
             transitive = g.classpaths.macro + [
                 g.classpaths.sdeps.compile_jars,
+                java_inputs,
                 # These almost certainly won't be on the compile classpath, but if they are, we don't want them to be
                 # declared as unused inputs because they're needed for compilation, even if they're not declared as
                 # direct dependencies.
@@ -118,6 +119,7 @@ def phase_zinc_compile(ctx, g):
     mains_file = ctx.actions.declare_file("{}.jar.mains.txt".format(ctx.label.name))
     used = ctx.actions.declare_file("{}/deps_used.txt".format(ctx.label.name))
 
+    java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0])
     javacopts = replace_source_target_with_release([
         ctx.expand_location(option, ctx.attr.data)
         for option in ctx.attr.javacopts + java_common.default_javac_opts(
@@ -125,17 +127,38 @@ def phase_zinc_compile(ctx, g):
             # "When attaching a transition to an outgoing edge (regardless of whether the transition
             # is a 1:1 or 1:2+ transition), `ctx.attr` is forced to be a list if it isn't already.
             # The order of elements in this list is unspecified."
-            java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain[0]),
+            java_toolchain = java_toolchain,
         )
     ])
 
+    java_builder = java_toolchain._javabuilder
+    java_inputs = depset(
+        [java_builder.tool.executable],
+        transitive = [
+            java_builder.data,
+            java_toolchain.tools,
+            java_toolchain.java_runtime.files,
+            java_toolchain.bootclasspath,
+        ],
+    )
+
     common_scalacopts = toolchain.scala_configuration.global_scalacopts + ctx.attr.scalacopts
     args = ctx.actions.args()
-    input_pruning_result = input_pruning(ctx, g, args) if toolchain.zinc_configuration.input_pruning else None
+
+    if toolchain.zinc_configuration.input_pruning:
+        input_pruning_result = input_pruning(ctx, g, args, java_inputs)
+    else:
+        input_pruning_result = None
+
     args.add("--compiler_bridge", toolchain.zinc_configuration.compiler_bridge)
     args.add_all("--compiler_classpath", g.classpaths.compiler)
     args.add_all("--classpath", g.classpaths.compile)
     args.add_all(common_scalacopts, format_each = "--compiler_option=%s")
+    args.add("--java_builder", java_builder.tool.executable)
+    args.add("--java_builder_java", java_toolchain.java_runtime.java_executable_exec_path)
+    args.add_all(java_toolchain.jvm_opt, format_each = "--java_builder_jvm_option=%s")
+    args.add_all(java_builder.jvm_opts, format_each = "--java_builder_jvm_option=%s")
+    args.add_all("--java_bootclasspath", java_toolchain.bootclasspath)
     args.add_all(javacopts, format_each = "--java_compiler_option=%s")
     args.add(ctx.label, format = "--label=%s")
     args.add("--main_manifest", mains_file)
@@ -160,6 +183,7 @@ def phase_zinc_compile(ctx, g):
             g.classpaths.plugin,
             g.classpaths.compile,
             g.classpaths.compiler,
+            java_inputs,
         ],
     )
 
@@ -204,6 +228,7 @@ def phase_zinc_compile(ctx, g):
         outputs = outputs,
         progress_message = "Compiling Scala %{label}",
         toolchain = "@rules_scala_annex//rules/scala:toolchain_type",
+        tools = [java_builder.tool],
         unused_inputs_list = None if input_pruning_result == None else input_pruning_result.unused_inputs_list,
     )
 

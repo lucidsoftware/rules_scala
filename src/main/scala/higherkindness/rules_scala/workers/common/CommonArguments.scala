@@ -27,7 +27,7 @@ class CommonArguments private (
   val compilerOptionsReferencingPaths: List[String],
   val classpath: List[Path],
   val debug: Boolean,
-  val javaCompilerOptions: Array[String],
+  val javaBuilder: JavaBuilderArguments,
   val label: String,
   val logLevel: LogLevel,
   val mainManifest: Path,
@@ -41,6 +41,14 @@ class CommonArguments private (
   val sources: List[Path],
   val usedJarListExportedJars: List[String],
   val usedJarReporterPlugin: Option[Path],
+)
+
+case class JavaBuilderArguments(
+  executable: Path,
+  javaExecutable: Path,
+  jvmOptions: List[String],
+  bootClasspath: List[Path],
+  javaCompilerOptions: List[String],
 )
 
 class Analysis private (
@@ -132,6 +140,26 @@ object CommonArguments {
       .required(false)
       .`type`(PathArgumentType.apply())
     parser
+      .addArgument("--java_builder")
+      .help("JavaBuilder executable used to compile Java sources.")
+      .required(true)
+      .`type`(PathArgumentType.apply())
+    parser
+      .addArgument("--java_builder_java")
+      .help("Java executable from the JavaBuilder toolchain.")
+      .required(true)
+      .`type`(PathArgumentType.apply())
+    parser
+      .addArgument("--java_builder_jvm_option")
+      .help("JVM option for JavaBuilder.")
+      .action(ArgumentsImpl.append())
+    parser
+      .addArgument("--java_bootclasspath")
+      .help("Java toolchain bootclasspath.")
+      .nargs("*")
+      .`type`(PathArgumentType.apply())
+      .setDefault_(Collections.emptyList)
+    parser
       .addArgument("--java_compiler_option")
       .help("Java compiler option")
       .action(ArgumentsImpl.append)
@@ -168,8 +196,7 @@ object CommonArguments {
     parser
       .addArgument("--output_used_jars_for_input_pruning")
       .help(
-        """Where the used JAR reporter plugin should output the list of JARs used during compilation for the purposes of
-          |input pruning.
+        """Where to output the list of JARs used during compilation for the purposes of input pruning.
           |
           |This option should be used with `--used_jar_reporter_plugin`""".stripMargin,
       )
@@ -245,7 +272,13 @@ object CommonArguments {
       ),
       classpath = pathResolver.resolve(classpath),
       debug = namespace.getBoolean("debug"),
-      javaCompilerOptions = namespace.getList[String]("java_compiler_option").asScala.toArray,
+      javaBuilder = JavaBuilderArguments(
+        pathResolver.resolve(namespace.get[Path]("java_builder")),
+        pathResolver.resolve(namespace.get[Path]("java_builder_java")),
+        Option(namespace.getList[String]("java_builder_jvm_option")).map(_.asScala.toList).getOrElse(Nil),
+        pathResolver.resolve(namespace.getList[Path]("java_bootclasspath")),
+        namespace.getList[String]("java_compiler_option").asScala.toList,
+      ),
       label = namespace.getString("label"),
       logLevel = LogLevel(namespace.getString("log_level")),
       mainManifest = pathResolver.resolve(namespace.get[Path]("main_manifest")),

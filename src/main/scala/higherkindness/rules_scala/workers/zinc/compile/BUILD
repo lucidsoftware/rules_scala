@@ -16,6 +16,7 @@ scala_binary(
         "//src/main/scala/higherkindness/rules_scala/workers/common",
         "//src/main/scala/sbt/internal/inc/classfile",
         "//third_party/bazel/src/java_tools/buildjar/java/com/google/devtools/build/buildjar/jarhelper",
+        "//third_party/bazel/src/main/protobuf:deps_java_proto",
     ],
 )
 

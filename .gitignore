@@ -22,5 +22,6 @@ target/
 /.vscode/
 /bazel.iml
 *.iml
+/.bazelbsp/
 
 .claude/**/*.local.*

@@ -2,17 +2,16 @@ import org.specs2.mutable.Specification
 
 object Test1 extends Specification {
   "Global" should {
-    "be 2" in {
-      Global.value = 2
-      Global.value must_== 2
+    "start at 1" in {
+      Global.value.getAndSet(2) must_== 1
     }
   }
 }
 
 object Test2 extends Specification {
   "Global" should {
-    "be 1" in {
-      Global.value must_== 1
+    "start at 1" in {
+      Global.value.getAndSet(2) must_== 1
     }
   }
 }

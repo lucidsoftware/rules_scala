@@ -27,6 +27,7 @@ scala_library(
     scala_version = "bootstrap_3",
     visibility = ["//visibility:public"],
     deps = [
+        "//src/main/scala/higherkindness/rules_scala/common/classloaders",
         "@annex//:org_playframework_play_json_3",
         "@annex//:org_scala_lang_modules_scala_xml_2_13",
         "@annex//:org_scala_sbt_compiler_interface",

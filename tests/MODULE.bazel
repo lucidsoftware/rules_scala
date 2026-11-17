@@ -114,7 +114,7 @@ annex_test.artifact(
     neverlink = True,
     version = zinc_version,
 )
-use_repo(annex_test, "annex_test")
+use_repo(annex_test, "annex", "annex_test")
 
 annex_test_2_12 = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 annex_test_2_12.install(

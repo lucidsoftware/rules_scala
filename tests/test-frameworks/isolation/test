@@ -6,7 +6,7 @@ bazel build :none :none-jvm
 ! bazel test :none-jvm
 
 bazel build :classloader-jvm
-bazel test :classloader
+bazel test :classloader :classloader-context
 ! bazel test :classloader-jvm
 
 bazel build :classloader-shared

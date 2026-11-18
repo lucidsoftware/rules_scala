@@ -112,3 +112,17 @@ scala_test(
         "@annex_test//:org_specs2_specs2_matcher_2_13",
     ],
 )
+
+scala_test(
+    name = "classloader-context",
+    srcs = ["ContextClassLoaderTest.scala"],
+    isolation = "classloader",
+    scala_version = "3",
+    deps = [
+        "@annex//:org_scala_sbt_test_interface",
+        "@annex_test//:org_specs2_specs2_common_2_13",
+        "@annex_test//:org_specs2_specs2_core_2_13",
+        "@annex_test//:org_specs2_specs2_matcher_2_13",
+        "@rules_scala_annex//src/main/scala/higherkindness/rules_scala/common/sbt-testing:common",
+    ],
+)

@@ -2,17 +2,16 @@ import org.specs2.mutable.Specification
 
 object Test3 extends Specification {
   "-Dexample" should {
-    "exist" in {
-      sys.props += "example" -> "value"
-      sys.props.get("example") must beSome("value")
+    "not already be set by another test class" in {
+      Option(System.setProperty("example", "value")) must beNone
     }
   }
 }
 
 object Test4 extends Specification {
   "-Dexample" should {
-    "not exist" in {
-      sys.props.get("example") must beNone
+    "not already be set by another test class" in {
+      Option(System.setProperty("example", "value")) must beNone
     }
   }
 }

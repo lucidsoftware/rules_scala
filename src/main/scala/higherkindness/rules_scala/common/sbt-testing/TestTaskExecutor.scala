@@ -1,5 +1,6 @@
 package higherkindness.rules_scala.common.sbt_testing
 
+import higherkindness.rules_scala.common.classloaders.ClassLoaders
 import java.util.concurrent.ConcurrentLinkedQueue
 import sbt.testing.{Event, Logger, Status, Task}
 import scala.collection.{concurrent, mutable}
@@ -38,40 +39,45 @@ class ConcurrentTestTaskExecutor(logger: Logger) extends TestTaskExecutor {
   private val activeTasks = new ConcurrentLinkedQueue[Future[Unit]]()
   private val currentResult = TaskExecutorResult.Mutable.empty
 
-  override def submitTask(task: Task): Unit = activeTasks.add(
-    Future {
-      blocking {
-        val bufferedLogger = new BufferedLogger(logger)
-        val reporter = new TestReporter(bufferedLogger)
+  override def submitTask(task: Task): Unit = {
+    val classLoader = Thread.currentThread().getContextClassLoader
+    activeTasks.add(
+      Future {
+        ClassLoaders.withContextClassLoader(classLoader) {
+          blocking {
+            val bufferedLogger = new BufferedLogger(logger)
+            val reporter = new TestReporter(bufferedLogger)
 
-        reporter.preTask(task)
+            reporter.preTask(task)
 
-        val additionalTasks = task.execute(
-          event => {
-            currentResult.synchronized {
-              currentResult.taskEvents.getOrElseUpdate(task, new ConcurrentLinkedQueue()).add(event)
+            val additionalTasks = task.execute(
+              event => {
+                currentResult.synchronized {
+                  currentResult.taskEvents.getOrElseUpdate(task, new ConcurrentLinkedQueue()).add(event)
 
-              event.status match {
-                case Status.Failure | Status.Error => currentResult.failures.add(task.taskDef.fullyQualifiedName)
-                case _                             =>
-              }
+                  event.status match {
+                    case Status.Failure | Status.Error => currentResult.failures.add(task.taskDef.fullyQualifiedName)
+                    case _                             =>
+                  }
+                }
+              },
+              Array(new PrefixedTestingLogger(bufferedLogger, "    ")),
+            )
+
+            additionalTasks.foreach(submitTask)
+
+            reporter.postTask()
+
+            // Only one task should write to stderr/stdout at a time. Of course, the task implementation could write to
+            // stdout/stderr directly, but that's out of our control.
+            synchronized {
+              bufferedLogger.flush()
             }
-          },
-          Array(new PrefixedTestingLogger(bufferedLogger, "    ")),
-        )
-
-        additionalTasks.foreach(submitTask)
-
-        reporter.postTask()
-
-        // Only one task should write to stderr/stdout at a time. Of course, the task implementation could write to
-        // stdout/stderr directly, but that's out of our control.
-        synchronized {
-          bufferedLogger.flush()
+          }
         }
-      }
-    }(using ExecutionContext.global),
-  )
+      }(using ExecutionContext.global),
+    )
+  }
 
   override def waitForTasks(): Future[TaskExecutorResult] = {
     given ExecutionContext = ExecutionContext.global

@@ -1,3 +1,5 @@
+import java.util.concurrent.atomic.AtomicInteger
+
 object Global {
-  var value = 1
+  val value = new AtomicInteger(1)
 }

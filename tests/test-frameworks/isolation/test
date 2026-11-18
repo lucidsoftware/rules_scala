@@ -6,7 +6,7 @@ bazel build :none :none-jvm
 ! bazel test :none-jvm
 
 bazel build :classloader-jvm
-bazel test :classloader
+bazel test :classloader :classloader-context
 ! bazel test :classloader-jvm
 
 bazel build :classloader-shared
@@ -15,7 +15,7 @@ bazel build :classloader-shared
 bazel test :process :process-jvm :process-2_12
 
 # verify framework args work for each level of isolation
-! (bazel test :none | grep 'be 2.*ms')
-bazel test --test_arg=--framework_args=-showtimes :none | grep 'be 2.*ms'
-bazel test --test_arg=--framework_args=-showtimes :classloader | grep 'be 2.*ms'
-bazel test --test_arg=--framework_args=-showtimes :process | grep 'be 2.*ms'
+! (bazel test :none | grep 'start at 1.*ms')
+bazel test --test_arg=--framework_args=-showtimes :none | grep 'start at 1.*ms'
+bazel test --test_arg=--framework_args=-showtimes :classloader | grep 'start at 1.*ms'
+bazel test --test_arg=--framework_args=-showtimes :process | grep 'start at 1.*ms'

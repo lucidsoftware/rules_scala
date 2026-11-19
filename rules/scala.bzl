@@ -130,6 +130,26 @@ _compile_attributes = _deps_checker_label_attributes | {
         doc = "The JVM library dependencies to always consider unused for `scala_deps_direct` checks.",
         providers = [JavaInfo],
     ),
+    "full_compile_classpath": attr.bool(
+        default = False,
+        doc = """\
+Include all transitive dependency runtime JARs on this target's compile classpath.
+
+Some necessary context to understand how this works: every JVM build target has a "compile classpath", which is the set
+of JARs required to compile the target, and a "runtime classpath", which is the set of all JARs required to execute the
+target's code at runtime. These are separate because not all runtime information (e.g. method implementations) is needed
+at compile-time.
+
+Macros upset this separation because they're executed at compile-time, so the runtime JARs of a target containing a
+macro need to be on the compile classpath of any target that depends on it. That's exactly what `macro = True` does: it
+tells all dependent targets to include this target's runtime JARs on their compile classpath.
+
+`full_compile_classpath = True` inverts the responsibility: it says that this target should include all its
+transitive dependencies' runtime JARs on its compile classpath. This can be useful when large segments of the
+build graph include macros, but those macros are only invoked in a small number of targets.
+
+This attribute does not affect the compile classpath of targets depending on this one.""",
+    ),
     "runtime_deps": attr.label_list(
         cfg = _scala_outgoing_transition,
         doc = "The JVM runtime-only library dependencies.",

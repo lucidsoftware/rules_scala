@@ -50,6 +50,10 @@ def phase_classpaths(ctx, g):
         for dep in ctx.attr.deps
         if _ScalaInfo in dep and dep[_ScalaInfo].macro
     ]
+
+    if ctx.attr.full_compile_classpath:
+        macro_classpath.extend([dependency[JavaInfo].transitive_runtime_jars for dependency in ctx.attr.deps])
+
     sdeps = java_common.merge(
         _collect(JavaInfo, g.init.scala_configuration.runtime_classpath + ctx.attr.deps),
     )

@@ -4,3 +4,13 @@
 bazel build :bad_compile 2>&1 | grep 'You may be missing a `macro = True` attribute.'
 [ "$(bazel run :test_macro)" = "hello world!" ]
 [ "$(bazel run :test_macro_only)" = $'hello world!\nworld hello!' ]
+
+bazel build :full_compile_classpath_library
+[ "$(bazel run :full_compile_classpath_binary)" = "hello world!" ]
+bazel test :full_compile_classpath_test
+
+if output=$(bazel build :bad_compile_full_compile_classpath_provider 2>&1); then
+    echo "A provider's full_compile_classpath unexpectedly affected its consumer"
+    exit 1
+fi
+echo "$output" | grep 'You may be missing a `macro = True` attribute.'

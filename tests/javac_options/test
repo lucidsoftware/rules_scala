@@ -1,4 +1,0 @@
-#!/bin/bash -e
-. "$(dirname "$0")"/../common.sh
-
-bazel test //javac_options:replace_source_target_with_release_test

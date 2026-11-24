@@ -101,11 +101,7 @@ object ReplRunner {
       replArgParser.parseArgsOrFail(Files.readAllLines(replArgFile).asScala.toArray),
     )
 
-    val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
-      replRequest.compilerClasspath.map(_.toFile).toArray,
-      workDir,
-      isWorker = false,
-    )
+    val scalaInstance = AnnexScalaInstance.createUncached(replRequest.compilerClasspath.map(_.toFile).toArray)
 
     val scalaCompiler = ZincUtil.scalaCompiler(scalaInstance, replRequest.compilerBridge.toFile)
 

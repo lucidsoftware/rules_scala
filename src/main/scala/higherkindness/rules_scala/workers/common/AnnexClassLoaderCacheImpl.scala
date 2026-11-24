@@ -8,9 +8,8 @@ import scala.collection.concurrent
 /**
  * [[AnnexClassLoaderCacheImpl]] is mostly identical to [[sbt.internal.inc.classpath.ClassLoaderCacheImpl]], with a few
  * exceptions:
- *   - It doesn't check the modification time of the compiler classpath files. This is because within the context of
- *     [[higherkindness.rules_scala.workers.zinc.compile.ZincRunner]], file paths being equal implies the contents of
- *     those files are equal and checking the modification time is unnecessary overhead.
+ *   - It doesn't check the modification time of the compiler classpath files. In worker mode, [[AnnexScalaInstance]]
+ *     stages those files at paths that include their content digests.
  *   - It doesn't use [[java.lang.ref.SoftReference]]s, to minimize the reloading of the compiler
  *   - It doesn't do any locking
  */

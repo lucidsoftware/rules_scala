@@ -124,7 +124,7 @@ object DocRunner extends WorkerMain[Unit] {
     val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
       workRequest.compilerClasspath.view.map(_.toFile).toArray,
       task.workDir,
-      isWorker,
+      task.inputs,
     )
 
     val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)

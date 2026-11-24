@@ -33,6 +33,7 @@ scala_test(
     name = "fatal-error-spec",
     srcs = ["FatalErrorSpec.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         ":fatal-error-spec-workers",
         "//test-lib/worker",

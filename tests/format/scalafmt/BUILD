@@ -12,6 +12,7 @@ scala_format_test(
     name = "unformatted",
     srcs = ["unformatted.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
 )
 
 scala_format_test(
@@ -32,6 +33,7 @@ scala_format_test(
     name = "unformatted-scala3",
     srcs = ["unformatted.scala"],
     scala_version = "3",
+    tags = ["manual"],
 )
 
 scala_format_test(

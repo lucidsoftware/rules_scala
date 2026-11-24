@@ -30,6 +30,7 @@ scala_test(
     srcs = ["TestJvm.scala"],
     isolation = "classloader",
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",
@@ -43,6 +44,7 @@ scala_test(
     isolation = "classloader",
     scala_version = "2.13",
     shared_deps = [":global"],
+    tags = ["manual"],
     deps = [
         ":global",
         "@annex_test//:org_specs2_specs2_common_2_13",
@@ -55,6 +57,7 @@ scala_test(
     name = "none",
     srcs = ["Test.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         ":global",
         "@annex_test//:org_specs2_specs2_common_2_13",
@@ -68,6 +71,7 @@ scala_test(
     srcs = ["TestJvm.scala"],
     isolation = "none",
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",

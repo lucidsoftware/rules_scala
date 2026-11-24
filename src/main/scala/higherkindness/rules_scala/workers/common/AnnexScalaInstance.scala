@@ -1,17 +1,17 @@
 package higherkindness.rules_scala.workers.common
 
+import com.google.devtools.build.lib.worker.WorkerProtocol
 import java.io.{File, IOException}
 import java.net.URLClassLoader
 import java.nio.file.{AtomicMoveNotSupportedException, FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
-import java.util.Properties
+import java.util.{HexFormat, Properties}
 import java.util.concurrent.ConcurrentHashMap
 import scala.util.control.NonFatal
 import xsbti.compile.ScalaInstance
 
 object AnnexScalaInstance {
   // See the comment on getAnnexScalaInstance as to why this is necessary
-  private val instanceCache: ConcurrentHashMap[Set[Path], AnnexScalaInstance] =
-    new ConcurrentHashMap[Set[Path], AnnexScalaInstance]()
+  private val instanceCache = new ConcurrentHashMap[Set[(Path, String)], AnnexScalaInstance]()
 
   /**
    * The worker will use this directory to store temp files in order to better perform atomic file copies.
@@ -26,21 +26,17 @@ object AnnexScalaInstance {
   private val workerJarDir = Paths.get("work-request-jars")
   Files.createDirectories(workerJarDir)
 
-  /**
-   * We only need to care about minimizing the number of AnnexScalaInstances we create if things are being run as a
-   * worker. Otherwise just create the AnnexScalaInstance and be done with it because the process won't be long lived.
-   */
   def getAnnexScalaInstance(
     allJars: Array[File],
     workDir: Path,
-    isWorker: Boolean,
-  ): AnnexScalaInstance = {
-    if (isWorker) {
-      getAnnexScalaInstance(allJars, workDir)
-    } else {
-      new AnnexScalaInstance(allJars)
-    }
+    inputs: Option[List[WorkerProtocol.Input]],
+  ): AnnexScalaInstance = inputs match {
+    case Some(requestInputs) => getCachedInstance(allJars, workDir, requestInputs)
+    case None                => createUncached(allJars)
   }
+
+  // A standalone process only needs the compiler for one invocation.
+  def createUncached(allJars: Array[File]): AnnexScalaInstance = new AnnexScalaInstance(allJars)
 
   /**
    * Given a set of jars, get back an AnnexScalaInstance for those jars. If an instance for those jars is already stored
@@ -82,38 +78,70 @@ object AnnexScalaInstance {
    * Using this cache and the Scala compiler cache, but disabling Zinc's classloader cache works, but doesn't seem to be
    * any different from leaving Zinc's cache enabled.
    */
-  private def getAnnexScalaInstance(allJars: Array[File], workDir: Path): AnnexScalaInstance = {
+  private def getCachedInstance(
+    allJars: Array[File],
+    workDir: Path,
+    inputs: List[WorkerProtocol.Input],
+  ): AnnexScalaInstance = {
+    val absoluteWorkDir = workDir.toAbsolutePath().normalize()
+    val compilerJarPaths = allJars.iterator.flatMap { jar =>
+      val path = jar.toPath.toAbsolutePath().normalize()
+      Iterator(path.toString -> path, absoluteWorkDir.relativize(path).toString -> path)
+    }.toMap
+    val hex = HexFormat.of()
+    // Use the digests supplied by Bazel so compiler versions are distinguished without rereading JARs.
+    val inputDigests = inputs.iterator.flatMap { input =>
+      compilerJarPaths.get(input.getPath).filter(_ => !input.getDigest.isEmpty).map { path =>
+        path -> hex.formatHex(input.getDigest.toByteArray)
+      }
+    }.toMap
+
+    // Bazel can strip the configuration from an argument path while reporting the input under its original path.
+    val mappedOutputRoot = Paths.get("bazel-out", "cfg")
+    lazy val mappedInputDigests = inputs.iterator
+      .filter(input => input.getPath.startsWith("bazel-out/") && !input.getDigest.isEmpty)
+      .flatMap { input =>
+        val path = Path.of(input.getPath)
+        if (path.getNameCount > 2) {
+          val mappedPath = mappedOutputRoot.resolve(path.subpath(2, path.getNameCount))
+          compilerJarPaths.get(mappedPath.toString).map { jarPath =>
+            jarPath -> Set(hex.formatHex(input.getDigest.toByteArray))
+          }
+        } else {
+          None
+        }
+      }
+      .toList
+      .groupMapReduce(_._1)(_._2)(_ ++ _)
+
     // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
     // We use a set because we don't care about ordering for comparison purposes
     val mapBuilder = Map.newBuilder[Path, Path]
-    val keyBuilder = Set.newBuilder[Path]
-    val absoluteWorkDir = workDir.toAbsolutePath().normalize()
+    val keyBuilder = Set.newBuilder[(Path, String)]
     allJars.foreach { jar =>
-      val absoluteJarPath = jar.toPath().toAbsolutePath().normalize()
-
-      // Remove the arch/config specific parts of the path.
-      val comparablePath = FileUtil.bazelShortPath(
-        // Remove the sandbox prefix from the path
-        absoluteWorkDir.relativize(absoluteJarPath),
-        replaceExternal = false,
-      )
-      mapBuilder.addOne(jar.toPath -> workerJarDir.resolve(comparablePath))
-      keyBuilder.addOne(comparablePath)
+      val absoluteJarPath = jar.toPath.toAbsolutePath().normalize()
+      val requestPath = absoluteWorkDir.relativize(absoluteJarPath)
+      val comparablePath = FileUtil.bazelShortPath(requestPath, replaceExternal = false)
+      val digest = inputDigests
+        .get(absoluteJarPath)
+        .orElse {
+          if (requestPath.startsWith(mappedOutputRoot)) {
+            mappedInputDigests.get(absoluteJarPath).map { digests =>
+              if (digests.size != 1) {
+                throw new IllegalStateException(s"Ambiguous Bazel WorkRequest digests for compiler JAR: $requestPath")
+              }
+              digests.head
+            }
+          } else {
+            None
+          }
+        }
+        .getOrElse(throw new IllegalStateException(s"Missing Bazel WorkRequest digest for compiler JAR: $requestPath"))
+      // The staged path also keys Zinc's classloader cache. Keep both versions available to concurrent requests.
+      mapBuilder.addOne(jar.toPath -> workerJarDir.resolve(digest).resolve(jar.getName))
+      keyBuilder.addOne(comparablePath -> digest)
     }
     val workRequestJarToWorkerJar = mapBuilder.result()
-
-    // Because we're just using file names here, theres's a problem  if the contents of the jars
-    // on the classpath for a particular version of the compiler change and we already have a
-    // ScalaInstance created and cached for the filenames on that classpath. In that case we'll use
-    // the cached ScalaInstance rather than create a new one.
-    //
-    // We could get around this problem by hashing all the jars and using that as the cache key,
-    // but that would require hashing the all the classpath jars on every compilation request. I
-    // imagine that would cause a performance hit.
-    //
-    // I also imagine it is extremely rare to be mutating the contents of compiler classpath jars
-    // while keeping the names the same, e.g., generating new scala library jar for scala 2.13.14.
-    // As a result I'm leaving this string based for now.
     val key = keyBuilder.result()
 
     Option(instanceCache.get(key)).getOrElse {
@@ -240,9 +268,8 @@ object AnnexScalaInstance {
  * See this interface for comments better explaining the purpose of all the member variables:
  * https://github.com/sbt/zinc/blob/4eacff2a9bf5c8750bfc5096955065ce67f4e68a/internal/compiler-interface/src/main/java/xsbti/compile/ScalaInstance.java
  *
- * This is private to this package, so people use the static getAnnexScalaInstance to get an instance of this class. We
- * need to have only one of these per Scala version to prevent non-determinism. See the comment on that function for
- * more info.
+ * Use the companion object to create instances. The worker cache shares instances with the same compiler classpath to
+ * prevent non-determinism. See the comment on getCachedInstance for more information.
  */
 private[common] class AnnexScalaInstance(override val allJars: Array[File]) extends ScalaInstance {
 

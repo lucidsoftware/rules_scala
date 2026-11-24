@@ -4,6 +4,7 @@ scala_test(
     name = "bad",
     srcs = ["Test.scala"],
     scala_version = "2.13",
+    tags = ["manual"],
     deps = [
         "@annex_test//:org_specs2_specs2_common_2_13",
         "@annex_test//:org_specs2_specs2_core_2_13",

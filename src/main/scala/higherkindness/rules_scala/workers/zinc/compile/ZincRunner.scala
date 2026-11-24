@@ -301,7 +301,6 @@ object ZincRunner extends WorkerMain[Unit] {
       val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
         workRequest.compilerClasspath.view.map(_.toFile).toArray,
         task.workDir,
-        isWorker,
         task.inputs,
       )
 

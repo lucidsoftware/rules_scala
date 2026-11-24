@@ -12,6 +12,7 @@ scala_binary(
         "//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "//src/main/scala/higherkindness/rules_scala/common/worker",
         "//src/main/scala/higherkindness/rules_scala/workers/common",
+        "//third_party/bazel/src/main/protobuf:worker_protocol_java_proto",
         "@annex//:net_sourceforge_argparse4j_argparse4j",
         "@annex//:org_scala_sbt_compiler_interface",
         "@annex//:org_scala_sbt_util_interface",

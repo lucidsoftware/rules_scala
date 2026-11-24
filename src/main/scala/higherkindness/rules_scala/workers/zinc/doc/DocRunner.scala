@@ -125,6 +125,7 @@ object DocRunner extends WorkerMain[Unit] {
       workRequest.compilerClasspath.view.map(_.toFile).toArray,
       task.workDir,
       isWorker,
+      task.inputs,
     )
 
     val logger = new AnnexLogger(workRequest.logLevel, task.workDir, task.output)

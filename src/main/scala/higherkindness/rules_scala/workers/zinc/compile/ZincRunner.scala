@@ -298,8 +298,12 @@ object ZincRunner extends WorkerMain[Unit] {
       val classesOutputDir = classesDir.resolve(labelToPath(workRequest.label))
       Files.createDirectories(classesOutputDir)
 
-      val scalaInstance = AnnexScalaInstance
-        .getAnnexScalaInstance(workRequest.compilerClasspath.view.map(_.toFile).toArray, task.workDir, isWorker)
+      val scalaInstance = AnnexScalaInstance.getAnnexScalaInstance(
+        workRequest.compilerClasspath.view.map(_.toFile).toArray,
+        task.workDir,
+        isWorker,
+        task.inputs,
+      )
 
       val normalizedSources = sources.view.map(_.toAbsolutePath.normalize()).toArray
       val reporter = new LoggedReporter(logger, scalaInstance.actualVersion)

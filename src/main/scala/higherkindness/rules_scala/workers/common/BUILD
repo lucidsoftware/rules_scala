@@ -10,6 +10,7 @@ scala_library(
         "//src/main/scala/higherkindness/rules_scala/common/args",
         "//src/main/scala/higherkindness/rules_scala/common/sandbox",
         "//third_party/bazel/src/java_tools/buildjar/java/com/google/devtools/build/buildjar/jarhelper",
+        "//third_party/bazel/src/main/protobuf:worker_protocol_java_proto",
         "@annex//:net_sourceforge_argparse4j_argparse4j",
         "@annex//:org_scala_sbt_zinc_2_13",
     ],

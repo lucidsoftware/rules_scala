@@ -114,8 +114,8 @@ object AnnexScalaInstance {
       .toList
       .groupMapReduce(_._1)(_._2)(_ ++ _)
 
-    // Compare short paths to ignore the Bazel sandbox and architecture/configuration prefixes.
-    // Use a set because classpath order does not affect the cache-key comparison.
+    // We want to compare short paths to avoid the Bazel sandbox prefix and arch/config specific parts of the path
+    // We use a set because we don't care about ordering for comparison purposes
     val mapBuilder = Map.newBuilder[Path, Path]
     val keyBuilder = Set.newBuilder[(Path, String)]
     allJars.foreach { jar =>
